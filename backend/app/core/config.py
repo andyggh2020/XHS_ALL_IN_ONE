@@ -154,4 +154,11 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     yaml_values = _load_yaml_config()
+    # Allow environment variables to override YAML values (critical for Vercel).
+    # pydantic-settings gives constructor args precedence over env vars,
+    # so we must remove YAML keys that already have a matching env var set.
+    for yaml_key in list(yaml_values.keys()):
+        env_var = yaml_key.upper()
+        if env_var in os.environ:
+            del yaml_values[yaml_key]
     return Settings(**yaml_values)

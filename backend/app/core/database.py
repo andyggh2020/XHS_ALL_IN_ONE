@@ -17,7 +17,15 @@ if settings.database_url.startswith("sqlite"):
     _connect_args["check_same_thread"] = False
     import os
     db_path = settings.database_url.replace("sqlite:///", "")
-    os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
+    try:
+        os.makedirs(os.path.dirname(os.path.abspath(db_path)) or ".", exist_ok=True)
+    except OSError:
+        # On read-only filesystems (e.g. Vercel), fall back to /tmp
+        import tempfile
+        db_name = os.path.basename(db_path) or "spider_xhs.db"
+        db_path = os.path.join(tempfile.gettempdir(), db_name)
+        settings.database_url = f"sqlite:///{db_path}"
+        os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
 
 engine = create_engine(settings.database_url, connect_args=_connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
