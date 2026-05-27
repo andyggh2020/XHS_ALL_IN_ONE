@@ -27,6 +27,7 @@ import { Button, Card, Col, Row, Space, Statistic, Tag, Typography } from "antd"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/use-auth";
+import { useMediaQuery } from "../../hooks/use-media-query";
 import { useThemeMode } from "../../app/providers";
 
 const { Title, Text, Paragraph } = Typography;
@@ -118,6 +119,7 @@ export function MarketingPage() {
   const auth = useAuth();
   const { mode: themeMode } = useThemeMode();
   const isDark = themeMode === "dark";
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   const c = {
@@ -151,24 +153,32 @@ export function MarketingPage() {
   return (
     <div style={{ background: c.bg, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif' }}>
       {/* Nav */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, padding: "10px 28px", background: c.navBg, borderBottom: `1px solid ${c.navBorder}`, display: "flex", alignItems: "center" }}>
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        padding: isMobile ? "8px 12px" : "10px 28px",
+        background: c.navBg, borderBottom: `1px solid ${c.navBorder}`,
+        display: "flex", alignItems: "center",
+      }}>
         <div style={{ flex: "0 0 auto", cursor: "pointer" }} onClick={() => navigate("/")}>
-          <Space size={8}>
-            <div style={{ width: 34, height: 34, borderRadius: 9, background: "linear-gradient(135deg, #1668dc, #7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 18, color: "#fff" }}>X</div>
-            <Text strong style={{ color: c.t1, fontSize: 15 }}>小红书矩阵运营</Text>
+          <Space size={6}>
+            <div style={{
+              width: isMobile ? 28 : 34, height: isMobile ? 28 : 34, borderRadius: 8,
+              background: "linear-gradient(135deg, #1668dc, #7c3aed)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontWeight: 800, fontSize: isMobile ? 14 : 18, color: "#fff",
+            }}>X</div>
+            {!isMobile && <Text strong style={{ color: c.t1, fontSize: 15 }}>小红书矩阵运营</Text>}
           </Space>
         </div>
-        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <Space size={36}>
-            {["功能", "定价", "FAQ"].map((n) => (
-              <Text key={n} onClick={() => scrollTo(`#${n}`)} style={{ color: c.t2, fontSize: 14, cursor: "pointer" }}>{n}</Text>
-            ))}
-          </Space>
-        </div>
-        <div style={{ flex: "0 0 auto" }}>
-          <Space size={12}>
-            <Button type="text" style={{ color: c.t2 }} onClick={() => navigate("/login")}>登录</Button>
-            <Button type="primary" size="small" onClick={handleCTA} style={{ borderRadius: 8, fontWeight: 600 }}>
+        {!isMobile && <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          {["功能", "定价", "FAQ"].map((n) => (
+            <Text key={n} onClick={() => scrollTo(`#${n}`)} style={{ color: c.t2, fontSize: 14, cursor: "pointer", margin: "0 18px" }}>{n}</Text>
+          ))}
+        </div>}
+        <div style={{ flex: "0 0 auto", marginLeft: "auto" }}>
+          <Space size={isMobile ? 6 : 12}>
+            <Button type="text" size={isMobile ? "small" : undefined} style={{ color: c.t2, fontSize: isMobile ? 13 : 14 }} onClick={() => navigate("/login")}>登录</Button>
+            <Button type="primary" size={isMobile ? "small" : "small"} onClick={handleCTA} style={{ borderRadius: 8, fontWeight: 600 }}>
               {auth.isAuthenticated ? "工作台" : "免费注册"}
             </Button>
           </Space>
@@ -176,30 +186,55 @@ export function MarketingPage() {
       </div>
 
       {/* Hero */}
-      <div style={{ padding: "160px 28px 80px", textAlign: "center", background: c.heroBg }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: isDark ? "rgba(22,104,220,0.1)" : "rgba(22,104,220,0.06)", borderRadius: 20, padding: "6px 18px", marginBottom: 24 }}>
-          <StarFilled style={{ color: "#f59e0b", fontSize: 14 }} />
-          <Text style={{ color: "#1668dc", fontSize: 13, fontWeight: 600 }}>全新 2.0 · 十项能力升级</Text>
+      <div style={{
+        padding: isMobile ? "100px 16px 60px" : "160px 28px 80px",
+        textAlign: "center", background: c.heroBg,
+      }}>
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 6,
+          background: isDark ? "rgba(22,104,220,0.1)" : "rgba(22,104,220,0.06)",
+          borderRadius: 20, padding: "5px 14px", marginBottom: isMobile ? 20 : 24,
+        }}>
+          <StarFilled style={{ color: "#f59e0b", fontSize: 12 }} />
+          <Text style={{ color: "#1668dc", fontSize: isMobile ? 12 : 13, fontWeight: 600 }}>全新 2.0 · 十项能力升级</Text>
         </div>
 
-        <Title level={1} style={{ color: c.t1, fontSize: 52, fontWeight: 800, marginBottom: 24 }}>
+        <Title level={1} style={{
+          color: c.t1,
+          fontSize: isMobile ? 32 : 52,
+          fontWeight: 800, marginBottom: isMobile ? 16 : 24,
+          lineHeight: 1.2,
+        }}>
           小红书的<br />
           <span style={{ background: c.gradientText, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>自动化运营引擎</span>
         </Title>
 
-        <Paragraph style={{ color: c.t2, fontSize: 18, maxWidth: 600, margin: "0 auto 40px" }}>
+        <Paragraph style={{
+          color: c.t2, fontSize: isMobile ? 15 : 18,
+          maxWidth: 600, margin: "0 auto 32px", padding: isMobile ? "0 8px" : 0,
+        }}>
           把采集、分析、改写、发布装进一个面板。
         </Paragraph>
 
-        <Space size={16}>
-          <Button type="primary" size="large" icon={<RocketOutlined />} onClick={handleCTA}
-            style={{ height: 54, paddingInline: 44, fontSize: 17, fontWeight: 700, borderRadius: 14, background: "linear-gradient(135deg, #1668dc, #7c3aed)", border: "none", boxShadow: "0 8px 32px rgba(22,104,220,0.4)" }}>
+        <Space size={isMobile ? 8 : 16} wrap style={{ justifyContent: "center" }}>
+          <Button type="primary" size={isMobile ? "middle" : "large"} icon={<RocketOutlined />} onClick={handleCTA}
+            style={{
+              height: isMobile ? 44 : 54, paddingInline: isMobile ? 28 : 44,
+              fontSize: isMobile ? 14 : 17, fontWeight: 700, borderRadius: 14,
+              background: "linear-gradient(135deg, #1668dc, #7c3aed)", border: "none",
+              boxShadow: "0 8px 32px rgba(22,104,220,0.4)",
+            }}>
             {auth.isAuthenticated ? "进入工作台" : "免费开始使用"}
           </Button>
-          <Button size="large" icon={<PlayCircleOutlined />} onClick={() => scrollTo("#功能")}
-            style={{ height: 54, paddingInline: 32, fontSize: 16, borderRadius: 14, background: c.btnOutlineBg, border: `1px solid ${c.btnOutlineBorder}`, color: c.btnOutlineColor }}>
-            探索功能
-          </Button>
+          {!isMobile && (
+            <Button size="large" icon={<PlayCircleOutlined />} onClick={() => scrollTo("#功能")}
+              style={{
+                height: 54, paddingInline: 32, fontSize: 16, borderRadius: 14,
+                background: c.btnOutlineBg, border: `1px solid ${c.btnOutlineBorder}`, color: c.btnOutlineColor,
+              }}>
+              探索功能
+            </Button>
+          )}
         </Space>
       </div>
 
@@ -276,7 +311,11 @@ export function MarketingPage() {
       </div>
 
       {/* Pricing */}
-      <div id="定价" style={{ maxWidth: 1000, margin: "80px auto 0", padding: "0 28px" }}>
+      <div id="定价" style={{
+        maxWidth: 1000,
+        margin: isMobile ? "60px auto 0" : "80px auto 0",
+        padding: isMobile ? "0 12px" : "0 28px",
+      }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <Tag color="blue" style={{ borderRadius: 8, marginBottom: 16 }}>定价</Tag>
           <Title level={2} style={{ color: c.t1, fontWeight: 700 }}>简单透明的方案选择</Title>
@@ -301,7 +340,7 @@ export function MarketingPage() {
             return (
               <Col xs={24} md={8} key={plan.name}>
                 <Card
-                  style={{ background: plan.popular ? c.cardBg : "transparent", borderColor: plan.popular ? plan.accent : c.cardBorder, borderRadius: 20, height: "100%", transform: plan.popular ? "scale(1.04)" : "scale(1)" }}
+                  style={{ background: plan.popular ? c.cardBg : "transparent", borderColor: plan.popular ? plan.accent : c.cardBorder, borderRadius: 20, height: "100%", transform: plan.popular && !isMobile ? "scale(1.04)" : "scale(1)" }}
                   styles={{ body: { padding: "36px 28px" } }}
                 >
                   {plan.popular && (
@@ -348,20 +387,36 @@ export function MarketingPage() {
       </div>
 
       {/* CTA */}
-      <div style={{ textAlign: "center", padding: "80px 28px", background: c.heroBg }}>
-        <Title level={2} style={{ color: c.t1, marginBottom: 16 }}>准备好让效率起飞了吗？</Title>
-        <Paragraph style={{ color: c.t2, fontSize: 16, marginBottom: 32 }}>
+      <div style={{
+        textAlign: "center",
+        padding: isMobile ? "60px 16px" : "80px 28px",
+        background: c.heroBg,
+      }}>
+        <Title level={isMobile ? 3 : 2} style={{ color: c.t1, marginBottom: isMobile ? 12 : 16 }}>
+          准备好让效率起飞了吗？
+        </Title>
+        <Paragraph style={{ color: c.t2, fontSize: isMobile ? 14 : 16, marginBottom: isMobile ? 24 : 32 }}>
           一个浏览器标签页，5 个工具的事。7 天免费试用，零风险上手。
         </Paragraph>
-        <Space size={16}>
-          <Button type="primary" size="large" icon={<RocketOutlined />} onClick={handleCTA}
-            style={{ height: 56, paddingInline: 48, fontSize: 18, fontWeight: 700, borderRadius: 16, background: "linear-gradient(135deg, #1668dc, #7c3aed)", border: "none", boxShadow: "0 8px 36px rgba(22,104,220,0.45)" }}>
+        <Space size={isMobile ? 8 : 16} wrap style={{ justifyContent: "center" }}>
+          <Button type="primary" size={isMobile ? "middle" : "large"} icon={<RocketOutlined />} onClick={handleCTA}
+            style={{
+              height: isMobile ? 44 : 56, paddingInline: isMobile ? 24 : 48,
+              fontSize: isMobile ? 14 : 18, fontWeight: 700, borderRadius: 16,
+              background: "linear-gradient(135deg, #1668dc, #7c3aed)", border: "none",
+              boxShadow: "0 8px 36px rgba(22,104,220,0.45)",
+            }}>
             {auth.isAuthenticated ? "进入工作台" : "立即免费使用"}
           </Button>
-          <Button size="large" icon={<ArrowRightOutlined />} onClick={() => navigate("/login")}
-            style={{ height: 56, paddingInline: 36, fontSize: 16, borderRadius: 16, background: c.btnOutlineBg, border: `1px solid ${c.btnOutlineBorder}`, color: c.btnOutlineColor }}>
-            已有账号？登录
-          </Button>
+          {!isMobile && (
+            <Button size="large" icon={<ArrowRightOutlined />} onClick={() => navigate("/login")}
+              style={{
+                height: 56, paddingInline: 36, fontSize: 16, borderRadius: 16,
+                background: c.btnOutlineBg, border: `1px solid ${c.btnOutlineBorder}`, color: c.btnOutlineColor,
+              }}>
+              已有账号？登录
+            </Button>
+          )}
         </Space>
       </div>
 
