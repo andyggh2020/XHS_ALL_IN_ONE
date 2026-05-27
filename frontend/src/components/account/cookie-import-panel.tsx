@@ -40,7 +40,7 @@ export function CookieImportPanel({ accountType, onImported }: CookieImportPanel
   }
 
   return (
-    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+    <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
       <Form layout="vertical">
         <Form.Item label={<span style={{ color: "rgba(255,255,255,0.88)" }}>Cookie 字符串</span>}>
           <Input.TextArea

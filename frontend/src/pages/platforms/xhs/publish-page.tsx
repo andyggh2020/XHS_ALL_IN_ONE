@@ -34,6 +34,7 @@ import type { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 
 import { PageHeader } from "../../../components/layout/app-shell";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   deletePublishJob,
   fetchAccounts,
@@ -83,6 +84,7 @@ const panelStyle: React.CSSProperties = {
 const cardBodyStyle: React.CSSProperties = { padding: 16 };
 
 export function XhsPublishPage() {
+  const c = useThemeColors();
   const [jobs, setJobs] = useState<PublishJob[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [assets, setAssets] = useState<PublishAsset[]>([]);
@@ -350,7 +352,7 @@ export function XhsPublishPage() {
                     <List.Item.Meta
                       title={<Text ellipsis style={{ maxWidth: "100%", color: "#e8e8e8" }}>{job.title || "未命名"}</Text>}
                       description={
-                        <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                        <Space orientation="vertical" size={4} style={{ width: "100%" }}>
                           <Space size={4} wrap>
                             {getStatusTag(job.status)}
                             <Tag>{job.publish_mode === "scheduled" ? "定时" : "即时"}</Tag>
@@ -407,7 +409,7 @@ export function XhsPublishPage() {
                         extra={<Text type="secondary" style={{ fontSize: 12 }}>内容修改请前往草稿工坊</Text>}
                       >
                         <Title level={5} style={{ marginBottom: 8 }}>{selectedJob.title || "未填写标题"}</Title>
-                        <Paragraph style={{ whiteSpace: "pre-wrap", color: "rgba(255,255,255,.65)", fontSize: 13, marginBottom: 16 }}>
+                        <Paragraph style={{ whiteSpace: "pre-wrap", color: c.textSecondary, fontSize: 13, marginBottom: 16 }}>
                           {selectedJob.body || "暂无正文"}
                         </Paragraph>
 

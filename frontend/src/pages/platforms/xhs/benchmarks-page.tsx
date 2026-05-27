@@ -33,14 +33,10 @@ import {
   fetchMonitoringSnapshots,
 } from "../../../lib/api";
 import { formatShanghaiTime } from "../../../lib/time";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import type { MonitoringTarget, MonitoringSnapshot } from "../../../types";
 
 const { Text } = Typography;
-
-const cardStyle: React.CSSProperties = {
-  background: "#1f1f1f",
-  borderColor: "#303030",
-};
 
 function extractEngagement(snapshot: MonitoringSnapshot | undefined): {
   likes: number;
@@ -69,6 +65,7 @@ function getRefreshInterval(target: MonitoringTarget): number {
 }
 
 export function XhsBenchmarksPage() {
+  const c = useThemeColors();
   const [targets, setTargets] = useState<MonitoringTarget[]>([]);
   const [snapshots, setSnapshots] = useState<Record<number, MonitoringSnapshot[]>>({});
   const [expandedTargetId, setExpandedTargetId] = useState<number | null>(null);
@@ -270,7 +267,7 @@ export function XhsBenchmarksPage() {
       />
 
       {/* Add Target Section */}
-      <Card size="small" style={{ ...cardStyle, marginBottom: 24 }}>
+      <Card size="small" style={{ background: c.cardBg, borderColor: c.cardBorder, marginBottom: 24 }}>
         <Space wrap style={{ width: "100%" }}>
           <Input
             placeholder="粘贴小红书笔记链接"
@@ -324,7 +321,7 @@ export function XhsBenchmarksPage() {
           <Spin tip="正在加载竞品数据..." />
         </div>
       ) : targets.length === 0 ? (
-        <Card style={cardStyle}>
+        <Card style={{ background: c.cardBg, borderColor: c.cardBorder }}>
           <Empty description="暂无竞品目标，在上方输入笔记链接添加监控。" />
         </Card>
       ) : (
@@ -339,7 +336,7 @@ export function XhsBenchmarksPage() {
             return (
               <Col xs={24} lg={12} key={target.id}>
                 <Card
-                  style={cardStyle}
+                  style={{ background: c.cardBg, borderColor: c.cardBorder }}
                   styles={{ body: { padding: 16 } }}
                   hoverable
                 >
@@ -396,7 +393,7 @@ export function XhsBenchmarksPage() {
                       gap: 16,
                       marginBottom: 12,
                       padding: "8px 12px",
-                      background: "#141414",
+                      background: c.cardBg3,
                       borderRadius: 6,
                     }}
                   >

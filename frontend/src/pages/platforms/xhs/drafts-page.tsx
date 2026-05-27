@@ -47,6 +47,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { PageHeader } from "../../../components/layout/app-shell";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   addDraftAsset,
   deleteDraft,
@@ -157,6 +158,7 @@ function SortableImageThumb({ asset, onEdit, onRemove, onView }: { asset: DraftA
 /* ── component ─────────────────────────────────────────────────────── */
 
 export function XhsDraftsPage() {
+  const c = useThemeColors();
   const navigate = useNavigate();
 
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -590,7 +592,7 @@ export function XhsDraftsPage() {
             <VideoCameraOutlined /> 视频素材 ({videoAssets.length})
           </Text>
         </div>
-        <Space direction="vertical" size={4} style={{ width: "100%" }}>
+        <Space orientation="vertical" size={4} style={{ width: "100%" }}>
           {videoAssets.map((asset) => (
             <div
               key={asset.id}
@@ -890,7 +892,7 @@ export function XhsDraftsPage() {
                               <img src={asset.url || asset.local_path} style={{ width: 140, height: 140, objectFit: "cover", borderRadius: 6 }} referrerPolicy="no-referrer" />
                             ) : (
                               <div style={{ height: 140, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <Space direction="vertical" align="center"><PlayCircleOutlined style={{ fontSize: 32, color: "#1668dc" }} /><Text style={{ fontSize: 12 }}>视频</Text></Space>
+                                <Space orientation="vertical" align="center"><PlayCircleOutlined style={{ fontSize: 32, color: "#1668dc" }} /><Text style={{ fontSize: 12 }}>视频</Text></Space>
                               </div>
                             )}
                           </div>
@@ -939,7 +941,7 @@ export function XhsDraftsPage() {
                             style={{ marginBottom: 12 }}
                             disabled={isOptimizing}
                           />
-                          <Space direction="vertical" style={{ width: "100%" }} size={8}>
+                          <Space orientation="vertical" style={{ width: "100%" }} size={8}>
                             <Button
                               block
                               type="primary"

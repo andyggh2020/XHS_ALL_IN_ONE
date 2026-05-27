@@ -31,6 +31,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { PageHeader } from "../../../components/layout/app-shell";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   deleteGeneratedImageAsset,
   deleteUserImage,
@@ -56,6 +57,7 @@ function isRenderableImage(value: string): boolean {
 }
 
 export function XhsImageStudioPage() {
+  const c = useThemeColors();
   const [assets, setAssets] = useState<GeneratedImageAsset[]>([]);
   const [userImages, setUserImages] = useState<UserImageFile[]>([]);
   const [prompt, setPrompt] = useState("");
@@ -288,7 +290,7 @@ export function XhsImageStudioPage() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          background: "#1a1a1a",
+                          background: c.cardBg2,
                         }}
                       >
                         <PictureOutlined style={{ fontSize: 20, color: "#666" }} />
@@ -330,7 +332,7 @@ export function XhsImageStudioPage() {
                     alignItems: "center",
                     justifyContent: "center",
                     cursor: "pointer",
-                    background: "#1a1a1a",
+                    background: c.cardBg2,
                   }}
                 >
                   <PlusOutlined style={{ fontSize: 20, color: "#666" }} />
@@ -383,7 +385,7 @@ export function XhsImageStudioPage() {
                 </Text>
                 <div
                   style={{
-                    background: "#1a1a1a",
+                    background: c.cardBg2,
                     borderRadius: 6,
                     padding: 8,
                     textAlign: "center",
@@ -453,7 +455,7 @@ export function XhsImageStudioPage() {
             {description && (
               <Paragraph
                 style={{
-                  background: "#262626",
+                  background: c.cardBorder2,
                   padding: 12,
                   borderRadius: 6,
                   fontSize: 13,
@@ -508,7 +510,7 @@ export function XhsImageStudioPage() {
                               marginBottom: 6,
                               overflow: "hidden",
                               borderRadius: 4,
-                              background: "#1a1a1a",
+                              background: c.cardBg2,
                             }}
                           >
                             {isRenderableImage(asset.file_path) ? (
@@ -615,7 +617,7 @@ export function XhsImageStudioPage() {
                               marginBottom: 6,
                               overflow: "hidden",
                               borderRadius: 4,
-                              background: "#1a1a1a",
+                              background: c.cardBg2,
                             }}
                           >
                             <Image
@@ -701,7 +703,7 @@ export function XhsImageStudioPage() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            background: "#1a1a1a",
+                            background: c.cardBg2,
                           }}
                         >
                           <img
@@ -748,7 +750,7 @@ export function XhsImageStudioPage() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            background: "#1a1a1a",
+                            background: c.cardBg2,
                           }}
                         >
                           {isRenderableImage(asset.file_path) ? (

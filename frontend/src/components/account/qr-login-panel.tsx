@@ -83,7 +83,7 @@ export function QrLoginPanel({ accountType, onConfirmed }: QrLoginPanelProps) {
   }, [accountType, onConfirmed, session?.session_id, session?.status]);
 
   return (
-    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+    <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
       <Card
         styles={{
           body: {

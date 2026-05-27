@@ -1,4 +1,5 @@
 import {
+  ArrowLeftOutlined,
   ArrowRightOutlined,
   DatabaseOutlined,
   LockOutlined,
@@ -24,6 +25,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import { useAuth } from "../../hooks/use-auth";
+import { useThemeMode } from "../../app/providers";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -47,6 +49,8 @@ function errorMessage(error: unknown, fallback: string): string {
 
 export function LoginPage() {
   const auth = useAuth();
+  const { mode: themeMode } = useThemeMode();
+  const isDark = themeMode === "dark";
   const navigate = useNavigate();
   const location = useLocation();
   const [mode, setMode] = useState<AuthMode>("login");
@@ -81,7 +85,7 @@ export function LoginPage() {
       const from = (
         location.state as { from?: { pathname?: string } } | null
       )?.from?.pathname;
-      navigate(from || "/platform-select", { replace: true });
+      navigate(from || "/platforms/xhs/dashboard", { replace: true });
     } catch (caughtError) {
       setError(
         errorMessage(
@@ -100,13 +104,26 @@ export function LoginPage() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0a",
+        background: isDark ? "#0a0a0a" : "#f5f5f5",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: 24,
+        position: "relative",
       }}
     >
+      {/* Back to home */}
+      <div style={{ position: "absolute", top: 20, left: 20 }}>
+        <Button
+          type="text"
+          icon={<ArrowLeftOutlined />}
+          onClick={() => navigate("/")}
+          style={{ color: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)" }}
+        >
+          返回首页
+        </Button>
+      </div>
       <Row
         gutter={48}
         align="middle"
@@ -142,10 +159,10 @@ export function LoginPage() {
                   display: "block",
                 }}
               >
-                Spider_XHS
+                小红书矩阵运营
               </Text>
-              <Text strong style={{ fontSize: 14 }}>
-                Operations OS
+              <Text strong style={{ fontSize: 14, color: isDark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.85)" }}>
+                All in One
               </Text>
             </div>
           </Space>
@@ -153,7 +170,7 @@ export function LoginPage() {
           <Title
             level={2}
             style={{
-              color: "#fff",
+              color: isDark ? "#fff" : "#1a1a1a",
               marginBottom: 12,
               lineHeight: 1.4,
             }}
@@ -179,7 +196,7 @@ export function LoginPage() {
                   </Space>
                 }
                 value={128}
-                valueStyle={{ color: "#fff", fontSize: 28 }}
+                styles={{ content: { color: isDark ? "#fff" : "#1a1a1a", fontSize: 28 } }}
               />
             </Col>
             <Col span={8}>
@@ -191,7 +208,7 @@ export function LoginPage() {
                   </Space>
                 }
                 value={14}
-                valueStyle={{ color: "#fff", fontSize: 28 }}
+                styles={{ content: { color: isDark ? "#fff" : "#1a1a1a", fontSize: 28 } }}
               />
             </Col>
             <Col span={8}>
@@ -203,7 +220,7 @@ export function LoginPage() {
                   </Space>
                 }
                 value={7}
-                valueStyle={{ color: "#fff", fontSize: 28 }}
+                styles={{ content: { color: isDark ? "#fff" : "#1a1a1a", fontSize: 28 } }}
               />
             </Col>
           </Row>
@@ -213,8 +230,8 @@ export function LoginPage() {
         <Col xs={24} md={12}>
           <Card
             style={{
-              background: "#1a1a1a",
-              borderColor: "#303030",
+              background: isDark ? "#1a1a1a" : "#ffffff",
+              borderColor: isDark ? "#303030" : "#e8e8e8",
               borderRadius: 12,
             }}
             styles={{
@@ -227,7 +244,7 @@ export function LoginPage() {
               style={{ marginBottom: 20 }}
             >
               <LockOutlined
-                style={{ fontSize: 16, color: "rgba(255,255,255,0.65)" }}
+                style={{ fontSize: 16, color: isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.45)" }}
               />
               <Text strong style={{ fontSize: 15 }}>
                 {mode === "login" ? "平台登录" : "注册平台账号"}
@@ -305,7 +322,7 @@ export function LoginPage() {
                   loading={isSubmitting}
                   disabled={auth.isChecking}
                   icon={<ArrowRightOutlined />}
-                  iconPosition="end"
+                  iconPlacement="end"
                 >
                   {mode === "login" ? "进入工作台" : "创建并进入"}
                 </Button>
@@ -322,8 +339,8 @@ export function LoginPage() {
               }}
             >
               {mode === "login"
-                ? "登录后选择小红书工作区开始运营。"
-                : "注册后会自动进入平台选择页。"}
+                ? "登录后直接进入小红书工作台。"
+                : "注册后自动进入小红书工作台。"}
             </Text>
           </Card>
         </Col>

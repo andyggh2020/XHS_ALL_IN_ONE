@@ -33,6 +33,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { PageHeader } from "../../../components/layout/app-shell";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   createAutoTask,
   deleteAutoTask,
@@ -69,6 +70,7 @@ const cardBodyStyle: React.CSSProperties = {
 };
 
 export function AutoOpsPage() {
+  const c = useThemeColors();
   const [tasks, setTasks] = useState<AutoTask[]>([]);
   const [pcAccounts, setPcAccounts] = useState<PlatformAccount[]>([]);
   const [creatorAccounts, setCreatorAccounts] = useState<PlatformAccount[]>([]);
@@ -347,13 +349,13 @@ export function AutoOpsPage() {
                     <Statistic
                       title="已发布"
                       value={task.total_published}
-                      valueStyle={{ fontSize: 20, color: "#e8e8e8" }}
+                      styles={{ content: { fontSize: 20, color: "#e8e8e8" } }}
                     />
                   </Col>
                 </Row>
 
                 {/* Time info */}
-                <Space direction="vertical" size={2} style={{ width: "100%", marginBottom: 12 }}>
+                <Space orientation="vertical" size={2} style={{ width: "100%", marginBottom: 12 }}>
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     <ClockCircleOutlined style={{ marginRight: 4 }} />
                     上次运行：{formatShanghaiTime(task.last_run_at)}

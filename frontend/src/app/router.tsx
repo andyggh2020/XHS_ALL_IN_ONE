@@ -1,10 +1,11 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { AppShell } from "../components/layout/app-shell";
 import { ComingSoonPage } from "../components/platforms/coming-soon";
 import { ProtectedRoute, PublicOnlyRoute } from "../components/ui/protected-route";
 import { LoginPage } from "../pages/login/login-page";
 import { ModelConfigPage } from "../pages/models/model-config-page";
+import { MarketingPage } from "../pages/marketing/marketing-page";
 import { PlatformSelectPage } from "../pages/platform-select/platform-select-page";
 import { SettingsPage } from "../pages/settings/settings-page";
 import { TaskCenterPage } from "../pages/tasks/task-center-page";
@@ -28,7 +29,7 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/platform-select" replace />} />
+        <Route path="/" element={<MarketingPage />} />
         <Route
           path="/login"
           element={

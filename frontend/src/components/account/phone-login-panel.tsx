@@ -97,7 +97,7 @@ export function PhoneLoginPanel({ accountType, onConfirmed }: PhoneLoginPanelPro
   }
 
   return (
-    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+    <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
       <Text style={{ color: "rgba(255,255,255,0.65)" }}>{statusText}</Text>
 
       <Form layout="vertical">

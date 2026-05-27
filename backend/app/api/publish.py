@@ -496,18 +496,25 @@ def publish_job_to_creator(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="没有成功上传的素材")
 
     if uploaded_videos:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="视频发布功能即将上线，目前仅支持图片发布")
-
-    image_file_infos = [_asset_creator_upload_info(asset) for asset in uploaded_images]
-
-    note_info = {
-        "title": job.title,
-        "desc": job.body,
-        "media_type": "image",
-        "image_file_infos": image_file_infos,
-        "type": 1,
-        "postTime": _scheduled_post_time(job),
-    }
+        video_info = _asset_creator_upload_info(uploaded_videos[0])
+        note_info = {
+            "title": job.title,
+            "desc": job.body,
+            "media_type": "video",
+            "video_info": video_info,
+            "type": 1,
+            "postTime": _scheduled_post_time(job),
+        }
+    else:
+        image_file_infos = [_asset_creator_upload_info(asset) for asset in uploaded_images]
+        note_info = {
+            "title": job.title,
+            "desc": job.body,
+            "media_type": "image",
+            "image_file_infos": image_file_infos,
+            "type": 1,
+            "postTime": _scheduled_post_time(job),
+        }
     _apply_publish_options(note_info, _load_publish_options(job))
 
     task = Task(
@@ -519,7 +526,7 @@ def publish_job_to_creator(
         payload={
             "publish_job_id": job.id,
             "platform_account_id": account.id,
-            "asset_ids": [asset.id for asset in uploaded_images],
+            "asset_ids": [asset.id for asset in (uploaded_images + uploaded_videos)],
             "publish_mode": job.publish_mode,
         },
     )

@@ -52,6 +52,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { PageHeader } from "../../../components/layout/app-shell";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   addDraftAsset,
   deleteDraft,
@@ -193,6 +194,7 @@ function SortableRewriteImage({ asset, onEdit, onRemove, onView }: { asset: Draf
 }
 
 export function XhsDraftsPage() {
+  const c = useThemeColors();
   const [activeMode, setActiveMode] = useState<AiContentMode>("rewrite");
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [selectedDraftId, setSelectedDraftId] = useState<number | null>(null);
@@ -914,7 +916,7 @@ export function XhsDraftsPage() {
 
             {rewritePreview !== null && (
               <Card size="small" title="改写结果" style={{ marginBottom: 16, background: "#1a2332", borderColor: "#1668dc40" }}>
-                <Paragraph style={{ whiteSpace: "pre-wrap", color: "rgba(255,255,255,.75)", fontSize: 13, maxHeight: 240, overflow: "auto" }}>{rewritePreview}</Paragraph>
+                <Paragraph style={{ whiteSpace: "pre-wrap", color: c.textPrimary, fontSize: 13, maxHeight: 240, overflow: "auto" }}>{rewritePreview}</Paragraph>
                 <Space style={{ marginTop: 8 }}>
                   <Button type="primary" size="small" onClick={applyRewrite}>采用</Button>
                   <Button size="small" onClick={discardRewrite}>放弃</Button>
@@ -924,7 +926,7 @@ export function XhsDraftsPage() {
 
             <Divider style={{ margin: "12px 0" }} />
 
-            <Space direction="vertical" style={{ width: "100%" }} size={8}>
+            <Space orientation="vertical" style={{ width: "100%" }} size={8}>
               <Button onClick={handleGenerateTitles} loading={isPolishingTitles} block icon={<EditOutlined />}>润色标题</Button>
               <Button onClick={handleGenerateTags} loading={isPolishingTags} block icon={<TagsOutlined />}>润色标签</Button>
             </Space>
@@ -1032,7 +1034,7 @@ export function XhsDraftsPage() {
                         />
                       ) : (
                         <div style={{ height: 180, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <Space direction="vertical" align="center"><PlayCircleOutlined style={{ fontSize: 32, color: "#1668dc" }} /><Text style={{ fontSize: 12 }}>视频</Text></Space>
+                          <Space orientation="vertical" align="center"><PlayCircleOutlined style={{ fontSize: 32, color: "#1668dc" }} /><Text style={{ fontSize: 12 }}>视频</Text></Space>
                         </div>
                       )}
                     </div>
@@ -1089,7 +1091,7 @@ export function XhsDraftsPage() {
                       style={{ marginBottom: 12 }}
                       disabled={isOptimizing}
                     />
-                    <Space direction="vertical" style={{ width: "100%" }} size={8}>
+                    <Space orientation="vertical" style={{ width: "100%" }} size={8}>
                       <Button
                         block
                         type="primary"

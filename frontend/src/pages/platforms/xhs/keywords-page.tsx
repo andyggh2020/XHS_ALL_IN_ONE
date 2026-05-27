@@ -1,3 +1,4 @@
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -47,6 +48,7 @@ function joinKeywords(keywords: string[]): string {
 }
 
 export function XhsKeywordsPage() {
+  const c = useThemeColors();
   const [groups, setGroups] = useState<KeywordGroup[]>([]);
   const [detailsByGroup, setDetailsByGroup] = useState<
     Record<number, KeywordGroupDetail>
@@ -194,7 +196,7 @@ export function XhsKeywordsPage() {
       />
 
       <Card
-        style={{ background: "#1f1f1f", borderColor: "#303030", marginBottom: 24 }}
+        style={{ background: c.cardBg, borderColor: c.cardBorder, marginBottom: 24 }}
       >
         <Form layout="inline" style={{ flexWrap: "wrap", gap: 8 }}>
           <Form.Item>
@@ -260,7 +262,7 @@ export function XhsKeywordsPage() {
           <Spin tip="正在加载关键词组..." />
         </div>
       ) : groups.length === 0 ? (
-        <Card style={{ background: "#1f1f1f", borderColor: "#303030" }}>
+        <Card style={{ background: c.cardBg, borderColor: c.cardBorder }}>
           <Empty description="暂无关键词组。" />
         </Card>
       ) : (
@@ -276,7 +278,7 @@ export function XhsKeywordsPage() {
                       <Tag color="blue">xhs</Tag>
                     </Space>
                   }
-                  style={{ background: "#1f1f1f", borderColor: "#303030" }}
+                  style={{ background: c.cardBg, borderColor: c.cardBorder }}
                 >
                   <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
                     {joinKeywords(group.keywords)}
@@ -288,14 +290,14 @@ export function XhsKeywordsPage() {
                         title="命中"
                         value={detail?.trend.total_matches ?? 0}
                         suffix="条"
-                        valueStyle={{ fontSize: 16 }}
+                        styles={{ content: { fontSize: 16 } }}
                       />
                     </Col>
                     <Col span={8}>
                       <Statistic
                         title="互动"
                         value={detail?.trend.total_engagement ?? 0}
-                        valueStyle={{ fontSize: 16 }}
+                        styles={{ content: { fontSize: 16 } }}
                       />
                     </Col>
                     <Col span={8}>
@@ -303,7 +305,7 @@ export function XhsKeywordsPage() {
                         title="关键词"
                         value={group.keywords.length}
                         suffix="个"
-                        valueStyle={{ fontSize: 16 }}
+                        styles={{ content: { fontSize: 16 } }}
                       />
                     </Col>
                   </Row>

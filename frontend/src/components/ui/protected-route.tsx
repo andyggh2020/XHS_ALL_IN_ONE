@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../../hooks/use-auth";
+import { useThemeMode } from "../../app/providers";
 
 type RouteGuardProps = {
   children: ReactNode;
@@ -11,6 +12,8 @@ type RouteGuardProps = {
 export function ProtectedRoute({ children }: RouteGuardProps) {
   const location = useLocation();
   const auth = useAuth();
+  const { mode: themeMode } = useThemeMode();
+  const isDark = themeMode === "dark";
 
   if (auth.isChecking) {
     return (
@@ -20,7 +23,7 @@ export function ProtectedRoute({ children }: RouteGuardProps) {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
-          background: "#0a0a0a",
+          background: isDark ? "#0a0a0a" : "#f5f5f5",
         }}
       >
         <Spin size="large" tip="正在验证登录状态..." />
@@ -37,6 +40,8 @@ export function ProtectedRoute({ children }: RouteGuardProps) {
 
 export function PublicOnlyRoute({ children }: RouteGuardProps) {
   const auth = useAuth();
+  const { mode: themeMode } = useThemeMode();
+  const isDark = themeMode === "dark";
 
   if (auth.isChecking) {
     return (
@@ -46,7 +51,7 @@ export function PublicOnlyRoute({ children }: RouteGuardProps) {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
-          background: "#0a0a0a",
+          background: isDark ? "#0a0a0a" : "#f5f5f5",
         }}
       >
         <Spin size="large" tip="正在验证登录状态..." />
@@ -55,7 +60,7 @@ export function PublicOnlyRoute({ children }: RouteGuardProps) {
   }
 
   if (auth.isAuthenticated) {
-    return <Navigate to="/platform-select" replace />;
+    return <Navigate to="/platforms/xhs/dashboard" replace />;
   }
 
   return <>{children}</>;

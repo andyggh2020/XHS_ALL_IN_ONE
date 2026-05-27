@@ -12,6 +12,7 @@ import {
 import { Alert, Button, Card, Checkbox, Col, Empty, Form, Input, InputNumber, Row, Select, Space, Spin, Table, Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { Link } from "react-router-dom";
 
 import { crawlXhsDataStream, fetchAccounts } from "../../../lib/api";
@@ -161,6 +162,7 @@ function exportRowsToExcel(items: XhsDataCrawlItem[]) {
 }
 
 export function XhsCrawlerPage() {
+  const c = useThemeColors();
   const [accounts, setAccounts] = useState<PlatformAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
   const [mode, setMode] = useState<XhsDataCrawlMode>("note_urls");

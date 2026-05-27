@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { PageHeader } from "../../../components/layout/app-shell";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { fetchXhsOverview } from "../../../lib/api";
 import type { DashboardOverview } from "../../../types";
 
@@ -29,6 +30,7 @@ const fallbackOverview: DashboardOverview = {
 
 export function XhsDashboard() {
   const [overview, setOverview] = useState<DashboardOverview>(fallbackOverview);
+  const c = useThemeColors();
 
   useEffect(() => {
     fetchXhsOverview()
@@ -46,9 +48,9 @@ export function XhsDashboard() {
   return (
     <div>
       <PageHeader
-        eyebrow="XHS Workspace"
-        title="小红书运营总览"
-        description="把抓取、洞察、AI 创作和发布任务放在同一张操作台上。"
+        eyebrow="小红书运营"
+        title="工作台总览"
+        description="采集、洞察、AI 创作和发布任务一屏管理。"
         action={
           <Link to="/platforms/xhs/discovery">
             <Button type="primary" icon={<DashboardOutlined />}>
@@ -61,7 +63,7 @@ export function XhsDashboard() {
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         {metrics.map((metric) => (
           <Col xs={12} sm={12} md={6} key={metric.label}>
-            <Card size="small" style={{ background: "#1f1f1f", borderColor: "#303030" }}>
+            <Card size="small" style={{ background: c.cardBg, borderColor: c.cardBorder }}>
               <Statistic
                 title={metric.label}
                 value={metric.value}
@@ -77,7 +79,7 @@ export function XhsDashboard() {
           <Card
             title="高潜话题"
             extra={<Link to="/platforms/xhs/analytics">查看洞察</Link>}
-            style={{ background: "#1f1f1f", borderColor: "#303030" }}
+            style={{ background: c.cardBg, borderColor: c.cardBorder }}
           >
             {overview.hot_topics.length === 0 ? (
               <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无话题数据" />
@@ -102,7 +104,7 @@ export function XhsDashboard() {
           <Card
             title="自动化结果"
             extra={<RobotOutlined />}
-            style={{ background: "#1f1f1f", borderColor: "#303030" }}
+            style={{ background: c.cardBg, borderColor: c.cardBorder }}
           >
             {overview.recent_activity.length === 0 ? (
               <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无最近活动" />

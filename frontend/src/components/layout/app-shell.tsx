@@ -82,11 +82,23 @@ function levelColor(level: string): string {
 export function AppShell() {
   const auth = useAuth();
   const { mode: themeMode, toggle: toggleTheme } = useThemeMode();
+  const isDark = themeMode === "dark";
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const colors = {
+    border: isDark ? "#303030" : "#e8e8e8",
+    borderSecondary: isDark ? "#262626" : "#f0f0f0",
+    logoText: isDark ? "rgba(255,255,255,.85)" : "rgba(0,0,0,.85)",
+    iconMuted: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.35)",
+    badgeBg: isDark ? "rgba(22,104,220,0.06)" : "rgba(22,104,220,0.06)",
+    dropdownBg: isDark ? "#1f1f1f" : "#ffffff",
+    headerBg: isDark ? "#141414" : "#ffffff",
+    emptyText: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)",
+  };
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -108,19 +120,19 @@ export function AppShell() {
   const selectedKeys = [location.pathname];
 
   const notificationDropdownContent = (
-    <div style={{ width: 360, background: "#1f1f1f", borderRadius: 8, border: "1px solid #303030", overflow: "hidden" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid #303030" }}>
+    <div style={{ width: 360, background: colors.dropdownBg, borderRadius: 8, border: `1px solid ${colors.border}`, overflow: "hidden" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: `1px solid ${colors.border}` }}>
         <Text strong style={{ fontSize: 14 }}>通知</Text>
         {unreadCount > 0 && <Button type="link" size="small" onClick={() => void handleMarkAllRead()}>全部已读</Button>}
       </div>
       <div style={{ maxHeight: 400, overflowY: "auto" }}>
         {notifications.length === 0 ? (
-          <div style={{ padding: "32px 16px", textAlign: "center", color: "rgba(255,255,255,0.35)" }}>暂无通知</div>
+          <div style={{ padding: "32px 16px", textAlign: "center", color: colors.emptyText }}>暂无通知</div>
         ) : (
           <List
             dataSource={notifications}
             renderItem={(n) => (
-              <List.Item key={n.id} style={{ padding: "10px 16px", cursor: n.read ? "default" : "pointer", background: n.read ? "transparent" : "rgba(22,104,220,0.06)", borderBottom: "1px solid #262626" }} onClick={() => !n.read && void handleMarkRead(n.id)}>
+              <List.Item key={n.id} style={{ padding: "10px 16px", cursor: n.read ? "default" : "pointer", background: n.read ? "transparent" : colors.badgeBg, borderBottom: `1px solid ${colors.borderSecondary}` }} onClick={() => !n.read && void handleMarkRead(n.id)}>
                 <List.Item.Meta
                   avatar={<span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: levelColor(n.level), marginTop: 6 }} />}
                   title={<Text style={{ fontSize: 13 }}>{n.title}</Text>}
@@ -142,7 +154,7 @@ export function AppShell() {
         collapsed={collapsed}
         width={220}
         collapsedWidth={64}
-        theme="dark"
+        theme={isDark ? "dark" : "light"}
         trigger={null}
         style={{
           height: "100vh",
@@ -150,42 +162,58 @@ export function AppShell() {
           left: 0,
           top: 0,
           bottom: 0,
-          borderRight: "1px solid #303030",
+          borderRight: `1px solid ${colors.border}`,
           overflow: "hidden",
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           {/* Logo */}
           <div
-            style={{ padding: collapsed ? "14px 0" : "14px 16px", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between", borderBottom: "1px solid #303030", flexShrink: 0, cursor: "pointer" }}
-            onClick={() => navigate("/platform-select")}
+            style={{ padding: collapsed ? "14px 0" : "14px 16px", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between", borderBottom: `1px solid ${colors.border}`, flexShrink: 0, cursor: "pointer" }}
+            onClick={() => navigate("/")}
           >
             <Space align="center" size={collapsed ? 0 : 8}>
-              <img src="/logo.jpg" alt="Logo" style={{ width: 28, height: 28, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
-              {!collapsed && <span style={{ fontWeight: 600, fontSize: 14, color: "rgba(255,255,255,.85)" }}>Spider XHS</span>}
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 7,
+                  background: "linear-gradient(135deg, #1668dc 0%, #4e8ff7 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 800,
+                  fontSize: 14,
+                  color: "#fff",
+                  flexShrink: 0,
+                }}
+              >
+                X
+              </div>
+              {!collapsed && <span style={{ fontWeight: 600, fontSize: 14, color: colors.logoText }}>小红书矩阵运营</span>}
             </Space>
-            {!collapsed && <Button type="text" size="small" icon={<MenuFoldOutlined />} onClick={(e) => { e.stopPropagation(); setCollapsed(true); }} style={{ color: "rgba(255,255,255,.35)" }} />}
+            {!collapsed && <Button type="text" size="small" icon={<MenuFoldOutlined />} onClick={(e) => { e.stopPropagation(); setCollapsed(true); }} style={{ color: colors.iconMuted }} />}
           </div>
           {collapsed && (
-            <div style={{ textAlign: "center", padding: "6px 0", borderBottom: "1px solid #262626", flexShrink: 0 }}>
-              <Button type="text" size="small" icon={<MenuUnfoldOutlined />} onClick={() => setCollapsed(false)} style={{ color: "rgba(255,255,255,.35)" }} />
+            <div style={{ textAlign: "center", padding: "6px 0", borderBottom: `1px solid ${colors.borderSecondary}`, flexShrink: 0 }}>
+              <Button type="text" size="small" icon={<MenuUnfoldOutlined />} onClick={() => setCollapsed(false)} style={{ color: colors.iconMuted }} />
             </div>
           )}
 
           {/* Main nav — scrollable */}
           <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
-            <Menu theme="dark" mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={mainNavItems} style={{ borderRight: 0 }} />
+            <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={mainNavItems} style={{ borderRight: 0 }} />
           </div>
 
           {/* Footer — pinned to bottom */}
-          <div style={{ flexShrink: 0, borderTop: "1px solid #303030" }}>
-            <Menu theme="dark" mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={footerNavItems} style={{ borderRight: 0 }} />
-            <div style={{ padding: collapsed ? "8px 0" : "8px 16px", borderTop: "1px solid #262626", display: "flex", alignItems: "center", gap: 8, justifyContent: collapsed ? "center" : "flex-start" }}>
+          <div style={{ flexShrink: 0, borderTop: `1px solid ${colors.border}` }}>
+            <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={footerNavItems} style={{ borderRight: 0 }} />
+            <div style={{ padding: collapsed ? "8px 0" : "8px 16px", borderTop: `1px solid ${colors.borderSecondary}`, display: "flex", alignItems: "center", gap: 8, justifyContent: collapsed ? "center" : "flex-start" }}>
               <Avatar size={22} icon={<UserOutlined />} style={{ background: "#1668dc", flexShrink: 0, fontSize: 11 }}>{(auth.user?.username ?? "U")[0].toUpperCase()}</Avatar>
               {!collapsed && (
                 <>
                   <Text type="secondary" ellipsis style={{ fontSize: 12, flex: 1, lineHeight: "22px" }}>{auth.user?.username ?? "用户"}</Text>
-                  <Button type="text" icon={<LogoutOutlined />} onClick={() => void auth.logout()} size="small" style={{ color: "rgba(255,255,255,0.35)", flexShrink: 0 }} />
+                  <Button type="text" icon={<LogoutOutlined />} onClick={() => void auth.logout()} size="small" style={{ color: colors.iconMuted, flexShrink: 0 }} />
                 </>
               )}
             </div>
@@ -194,7 +222,7 @@ export function AppShell() {
       </Sider>
 
       <Layout style={{ marginLeft: siderWidth, transition: "margin-left 0.2s" }}>
-        <Header style={{ padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "flex-end", borderBottom: "1px solid #303030", height: 48, lineHeight: "48px" }}>
+        <Header style={{ padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "flex-end", borderBottom: `1px solid ${colors.border}`, height: 48, lineHeight: "48px" }}>
           <Space size={12} align="center">
             <Button
               type="text"

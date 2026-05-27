@@ -31,6 +31,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { PageHeader } from "../../../components/layout/app-shell";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   createXhsAnalyticsReport,
   downloadExportFile,
@@ -107,6 +108,7 @@ const topContentColumns: ColumnsType<AnalyticsTopContent> = [
 const metricIconColors = ["#1668dc", "#52c41a", "#faad14", "#eb2f96"];
 
 export function XhsAnalyticsPage() {
+  const c = useThemeColors();
   const [overview, setOverview] = useState<DashboardOverview>(fallbackOverview);
   const [topContent, setTopContent] = useState<AnalyticsTopContent[]>([]);
   const [hotTopics, setHotTopics] = useState<AnalyticsHotTopic[]>([]);
@@ -205,8 +207,8 @@ export function XhsAnalyticsPage() {
             <Card
               size="small"
               style={{
-                background: "#1f1f1f",
-                borderColor: "#303030",
+                background: c.cardBg,
+                borderColor: c.cardBorder,
                 borderTop: `2px solid ${metricIconColors[idx]}`,
               }}
             >
@@ -220,7 +222,7 @@ export function XhsAnalyticsPage() {
                     {metric.icon}
                   </span>
                 }
-                valueStyle={{ fontSize: 28, fontWeight: 600, color: "#e8e8e8" }}
+                styles={{ content: { fontSize: 28, fontWeight: 600, color: "#e8e8e8" } }}
               />
             </Card>
           </Col>
@@ -264,7 +266,7 @@ export function XhsAnalyticsPage() {
                   </Space>
                 }
                 extra={<Link to="/platforms/xhs/library">进入内容库</Link>}
-                style={{ background: "#1f1f1f", borderColor: "#303030", height: "100%" }}
+                style={{ background: c.cardBg, borderColor: c.cardBorder, height: "100%" }}
                 styles={{ body: { padding: "12px 16px" } }}
               >
                 <Table<AnalyticsTopContent>
@@ -292,7 +294,7 @@ export function XhsAnalyticsPage() {
                   extra={
                     <Tag color="blue">{hotTopics.length} 个</Tag>
                   }
-                  style={{ background: "#1f1f1f", borderColor: "#303030", flex: 1 }}
+                  style={{ background: c.cardBg, borderColor: c.cardBorder, flex: 1 }}
                   styles={{ body: { padding: "8px 16px", maxHeight: 320, overflowY: "auto" } }}
                 >
                   {hotTopics.length === 0 ? (
@@ -316,7 +318,7 @@ export function XhsAnalyticsPage() {
                                 percent={pct}
                                 showInfo={false}
                                 strokeColor="#1668dc"
-                                trailColor="#303030"
+                                trailColor={c.cardBorder}
                                 size="small"
                               />
                             </div>
@@ -340,7 +342,7 @@ export function XhsAnalyticsPage() {
                       {commentInsights.question_count} 个提问
                     </Text>
                   }
-                  style={{ background: "#1f1f1f", borderColor: "#303030" }}
+                  style={{ background: c.cardBg, borderColor: c.cardBorder }}
                   styles={{ body: { padding: "12px 16px" } }}
                 >
                   {commentInsights.top_terms.length === 0 ? (
@@ -373,7 +375,7 @@ export function XhsAnalyticsPage() {
             </Col>
           </Row>
 
-          <Divider style={{ borderColor: "#303030", margin: "24px 0" }} />
+          <Divider style={{ borderColor: c.cardBorder, margin: "24px 0" }} />
 
           {/* ---- Bottom: Top Comments ---- */}
           <Card
@@ -386,7 +388,7 @@ export function XhsAnalyticsPage() {
             extra={
               <Tag>{commentInsights.top_comments.length} 条</Tag>
             }
-            style={{ background: "#1f1f1f", borderColor: "#303030" }}
+            style={{ background: c.cardBg, borderColor: c.cardBorder }}
             styles={{ body: { padding: "8px 16px" } }}
           >
             <List
@@ -400,7 +402,7 @@ export function XhsAnalyticsPage() {
                       <Avatar
                         size={36}
                         icon={<UserOutlined />}
-                        style={{ backgroundColor: "#303030" }}
+                        style={{ backgroundColor: c.cardBorder }}
                       />
                     }
                     title={

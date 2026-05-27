@@ -24,6 +24,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { PageHeader } from "../../../components/layout/app-shell";
+import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   createMonitoringTarget,
   deleteMonitoringTarget,
@@ -69,6 +70,7 @@ function snapshotMetric(
 }
 
 export function XhsMonitoringPage() {
+  const c = useThemeColors();
   const [targets, setTargets] = useState<MonitoringTarget[]>([]);
   const [snapshotsByTarget, setSnapshotsByTarget] = useState<
     Record<number, MonitoringSnapshot>
@@ -229,7 +231,7 @@ export function XhsMonitoringPage() {
       />
 
       <Card
-        style={{ background: "#1f1f1f", borderColor: "#303030", marginBottom: 24 }}
+        style={{ background: c.cardBg, borderColor: c.cardBorder, marginBottom: 24 }}
       >
         <Form layout="inline" style={{ flexWrap: "wrap", gap: 8 }}>
           <Form.Item>
@@ -298,7 +300,7 @@ export function XhsMonitoringPage() {
           <Spin tip="正在加载监控目标..." />
         </div>
       ) : targets.length === 0 ? (
-        <Card style={{ background: "#1f1f1f", borderColor: "#303030" }}>
+        <Card style={{ background: c.cardBg, borderColor: c.cardBorder }}>
           <Empty description="暂无监控目标。" />
         </Card>
       ) : (
@@ -314,7 +316,7 @@ export function XhsMonitoringPage() {
                     </Tag>
                   </Space>
                 }
-                style={{ background: "#1f1f1f", borderColor: "#303030" }}
+                style={{ background: c.cardBg, borderColor: c.cardBorder }}
               >
                 <Text type="secondary" style={{ display: "block", marginBottom: 8 }}>
                   {target.value}
@@ -338,21 +340,21 @@ export function XhsMonitoringPage() {
                         title="匹配"
                         value={snapshotMetric(snapshotsByTarget[target.id], "matched_count")}
                         suffix="条"
-                        valueStyle={{ fontSize: 16 }}
+                        styles={{ content: { fontSize: 16 } }}
                       />
                     </Col>
                     <Col span={8}>
                       <Statistic
                         title="互动"
                         value={snapshotMetric(snapshotsByTarget[target.id], "total_engagement")}
-                        valueStyle={{ fontSize: 16 }}
+                        styles={{ content: { fontSize: 16 } }}
                       />
                     </Col>
                     <Col span={8}>
                       <Statistic
                         title="快照时间"
                         value={formatTime(snapshotsByTarget[target.id].created_at)}
-                        valueStyle={{ fontSize: 12 }}
+                        styles={{ content: { fontSize: 12 } }}
                       />
                     </Col>
                   </Row>
