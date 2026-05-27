@@ -10,6 +10,7 @@ import {
   KeyOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
+  MenuOutlined,
   MenuUnfoldOutlined,
   MoonOutlined,
   RobotOutlined,
@@ -30,6 +31,7 @@ import {
   Badge,
   Button,
   Col,
+  Drawer,
   Dropdown,
   Layout,
   List,
@@ -46,6 +48,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import KeepAliveRouteOutlet from "keepalive-for-react-router";
 
 import { useAuth } from "../../hooks/use-auth";
+import { useMediaQuery } from "../../hooks/use-media-query";
 import { useThemeMode } from "../../app/providers";
 import { fetchNotifications, markAllNotificationsRead, markNotificationRead } from "../../lib/api";
 import type { AppNotification } from "../../types";
@@ -91,7 +94,9 @@ export function AppShell() {
   const isDark = themeMode === "dark";
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -126,7 +131,7 @@ export function AppShell() {
   const selectedKeys = [location.pathname];
 
   const notificationDropdownContent = (
-    <div style={{ width: 360, background: colors.dropdownBg, borderRadius: 8, border: `1px solid ${colors.border}`, overflow: "hidden" }}>
+    <div style={{ width: isMobile ? "calc(100vw - 32px)" : 360, maxWidth: 360, background: colors.dropdownBg, borderRadius: 8, border: `1px solid ${colors.border}`, overflow: "hidden" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: `1px solid ${colors.border}` }}>
         <Text strong style={{ fontSize: 14 }}>通知</Text>
         {unreadCount > 0 && <Button type="link" size="small" onClick={() => void handleMarkAllRead()}>全部已读</Button>}
@@ -154,104 +159,145 @@ export function AppShell() {
 
   const siderWidth = collapsed ? 64 : 220;
 
+  // 侧栏内容（可复用到 Drawer 和桌面 Sider）
+  const sidebarContent = (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Logo */}
+      <div
+        style={{ padding: collapsed || isMobile ? "16px 0" : "16px 16px", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: `1px solid ${colors.border}`, flexShrink: 0, cursor: "pointer" }}
+        onClick={() => { navigate("/"); if (isMobile) setMobileMenuOpen(false); }}
+      >
+        <Space align="center" size={8}>
+          <div
+            style={{
+              width: collapsed ? 30 : 30, height: 30, borderRadius: 8,
+              background: "linear-gradient(135deg, #1668dc 0%, #4e8ff7 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontWeight: 800, fontSize: 13, color: "#fff",
+              boxShadow: "0 2px 8px rgba(22,104,220,0.3)",
+            }}
+          >X</div>
+          {(!collapsed || isMobile) && <span style={{ fontWeight: 600, fontSize: 14, color: colors.logoText, letterSpacing: 0.5 }}>小红书矩阵运营</span>}
+        </Space>
+        {!isMobile && !collapsed && (
+          <Button type="text" size="small" icon={<MenuFoldOutlined style={{ fontSize: 14 }} />} onClick={(e) => { e.stopPropagation(); setCollapsed(true); }} style={{ color: colors.iconMuted, opacity: 0.6 }} />
+        )}
+      </div>
+
+      {/* Main nav — scrollable */}
+      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", marginTop: 4 }}>
+        <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={(info) => { handleMenuClick(info); if (isMobile) setMobileMenuOpen(false); }} items={mainNavItems} style={{ borderRight: 0 }} />
+      </div>
+
+      {/* Footer — pinned to bottom */}
+      <div style={{ flexShrink: 0 }}>
+        {auth.user?.is_admin && (
+          <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={(info) => { handleMenuClick(info); if (isMobile) setMobileMenuOpen(false); }} items={adminNavItem} style={{ borderRight: 0 }} />
+        )}
+        <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={(info) => { handleMenuClick(info); if (isMobile) setMobileMenuOpen(false); }} items={footerNavItems} style={{ borderRight: 0 }} />
+        <div style={{
+          padding: "10px 14px",
+          borderTop: `1px solid ${colors.borderSecondary}`,
+          display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-start",
+        }}>
+          <div style={{ position: "relative" }}>
+            <Avatar size={26} style={{ background: "linear-gradient(135deg, #1668dc, #4e8ff7)", flexShrink: 0, fontSize: 11, border: "2px solid rgba(22,104,220,0.2)" }}>
+              {(auth.user?.username ?? "U")[0].toUpperCase()}
+            </Avatar>
+            <div style={{ position: "absolute", bottom: 0, right: 0, width: 8, height: 8, borderRadius: "50%", background: "#22c55e", border: `2px solid ${isDark ? "#0f0f0f" : "#ffffff"}` }} />
+          </div>
+          <Text ellipsis style={{ fontSize: 12, flex: 1, lineHeight: "26px", color: isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)" }}>
+            {auth.user?.username ?? "用户"}
+          </Text>
+          {!isMobile && collapsed && (
+            <Button type="text" size="small" icon={<MenuUnfoldOutlined />} onClick={() => setCollapsed(false)} style={{ color: colors.iconMuted, flexShrink: 0 }} title="展开侧栏" />
+          )}
+          {!collapsed && <Button type="text" icon={<LogoutOutlined />} onClick={() => void auth.logout()} size="small" style={{ color: colors.iconMuted, flexShrink: 0, opacity: 0.5 }} title="退出登录" />}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider
-        collapsed={collapsed}
-        width={220}
-        collapsedWidth={64}
-        theme={isDark ? "dark" : "light"}
-        trigger={null}
-        style={{
-          height: "100vh",
-          position: "fixed",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          borderRight: `1px solid ${colors.border}`,
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-          {/* Logo */}
-          <div
-            style={{ padding: collapsed ? "14px 0" : "14px 16px", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between", borderBottom: `1px solid ${colors.border}`, flexShrink: 0, cursor: "pointer" }}
-            onClick={() => navigate("/")}
+      {isMobile ? (
+        // 移动端：Hamburger 菜单 → Drawer
+        <>
+          <Drawer
+            open={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+            placement="left"
+            width={260}
+            styles={{ body: { padding: 0, background: isDark ? "#0f0f0f" : "#ffffff" } }}
+            closeIcon={null}
           >
-            <Space align="center" size={collapsed ? 0 : 8}>
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 7,
-                  background: "linear-gradient(135deg, #1668dc 0%, #4e8ff7 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 800,
-                  fontSize: 14,
-                  color: "#fff",
-                  flexShrink: 0,
-                }}
-              >
-                X
-              </div>
-              {!collapsed && <span style={{ fontWeight: 600, fontSize: 14, color: colors.logoText }}>小红书矩阵运营</span>}
-            </Space>
-            {!collapsed && <Button type="text" size="small" icon={<MenuFoldOutlined />} onClick={(e) => { e.stopPropagation(); setCollapsed(true); }} style={{ color: colors.iconMuted }} />}
-          </div>
-          {collapsed && (
-            <div style={{ textAlign: "center", padding: "6px 0", borderBottom: `1px solid ${colors.borderSecondary}`, flexShrink: 0 }}>
-              <Button type="text" size="small" icon={<MenuUnfoldOutlined />} onClick={() => setCollapsed(false)} style={{ color: colors.iconMuted }} />
-            </div>
-          )}
-
-          {/* Main nav — scrollable */}
-          <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
-            <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={mainNavItems} style={{ borderRight: 0 }} />
-          </div>
-
-          {/* Footer — pinned to bottom */}
-          <div style={{ flexShrink: 0, borderTop: `1px solid ${colors.border}` }}>
-            {auth.user?.is_admin && (
-              <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={adminNavItem} style={{ borderRight: 0 }} />
-            )}
-            <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={footerNavItems} style={{ borderRight: 0 }} />
-            <div style={{ padding: collapsed ? "8px 0" : "8px 16px", borderTop: `1px solid ${colors.borderSecondary}`, display: "flex", alignItems: "center", gap: 8, justifyContent: collapsed ? "center" : "flex-start" }}>
-              <Avatar size={22} icon={<UserOutlined />} style={{ background: "#1668dc", flexShrink: 0, fontSize: 11 }}>{(auth.user?.username ?? "U")[0].toUpperCase()}</Avatar>
-              {!collapsed && (
-                <>
-                  <Text type="secondary" ellipsis style={{ fontSize: 12, flex: 1, lineHeight: "22px" }}>{auth.user?.username ?? "用户"}</Text>
-                  <Button type="text" icon={<LogoutOutlined />} onClick={() => void auth.logout()} size="small" style={{ color: colors.iconMuted, flexShrink: 0 }} />
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </Sider>
-
-      <Layout style={{ marginLeft: siderWidth, transition: "margin-left 0.2s" }}>
-        <Header style={{ padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "flex-end", borderBottom: `1px solid ${colors.border}`, height: 48, lineHeight: "48px" }}>
-          <Space size={12} align="center">
-            <Button
-              type="text"
-              icon={themeMode === "dark" ? <SunOutlined style={{ fontSize: 16 }} /> : <MoonOutlined style={{ fontSize: 16 }} />}
-              onClick={toggleTheme}
-              title={themeMode === "dark" ? "切换为浅色模式" : "切换为暗色模式"}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-            />
-            <Dropdown dropdownRender={() => notificationDropdownContent} trigger={["click"]} placement="bottomRight">
-              <Badge count={unreadCount} size="small" offset={[-2, 2]}>
-                <Button type="text" icon={<BellOutlined style={{ fontSize: 16 }} />} style={{ display: "flex", alignItems: "center", justifyContent: "center" }} />
-              </Badge>
-            </Dropdown>
-            <Avatar size={28} style={{ background: "#1668dc", fontSize: 12, cursor: "default" }}>{(auth.user?.username ?? "U")[0].toUpperCase()}</Avatar>
-          </Space>
-        </Header>
-        <Content style={{ padding: 24, minHeight: "calc(100vh - 48px)", overflow: "auto" }}>
-          <KeepAliveRouteOutlet include={[/\/platforms\/xhs\/discovery/, /\/platforms\/xhs\/crawler/]} />
-        </Content>
-      </Layout>
+            {sidebarContent}
+          </Drawer>
+          <Layout>
+            <Header style={{
+              padding: "0 16px",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              borderBottom: `1px solid ${colors.border}`,
+              height: 50, lineHeight: "50px",
+              backdropFilter: "blur(12px)",
+              position: "sticky", top: 0, zIndex: 10,
+            }}>
+              <Space>
+                <Button type="text" icon={<MenuOutlined style={{ fontSize: 16 }} />} onClick={() => setMobileMenuOpen(true)} style={{ opacity: 0.65 }} />
+                <span style={{ fontWeight: 600, fontSize: 14, color: colors.logoText }}>小红书矩阵运营</span>
+              </Space>
+              <Space size={8}>
+                <Button type="text" icon={themeMode === "dark" ? <SunOutlined style={{ fontSize: 15 }} /> : <MoonOutlined style={{ fontSize: 15 }} />} onClick={toggleTheme} style={{ opacity: 0.65 }} />
+                <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+                  <Button type="text" icon={<BellOutlined style={{ fontSize: 15 }} />} style={{ opacity: 0.65 }} />
+                </Badge>
+              </Space>
+            </Header>
+            <Content style={{ padding: 16, minHeight: "calc(100vh - 50px)", overflow: "auto" }}>
+              <KeepAliveRouteOutlet include={[/\/platforms\/xhs\/discovery/, /\/platforms\/xhs\/crawler/]} />
+            </Content>
+          </Layout>
+        </>
+      ) : (
+        // 桌面端：固定侧栏
+        <>
+          <Sider
+            collapsed={collapsed}
+            width={220}
+            collapsedWidth={64}
+            theme={isDark ? "dark" : "light"}
+            trigger={null}
+            style={{
+              height: "100vh", position: "fixed", left: 0, top: 0, bottom: 0,
+              borderRight: `1px solid ${colors.border}`, overflow: "hidden",
+            }}
+          >
+            {sidebarContent}
+          </Sider>
+          <Layout style={{ marginLeft: siderWidth, transition: "margin-left 0.2s" }}>
+            <Header style={{
+              padding: "0 24px",
+              display: "flex", alignItems: "center", justifyContent: "flex-end",
+              borderBottom: `1px solid ${colors.border}`,
+              height: 50, lineHeight: "50px",
+              backdropFilter: "blur(12px)",
+              position: "sticky", top: 0, zIndex: 10,
+            }}>
+              <Space size={10}>
+                <Button type="text" icon={themeMode === "dark" ? <SunOutlined style={{ fontSize: 15 }} /> : <MoonOutlined style={{ fontSize: 15 }} />} onClick={toggleTheme} style={{ opacity: 0.65 }} />
+                <Dropdown dropdownRender={() => notificationDropdownContent} trigger={["click"]} placement="bottomRight">
+                  <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+                    <Button type="text" icon={<BellOutlined style={{ fontSize: 15 }} />} style={{ opacity: 0.65 }} />
+                  </Badge>
+                </Dropdown>
+              </Space>
+            </Header>
+            <Content style={{ padding: 24, minHeight: "calc(100vh - 50px)", overflow: "auto" }}>
+              <KeepAliveRouteOutlet include={[/\/platforms\/xhs\/discovery/, /\/platforms\/xhs\/crawler/]} />
+            </Content>
+          </Layout>
+        </>
+      )}
     </Layout>
   );
 }

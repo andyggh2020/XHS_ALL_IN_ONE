@@ -1,51 +1,42 @@
+/* ===== Base ===== */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
   min-height: 100vh;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #434343; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
 
-::-webkit-scrollbar-track {
-  background: #1f1f1f;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #434343;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-.ant-layout {
-  min-height: 100vh;
-}
-
-/* ===== Hover & transition effects only ===== */
-/* These use CSS transition (not animation) so they only trigger on   */
-/* hover/focus, never on React re-render.                             */
-
+/* ===== Card base ===== */
 .ant-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .ant-card:hover {
-  border-color: #1668dc40;
+  border-color: #1668dc30 !important;
+}
+
+.ant-card:not(.ant-card-hoverable):hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
 .ant-card-hoverable:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(22, 104, 220, 0.12);
-  border-color: #1668dc60;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(22, 104, 220, 0.12);
+  border-color: #1668dc50 !important;
+}
+
+/* ===== Table ===== */
+.ant-table-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .ant-table-tbody > tr {
@@ -53,49 +44,150 @@ body {
 }
 
 .ant-table-tbody > tr:hover > td {
-  background: #1a1a2e !important;
+  background-color: rgba(22, 104, 220, 0.03) !important;
 }
 
-.ant-tag {
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-.ant-tag:hover {
-  transform: scale(1.05);
-}
-
+/* ===== Button ===== */
 .ant-btn {
   transition: all 0.2s ease;
+}
+
+.ant-btn-primary:not(:disabled):hover {
+  box-shadow: 0 4px 14px rgba(22, 104, 220, 0.3);
+  transform: translateY(-1px);
 }
 
 .ant-btn-primary:not(:disabled):active {
   transform: scale(0.97);
 }
 
-.ant-btn-primary:not(:disabled):hover {
-  box-shadow: 0 4px 12px rgba(22, 104, 220, 0.3);
+.ant-btn-default:not(:disabled):hover {
+  border-color: #1668dc60;
+  color: #1668dc;
 }
 
+/* ===== Tag ===== */
+.ant-tag {
+  transition: transform 0.15s ease;
+}
+
+.ant-tag:hover {
+  transform: scale(1.05);
+}
+
+/* ===== Menu ===== */
 .ant-menu-item {
   transition: background 0.2s ease, color 0.15s ease;
 }
 
+.ant-menu-item .anticon {
+  font-size: 15px !important;
+}
+
+.ant-menu-item-selected .anticon {
+  color: #1668dc;
+}
+
+/* ===== Input ===== */
+.ant-input-affix-wrapper {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: #1668dc;
+  box-shadow: 0 0 0 3px rgba(22, 104, 220, 0.1);
+}
+
+/* ===== Segmented ===== */
 .ant-segmented-item {
   transition: all 0.2s ease;
 }
 
+.ant-segmented-item-selected {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* ===== Statistic ===== */
 .ant-statistic-content-value {
   transition: color 0.3s ease;
 }
 
+/* ===== Progress ===== */
 .ant-progress-bg {
-  transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
 }
 
+/* ===== Spin ===== */
 .ant-spin-dot-item {
-  background: #1668dc;
+  background-color: #1668dc !important;
 }
 
-.ant-image-preview-img {
-  transition: transform 0.3s ease;
+/* ===== Steps ===== */
+.ant-steps-item-title {
+  transition: color 0.2s ease;
+}
+
+/* ===== Modal ===== */
+.ant-modal-content {
+  overflow: hidden;
+}
+
+/* ===== Dropdown ===== */
+.ant-dropdown-menu {
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.ant-dropdown-menu-item {
+  border-radius: 6px;
+}
+
+/* ===== Skeleton ===== */
+.ant-skeleton-element {
+  width: 100%;
+}
+
+/* ===== Empty state ===== */
+.ant-empty-image {
+  opacity: 0.5;
+}
+
+/* ===== Sidebar ===== */
+.ant-layout-sider {
+  transition: all 0.2s ease !important;
+}
+
+.ant-layout-sider .ant-layout-sider-children {
+  position: relative;
+}
+
+/* ===== Collapse button hover ===== */
+.sidebar-collapse-btn {
+  transition: opacity 0.2s, background 0.2s !important;
+}
+
+.sidebar-collapse-btn:hover {
+  opacity: 1 !important;
+  background: rgba(22, 104, 220, 0.1) !important;
+}
+
+/* ===== Header backdrop ===== */
+.ant-layout-header {
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* ===== Table wrapper ===== */
+.ant-table-wrapper {
+  border: 1px solid transparent;
+}
+
+/* ===== List items ===== */
+.ant-list-item {
+  transition: background 0.15s ease;
+}
+
+/* ===== Notification badge ===== */
+.ant-badge .ant-badge-count {
+  box-shadow: none;
 }
