@@ -3,8 +3,6 @@ import os
 import tempfile
 import time
 
-import cv2
-import numpy as np
 import requests
 from loguru import logger
 from xhs_utils.cookie_util import trans_cookies
@@ -297,6 +295,11 @@ class XHS_Creator_Apis():
     def get_file_info(self, file, media_type="image"):
         file_size = len(file)
         if media_type == "image":
+            try:
+                import cv2
+                import numpy as np
+            except ImportError:
+                raise ImportError("opencv-python and numpy are required for image/video processing. Install: pip install opencv-python-headless numpy")
             image = cv2.imdecode(np.frombuffer(file, np.uint8), cv2.IMREAD_COLOR)
             if image is None:
                 raise ValueError('image decode failed')
@@ -309,6 +312,10 @@ class XHS_Creator_Apis():
             return file, file_size
 
     def extract_video_cover_and_metadata(self, video):
+        try:
+            import cv2
+        except ImportError:
+            raise ImportError("opencv-python is required for video processing. Install: pip install opencv-python-headless numpy")
         temp_path = None
         try:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as f:

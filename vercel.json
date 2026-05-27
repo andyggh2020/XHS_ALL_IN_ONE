@@ -10,5 +10,10 @@
       "src": "/(.*)",
       "dest": "main.py"
     }
-  ]
+  ],
+  "env": {
+    "DATABASE_SQLITE_PATH": "/tmp/spider_xhs.db",
+    "DATABASE_TYPE": "sqlite",
+    "SECRET_KEY": "vercel-deploy-change-me-in-production"
+  }
 }
