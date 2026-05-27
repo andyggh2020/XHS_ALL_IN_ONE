@@ -80,7 +80,7 @@ def _load_yaml_config() -> Dict[str, Any]:
 
 class Settings(BaseSettings):
     app_name: str = "Spider_XHS"
-    api_title: str = "Spider_XHS Operations Platform"
+    api_title: str = "小红书矩阵运营"
     environment: str = "development"
 
     # Database

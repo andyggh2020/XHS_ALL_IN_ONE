@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import Optional, Sequence
 
+# Export FastAPI app for Vercel / production deployments
+from backend.app.main import app  # noqa: F401
 
 ROOT = Path(__file__).resolve().parent
 
