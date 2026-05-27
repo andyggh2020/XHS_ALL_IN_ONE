@@ -37,8 +37,24 @@ def init_db(bind=engine) -> None:
     import backend.app.models  # noqa: F401
 
     _run_alembic_migrations()
+    _add_user_membership_columns(bind)
     _normalize_model_config_names(bind)
     _normalize_sqlite_datetime_storage(bind)
+
+
+def _add_user_membership_columns(bind) -> None:
+    """Add is_admin, membership_level, membership_expires_at columns if missing."""
+    inspector = inspect(bind)
+    if "users" not in inspector.get_table_names():
+        return
+    existing = {c["name"] for c in inspector.get_columns("users")}
+    with bind.begin() as conn:
+        if "is_admin" not in existing:
+            conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0"))
+        if "membership_level" not in existing:
+            conn.execute(text("ALTER TABLE users ADD COLUMN membership_level VARCHAR(20) DEFAULT 'free'"))
+        if "membership_expires_at" not in existing:
+            conn.execute(text("ALTER TABLE users ADD COLUMN membership_expires_at DATETIME"))
 
 
 def _run_alembic_migrations() -> None:

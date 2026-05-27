@@ -59,11 +59,13 @@ function getStatusTag(s: string) {
   return <Tag color={cfg.color}>{cfg.label}</Tag>;
 }
 
-const panelStyle: React.CSSProperties = {
-  background: "#1a1a1a",
-  borderRadius: 8,
-  border: "1px solid #303030",
-};
+function usePanelStyle(c: ReturnType<typeof useThemeColors>): React.CSSProperties {
+  return {
+    background: c.cardBg2,
+    borderRadius: 8,
+    border: `1px solid ${c.cardBorder}`,
+  };
+}
 
 const cardBodyStyle: React.CSSProperties = {
   padding: 16,
@@ -71,6 +73,7 @@ const cardBodyStyle: React.CSSProperties = {
 
 export function AutoOpsPage() {
   const c = useThemeColors();
+  const panelStyle = usePanelStyle(c);
   const [tasks, setTasks] = useState<AutoTask[]>([]);
   const [pcAccounts, setPcAccounts] = useState<PlatformAccount[]>([]);
   const [creatorAccounts, setCreatorAccounts] = useState<PlatformAccount[]>([]);
@@ -293,13 +296,13 @@ export function AutoOpsPage() {
         <Card style={panelStyle} styles={{ body: cardBodyStyle }}>
           <div style={{ textAlign: "center", padding: 48 }}>
             <Spin size="large" />
-            <Paragraph style={{ color: "#8c8c8c", marginTop: 16 }}>正在加载自动运营任务...</Paragraph>
+            <Paragraph style={{ color: c.textMuted, marginTop: 16 }}>正在加载自动运营任务...</Paragraph>
           </div>
         </Card>
       ) : tasks.length === 0 && !showCreate ? (
         <Card style={panelStyle} styles={{ body: cardBodyStyle }}>
           <Empty
-            image={<ThunderboltOutlined style={{ fontSize: 48, color: "#8c8c8c" }} />}
+            image={<ThunderboltOutlined style={{ fontSize: 48, color: c.textMuted }} />}
             imageStyle={{ height: 64 }}
             description={
               <div>
@@ -318,10 +321,10 @@ export function AutoOpsPage() {
             <Col xs={24} md={12} xl={8} key={task.id}>
               <Card
                 style={panelStyle}
-                styles={{ body: cardBodyStyle, header: { borderBottom: "1px solid #303030" } }}
+                styles={{ body: cardBodyStyle, header: { borderBottom: `1px solid ${c.cardBorder}` } }}
                 title={
                   <Space>
-                    <ThunderboltOutlined style={{ color: task.status === "active" ? "#52c41a" : "#8c8c8c" }} />
+                    <ThunderboltOutlined style={{ color: task.status === "active" ? "#52c41a" : c.textMuted }} />
                     <Text ellipsis style={{ maxWidth: 180 }}>
                       {task.name}
                     </Text>
@@ -349,7 +352,7 @@ export function AutoOpsPage() {
                     <Statistic
                       title="已发布"
                       value={task.total_published}
-                      styles={{ content: { fontSize: 20, color: "#e8e8e8" } }}
+                      styles={{ content: { fontSize: 20, color: c.textPrimary } }}
                     />
                   </Col>
                 </Row>
@@ -448,7 +451,7 @@ export function AutoOpsPage() {
             </Space>
           }
           style={panelStyle}
-          styles={{ body: cardBodyStyle, header: { borderBottom: "1px solid #303030" } }}
+          styles={{ body: cardBodyStyle, header: { borderBottom: `1px solid ${c.cardBorder}` } }}
         >
           <Descriptions column={{ xs: 1, md: 2, lg: 4 }} size="small">
             <Descriptions.Item label="关键词">{lastRunResult.keyword}</Descriptions.Item>
@@ -483,7 +486,7 @@ export function AutoOpsPage() {
             </Space>
           }
           style={panelStyle}
-          styles={{ body: cardBodyStyle, header: { borderBottom: "1px solid #303030" } }}
+          styles={{ body: cardBodyStyle, header: { borderBottom: `1px solid ${c.cardBorder}` } }}
           extra={
             <Button type="text" onClick={() => setShowCreate(false)}>
               取消

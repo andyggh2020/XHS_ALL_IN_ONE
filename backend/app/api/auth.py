@@ -27,6 +27,12 @@ class RefreshRequest(BaseModel):
 class UserResponse(BaseModel):
     id: int
     username: str
+    is_admin: bool = False
+    membership_level: str = "free"
+    membership_expires_at: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 
 class TokenResponse(BaseModel):
@@ -37,7 +43,13 @@ class TokenResponse(BaseModel):
 
 
 def _serialize_user(user: User) -> dict:
-    return {"id": user.id, "username": user.username}
+    return {
+        "id": user.id,
+        "username": user.username,
+        "is_admin": user.is_admin,
+        "membership_level": user.membership_level,
+        "membership_expires_at": user.membership_expires_at.isoformat() if user.membership_expires_at else None,
+    }
 
 
 def _token_response(user: User) -> dict:

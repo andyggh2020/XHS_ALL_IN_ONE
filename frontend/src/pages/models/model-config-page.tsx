@@ -31,6 +31,7 @@ import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 import { PageHeader } from "../../components/layout/app-shell";
+import { useThemeColors } from "../../hooks/use-theme-colors";
 import {
   createModelConfig,
   deleteModelConfig,
@@ -65,9 +66,9 @@ function ModelTypeIcon({ type }: { type: ModelType }) {
   return type === "text" ? <RobotOutlined /> : <FileImageOutlined />;
 }
 
-const cardStyle = { background: "#1f1f1f", borderColor: "#303030" };
-
 export function ModelConfigPage() {
+  const c = useThemeColors();
+  const cardStyle = { background: c.cardBg, borderColor: c.cardBorder };
   const [configs, setConfigs] = useState<ModelConfig[]>([]);
   const [form, setForm] = useState<ModelConfigPayload>(emptyForm);
   const [isLoading, setIsLoading] = useState(true);
@@ -410,8 +411,8 @@ export function ModelConfigPage() {
                           key={config.id}
                           size="small"
                           style={{
-                            background: "#262626",
-                            borderColor: "#303030",
+                            background: c.cardBg4,
+                            borderColor: c.cardBorder,
                           }}
                         >
                           <Space

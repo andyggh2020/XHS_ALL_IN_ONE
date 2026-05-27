@@ -33,6 +33,34 @@ export type DashboardOverview = {
 export type PlatformUser = {
   id: number;
   username: string;
+  is_admin: boolean;
+  membership_level: string;
+  membership_expires_at: string | null;
+};
+
+export type MembershipLevel = "free" | "pro" | "enterprise";
+
+export type AdminUserItem = {
+  id: number;
+  username: string;
+  is_admin: boolean;
+  membership_level: string;
+  membership_expires_at: string | null;
+  created_at: string;
+};
+
+export type UpdateMembershipPayload = {
+  membership_level?: MembershipLevel;
+  is_admin?: boolean;
+  expires_in_days?: number;
+};
+
+export type MembershipPlan = {
+  level: string;
+  name: string;
+  price_monthly: number;
+  price_yearly: number;
+  features: string[];
 };
 
 export type AuthTokens = {

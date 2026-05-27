@@ -24,6 +24,7 @@ import { XhsImageStudioPage } from "../pages/platforms/xhs/image-studio-page";
 import { XhsPublishPage } from "../pages/platforms/xhs/publish-page";
 import { XhsVideoStudioPage } from "../pages/platforms/xhs/video-studio-page";
 import { XhsSectionPage } from "../pages/platforms/xhs/xhs-section-page";
+import { AdminUsersPage } from "../pages/admin/admin-users-page";
 
 export function AppRouter() {
   return (
@@ -78,6 +79,7 @@ export function AppRouter() {
           <Route path="/tasks" element={<TaskCenterPage />} />
           <Route path="/models" element={<ModelConfigPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

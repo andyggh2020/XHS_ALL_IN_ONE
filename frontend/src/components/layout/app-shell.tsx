@@ -3,6 +3,7 @@ import {
   BarChartOutlined,
   BellOutlined,
   CloudDownloadOutlined,
+  CrownOutlined,
   DashboardOutlined,
   DatabaseOutlined,
   FileTextOutlined,
@@ -17,6 +18,7 @@ import {
   SearchOutlined,
   SendOutlined,
   SettingOutlined,
+  TeamOutlined,
   ThunderboltOutlined,
   StarOutlined,
   SunOutlined,
@@ -71,6 +73,10 @@ const footerNavItems: MenuProps["items"] = [
   { key: "/tasks", icon: <ScheduleOutlined />, label: "任务中心" },
   { key: "/models", icon: <RobotOutlined />, label: "模型配置" },
   { key: "/settings", icon: <SettingOutlined />, label: "设置" },
+];
+
+const adminNavItem: MenuProps["items"] = [
+  { key: "/admin/users", icon: <TeamOutlined />, label: "用户管理" },
 ];
 
 function levelColor(level: string): string {
@@ -207,6 +213,9 @@ export function AppShell() {
 
           {/* Footer — pinned to bottom */}
           <div style={{ flexShrink: 0, borderTop: `1px solid ${colors.border}` }}>
+            {auth.user?.is_admin && (
+              <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={adminNavItem} style={{ borderRight: 0 }} />
+            )}
             <Menu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={footerNavItems} style={{ borderRight: 0 }} />
             <div style={{ padding: collapsed ? "8px 0" : "8px 16px", borderTop: `1px solid ${colors.borderSecondary}`, display: "flex", alignItems: "center", gap: 8, justifyContent: collapsed ? "center" : "flex-start" }}>
               <Avatar size={22} icon={<UserOutlined />} style={{ background: "#1668dc", flexShrink: 0, fontSize: 11 }}>{(auth.user?.username ?? "U")[0].toUpperCase()}</Avatar>

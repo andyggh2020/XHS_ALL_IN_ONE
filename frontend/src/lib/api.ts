@@ -3,6 +3,7 @@ import { message } from "antd";
 
 import { fallbackPlatforms } from "./platforms";
 import type {
+  AdminUserItem,
   AuthPayload,
   AutoTask,
   AutoTaskCreatePayload,
@@ -36,6 +37,7 @@ import type {
   KeywordGroup,
   KeywordGroupDetail,
   KeywordGroupPayload,
+  MembershipPlan,
   ModelConfig,
   ModelConfigPayload,
   ModelType,
@@ -68,6 +70,7 @@ import type {
   UserImageFile,
   TagPayload,
   TaskRecord,
+  UpdateMembershipPayload,
   XhsNoteSearchResponse,
   XhsDataCrawlItem,
   XhsDataCrawlPayload,
@@ -872,5 +875,22 @@ export async function deleteAutoTask(taskId: number): Promise<{ id: number; stat
 
 export async function runAutoTask(taskId: number): Promise<AutoTaskRunResult> {
   const response = await http.post<AutoTaskRunResult>(`/auto-tasks/${taskId}/run`);
+  return response.data;
+}
+
+// Admin & Membership
+
+export async function fetchAdminUsers(params?: { q?: string; page?: number; page_size?: number }): Promise<Paginated<AdminUserItem>> {
+  const response = await http.get<Paginated<AdminUserItem>>("/admin/users", { params });
+  return response.data;
+}
+
+export async function updateUserMembership(userId: number, payload: UpdateMembershipPayload): Promise<AdminUserItem> {
+  const response = await http.put<AdminUserItem>(`/admin/users/${userId}`, payload);
+  return response.data;
+}
+
+export async function fetchMembershipPlans(): Promise<MembershipPlan[]> {
+  const response = await http.get<MembershipPlan[]>("/admin/membership/plans");
   return response.data;
 }

@@ -25,6 +25,7 @@ import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 
 import { PageHeader } from "../../components/layout/app-shell";
+import { useThemeColors } from "../../hooks/use-theme-colors";
 import {
   cancelTask,
   fetchSchedulerStatus,
@@ -69,6 +70,7 @@ function statusColor(status: string): string {
 }
 
 export function TaskCenterPage() {
+  const c = useThemeColors();
   const [tasks, setTasks] = useState<TaskRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -211,7 +213,7 @@ export function TaskCenterPage() {
     },
   ];
 
-  const cardStyle = { background: "#1f1f1f", borderColor: "#303030" };
+  const cardStyle = { background: c.cardBg, borderColor: c.cardBorder };
 
   return (
     <div>
@@ -338,7 +340,7 @@ export function TaskCenterPage() {
           </div>
         ) : tasks.length === 0 ? (
           <Empty
-            image={<ClockCircleOutlined style={{ fontSize: 48, color: "#555" }} />}
+            image={<ClockCircleOutlined style={{ fontSize: 48, color: c.textMuted }} />}
             description={
               <div>
                 <Text strong>暂无任务记录</Text>
