@@ -48,6 +48,7 @@ def init_db(bind=engine) -> None:
     _add_user_membership_columns(bind)
     _normalize_model_config_names(bind)
     _normalize_sqlite_datetime_storage(bind)
+    _seed_default_admin(bind)
 
 
 def _add_user_membership_columns(bind) -> None:
@@ -171,6 +172,27 @@ def _normalize_sqlite_datetime_storage(bind) -> None:
                 text("UPDATE publish_jobs SET scheduled_at = datetime(scheduled_at, '+8 hours') WHERE scheduled_at IS NOT NULL")
             )
         connection.execute(text("INSERT INTO app_migrations (name) VALUES ('sqlite_publish_scheduled_at_asia_shanghai_v1')"))
+
+
+def _seed_default_admin(bind) -> None:
+    """Create a default admin user if no users exist yet (useful for fresh Vercel deploys)."""
+    inspector = inspect(bind)
+    if "users" not in inspector.get_table_names():
+        return
+    from backend.app.core.security import hash_password
+    from sqlalchemy import select as sa_select
+    from backend.app.models import User
+    with SessionLocal() as db:
+        existing = db.scalar(sa_select(User).where(User.username == "admin"))
+        if existing is None:
+            admin = User(
+                username="admin",
+                password_hash=hash_password("admin123"),
+                is_admin=True,
+                membership_level="admin",
+            )
+            db.add(admin)
+            db.commit()
 
 
 def get_db():
