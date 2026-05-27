@@ -46,10 +46,6 @@ def create_app() -> FastAPI:
     def health() -> dict:
         return {"status": "ok", "service": "spider-xhs"}
 
-    @app.get("/", tags=["root"])
-    def root() -> dict:
-        return {"service": "spider-xhs", "version": "1.0", "docs": "/docs"}
-
     app.include_router(registry.router, prefix="/api")
     app.include_router(auth.router, prefix="/api")
     app.include_router(accounts.router, prefix="/api")
