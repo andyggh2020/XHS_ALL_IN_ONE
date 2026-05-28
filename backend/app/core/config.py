@@ -92,6 +92,8 @@ class Settings(BaseSettings):
     database_mysql_user: str = "spider_xhs"
     database_mysql_password: str = "change_me"
     database_mysql_database: str = "spider_xhs"
+    # Vercel Postgres auto-detection (set by Vercel integration)
+    postgres_url: str = ""
 
     # Security
     secret_key: str = "dev-only-change-me"
@@ -119,6 +121,12 @@ class Settings(BaseSettings):
         model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     def model_post_init(self, __context: Any) -> None:
+        # Auto-detect Vercel Postgres from env vars set by Vercel integration
+        pg_url = self.postgres_url or os.environ.get("POSTGRES_URL") or ""
+        if pg_url:
+            object.__setattr__(self, "database_url", pg_url.replace("postgres://", "postgresql://"))
+            object.__setattr__(self, "database_type", "postgresql")
+            return
         # Build database_url from component fields if not explicitly set
         if not self.database_url:
             if self.database_type == "mysql":
