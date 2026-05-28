@@ -74,12 +74,12 @@ export function LoginPage() {
         <div style={{
           position: "absolute", top: -160, right: -160, width: 400, height: 400,
           borderRadius: "50%", background: "#1668dc15",
-          filter: "blur(80px)",
+          filter: "blur(80px)", animation: "loginBgFloat 8s ease-in-out infinite",
         }} />
         <div style={{
           position: "absolute", bottom: -160, left: -160, width: 400, height: 400,
           borderRadius: "50%", background: "#4e8ff715",
-          filter: "blur(80px)",
+          filter: "blur(80px)", animation: "loginBgFloat 10s ease-in-out infinite 1s",
         }} />
       </div>
 
@@ -91,7 +91,7 @@ export function LoginPage() {
         alignItems: "center",
       }}>
         {/* 左侧：品牌介绍 */}
-        {!isMobile && (<div>
+        {!isMobile && (<div style={{ animation: "loginLeft 0.6s ease-out" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
             <div style={{
               width: 40, height: 40, borderRadius: 10,
@@ -135,6 +135,7 @@ export function LoginPage() {
           borderRadius: 16, padding: "32px 28px",
           background: cardBg, border: `1px solid ${cardBorder}`,
           boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          animation: "loginRight 0.6s ease-out 0.1s both",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
             <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={textMuted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
