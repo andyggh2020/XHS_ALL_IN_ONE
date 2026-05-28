@@ -14,37 +14,37 @@ export function useThemeMode() {
   return useContext(ThemeContext);
 }
 
-const sharedToken = {
+const shared = {
   colorPrimary: "#1668dc",
   borderRadius: 8,
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif',
 };
 
 const darkToken = {
-  ...sharedToken,
-  colorBgBase: "#0a0a0a",
-  colorBgContainer: "#111111",
-  colorBgElevated: "#1a1a1a",
-  colorBorder: "#1e1e1e",
-  colorBorderSecondary: "#181818",
+  ...shared,
+  colorBgBase: "#08080f",
+  colorBgContainer: "#111118",
+  colorBgElevated: "#1a1a24",
+  colorBorder: "#1e1e2a",
+  colorBorderSecondary: "#16161f",
   colorBgSpotlight: "rgba(22,104,220,0.08)",
   colorLink: "#4e8ff7",
   colorSuccess: "#22c55e",
   colorWarning: "#eab308",
   colorError: "#ef4444",
   colorInfo: "#4e8ff7",
-  boxShadow: "0 1px 2px rgba(0,0,0,0.4)",
-  boxShadowSecondary: "0 4px 16px rgba(0,0,0,0.5)",
-  controlOutline: "rgba(22,104,220,0.3)",
+  boxShadow: "0 1px 2px rgba(0,0,0,0.5)",
+  boxShadowSecondary: "0 8px 32px rgba(0,0,0,0.6)",
+  controlOutline: "rgba(22,104,220,0.25)",
 };
 
 const lightToken = {
-  ...sharedToken,
-  colorBgBase: "#f5f5f7",
+  ...shared,
+  colorBgBase: "#f4f4f8",
   colorBgContainer: "#ffffff",
   colorBgElevated: "#ffffff",
-  colorBorder: "#e5e5e7",
-  colorBorderSecondary: "#eeeef0",
+  colorBorder: "#e2e2ea",
+  colorBorderSecondary: "#eaeaf2",
   colorBgSpotlight: "rgba(22,104,220,0.04)",
   colorLink: "#1668dc",
   colorSuccess: "#22c55e",
@@ -52,13 +52,12 @@ const lightToken = {
   colorError: "#ef4444",
   colorInfo: "#1668dc",
   boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-  boxShadowSecondary: "0 4px 16px rgba(0,0,0,0.06)",
+  boxShadowSecondary: "0 8px 32px rgba(0,0,0,0.08)",
   controlOutline: "rgba(22,104,220,0.2)",
 };
 
-type AppProvidersProps = { children: ReactNode };
-
-export function AppProviders({ children }: AppProvidersProps) {
+type Props = { children: ReactNode };
+export function AppProviders({ children }: Props) {
   const [mode, setMode] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem("theme-mode");
     return saved === "light" ? "light" : "dark";
@@ -66,86 +65,12 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   useEffect(() => {
     localStorage.setItem("theme-mode", mode);
-    document.body.style.background = mode === "dark" ? "#0a0a0a" : "#f5f5f7";
-    document.body.style.color = mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)";
+    const root = document.documentElement;
+    root.setAttribute("data-theme", mode);
   }, [mode]);
 
   const toggle = () => setMode((m) => (m === "dark" ? "light" : "dark"));
   const isDark = mode === "dark";
-
-  const components = {
-    Layout: {
-      siderBg: isDark ? "#0a0a0a" : "#ffffff",
-      headerBg: isDark ? "rgba(10,10,10,0.8)" : "rgba(255,255,255,0.8)",
-      bodyBg: isDark ? "#0a0a0a" : "#f5f5f7",
-    },
-    Menu: {
-      itemBorderRadius: 8,
-      itemMarginInline: 8,
-      itemMarginBlock: 2,
-      subMenuItemBg: "transparent",
-      ...(isDark ? {
-        darkItemBg: "transparent",
-        darkSubMenuItemBg: "transparent",
-        darkItemSelectedBg: "rgba(22,104,220,0.12)",
-        darkItemSelectedColor: "#4e8ff7",
-        darkItemHoverBg: "rgba(255,255,255,0.04)",
-        darkItemColor: "rgba(255,255,255,0.65)",
-      } : {
-        itemBg: "transparent",
-        itemSelectedBg: "rgba(22,104,220,0.06)",
-        itemSelectedColor: "#1668dc",
-        itemHoverBg: "rgba(0,0,0,0.03)",
-        itemColor: "rgba(0,0,0,0.55)",
-      }),
-    },
-    Card: {
-      borderRadius: 16,
-      colorBgContainer: isDark ? "#111111" : "#ffffff",
-    },
-    Table: {
-      borderRadius: 16,
-      headerBg: isDark ? "#111111" : "#fafafa",
-      headerColor: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)",
-      borderColor: isDark ? "#1a1a1a" : "#eeeef0",
-      rowHoverBg: isDark ? "rgba(22,104,220,0.04)" : "rgba(22,104,220,0.02)",
-    },
-    Button: {
-      borderRadius: 10,
-      primaryShadow: "0 2px 8px rgba(22,104,220,0.3)",
-      controlHeight: 38,
-    },
-    Input: {
-      borderRadius: 10,
-      controlHeight: 42,
-    },
-    Select: {
-      borderRadius: 10,
-      controlHeight: 42,
-    },
-    Tag: {
-      borderRadius: 6,
-    },
-    Modal: {
-      borderRadius: 16,
-    },
-    Notification: {
-      borderRadius: 14,
-    },
-    Popover: {
-      borderRadius: 12,
-    },
-    Tooltip: {
-      borderRadius: 6,
-    },
-    Segmented: {
-      borderRadius: 10,
-      itemSelectedBg: isDark ? "#1668dc" : "#ffffff",
-    },
-    Dropdown: {
-      borderRadius: 12,
-    },
-  };
 
   return (
     <ThemeContext.Provider value={{ mode, toggle }}>
@@ -154,7 +79,50 @@ export function AppProviders({ children }: AppProvidersProps) {
         theme={{
           algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
           token: isDark ? darkToken : lightToken,
-          components,
+          components: {
+            Layout: {
+              siderBg: isDark ? "#0a0a0f" : "#ffffff",
+              headerBg: isDark ? "rgba(10,10,15,0.8)" : "rgba(255,255,255,0.8)",
+              bodyBg: isDark ? "#08080f" : "#f4f4f8",
+            },
+            Menu: {
+              itemBorderRadius: 10,
+              itemMarginInline: 8,
+              itemMarginBlock: 3,
+              ...(isDark ? {
+                darkItemBg: "transparent",
+                darkSubMenuItemBg: "transparent",
+                darkItemSelectedBg: "rgba(22,104,220,0.12)",
+                darkItemSelectedColor: "#fff",
+                darkItemHoverBg: "rgba(255,255,255,0.04)",
+                darkItemColor: "rgba(255,255,255,0.55)",
+              } : {
+                itemBg: "transparent",
+                itemSelectedBg: "rgba(22,104,220,0.06)",
+                itemSelectedColor: "#1668dc",
+                itemHoverBg: "rgba(0,0,0,0.03)",
+                itemColor: "rgba(0,0,0,0.5)",
+              }),
+            },
+            Card: { borderRadius: 16 },
+            Table: {
+              borderRadius: 16,
+              headerBg: isDark ? "#0d0d16" : "#f8f8fb",
+              headerColor: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
+              borderColor: isDark ? "#16161f" : "#eeeef2",
+              rowHoverBg: isDark ? "rgba(22,104,220,0.04)" : "rgba(22,104,220,0.02)",
+            },
+            Button: { borderRadius: 10, controlHeight: 38 },
+            Input: { borderRadius: 10, controlHeight: 42 },
+            Select: { borderRadius: 10, controlHeight: 42 },
+            Tag: { borderRadius: 6 },
+            Modal: { borderRadius: 16 },
+            Notification: { borderRadius: 14 },
+            Popover: { borderRadius: 12 },
+            Tooltip: { borderRadius: 6 },
+            Segmented: { borderRadius: 10, itemSelectedBg: isDark ? "#1668dc" : "#ffffff" },
+            Dropdown: { borderRadius: 12 },
+          },
         }}
       >
         {children}
