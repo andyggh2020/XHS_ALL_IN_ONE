@@ -10,7 +10,7 @@ fastapi
 uvicorn
 sqlalchemy>=2.0
 alembic
-psycopg2-binary
+pg8000
 pydantic
 pydantic-settings
 cryptography
