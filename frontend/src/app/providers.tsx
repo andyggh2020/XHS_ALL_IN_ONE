@@ -22,37 +22,37 @@ const sharedToken = {
 
 const darkToken = {
   ...sharedToken,
-  colorBgBase: "#0f0f0f",
-  colorBgContainer: "#1a1a1a",
-  colorBgElevated: "#242424",
-  colorBorder: "#2a2a2a",
-  colorBorderSecondary: "#222222",
+  colorBgBase: "#0a0a0a",
+  colorBgContainer: "#111111",
+  colorBgElevated: "#1a1a1a",
+  colorBorder: "#1e1e1e",
+  colorBorderSecondary: "#181818",
   colorBgSpotlight: "rgba(22,104,220,0.08)",
   colorLink: "#4e8ff7",
   colorSuccess: "#22c55e",
   colorWarning: "#eab308",
   colorError: "#ef4444",
   colorInfo: "#4e8ff7",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-  boxShadowSecondary: "0 4px 12px rgba(0,0,0,0.4)",
-  controlOutline: "rgba(22,104,220,0.25)",
+  boxShadow: "0 1px 2px rgba(0,0,0,0.4)",
+  boxShadowSecondary: "0 4px 16px rgba(0,0,0,0.5)",
+  controlOutline: "rgba(22,104,220,0.3)",
 };
 
 const lightToken = {
   ...sharedToken,
-  colorBgBase: "#f8f9fa",
+  colorBgBase: "#f5f5f7",
   colorBgContainer: "#ffffff",
   colorBgElevated: "#ffffff",
-  colorBorder: "#e8e8e8",
-  colorBorderSecondary: "#f0f0f0",
+  colorBorder: "#e5e5e7",
+  colorBorderSecondary: "#eeeef0",
   colorBgSpotlight: "rgba(22,104,220,0.04)",
   colorLink: "#1668dc",
   colorSuccess: "#22c55e",
   colorWarning: "#eab308",
   colorError: "#ef4444",
   colorInfo: "#1668dc",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-  boxShadowSecondary: "0 4px 12px rgba(0,0,0,0.08)",
+  boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+  boxShadowSecondary: "0 4px 16px rgba(0,0,0,0.06)",
   controlOutline: "rgba(22,104,220,0.2)",
 };
 
@@ -66,8 +66,8 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   useEffect(() => {
     localStorage.setItem("theme-mode", mode);
-    document.body.style.background = mode === "dark" ? "#0f0f0f" : "#f8f9fa";
-    document.body.style.color = mode === "dark" ? "rgba(255,255,255,0.88)" : "rgba(0,0,0,0.88)";
+    document.body.style.background = mode === "dark" ? "#0a0a0a" : "#f5f5f7";
+    document.body.style.color = mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)";
   }, [mode]);
 
   const toggle = () => setMode((m) => (m === "dark" ? "light" : "dark"));
@@ -75,13 +75,14 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   const components = {
     Layout: {
-      siderBg: isDark ? "#0f0f0f" : "#ffffff",
-      headerBg: isDark ? "rgba(15,15,15,0.8)" : "rgba(255,255,255,0.8)",
-      bodyBg: isDark ? "#0f0f0f" : "#f8f9fa",
+      siderBg: isDark ? "#0a0a0a" : "#ffffff",
+      headerBg: isDark ? "rgba(10,10,10,0.8)" : "rgba(255,255,255,0.8)",
+      bodyBg: isDark ? "#0a0a0a" : "#f5f5f7",
     },
     Menu: {
       itemBorderRadius: 8,
-      itemMarginInline: 6,
+      itemMarginInline: 8,
+      itemMarginBlock: 2,
       subMenuItemBg: "transparent",
       ...(isDark ? {
         darkItemBg: "transparent",
@@ -89,60 +90,60 @@ export function AppProviders({ children }: AppProvidersProps) {
         darkItemSelectedBg: "rgba(22,104,220,0.12)",
         darkItemSelectedColor: "#4e8ff7",
         darkItemHoverBg: "rgba(255,255,255,0.04)",
-        darkItemColor: "rgba(255,255,255,0.75)",
+        darkItemColor: "rgba(255,255,255,0.65)",
       } : {
         itemBg: "transparent",
         itemSelectedBg: "rgba(22,104,220,0.06)",
         itemSelectedColor: "#1668dc",
         itemHoverBg: "rgba(0,0,0,0.03)",
-        itemColor: "rgba(0,0,0,0.65)",
+        itemColor: "rgba(0,0,0,0.55)",
       }),
     },
     Card: {
-      borderRadius: 12,
-      colorBgContainer: isDark ? "#1a1a1a" : "#ffffff",
+      borderRadius: 16,
+      colorBgContainer: isDark ? "#111111" : "#ffffff",
     },
     Table: {
-      borderRadius: 12,
-      headerBg: isDark ? "#1a1a1a" : "#fafafa",
-      headerColor: isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)",
-      borderColor: isDark ? "#222222" : "#f0f0f0",
+      borderRadius: 16,
+      headerBg: isDark ? "#111111" : "#fafafa",
+      headerColor: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)",
+      borderColor: isDark ? "#1a1a1a" : "#eeeef0",
       rowHoverBg: isDark ? "rgba(22,104,220,0.04)" : "rgba(22,104,220,0.02)",
     },
     Button: {
-      borderRadius: 8,
-      primaryShadow: "0 2px 8px rgba(22,104,220,0.25)",
-      controlHeight: 36,
+      borderRadius: 10,
+      primaryShadow: "0 2px 8px rgba(22,104,220,0.3)",
+      controlHeight: 38,
     },
     Input: {
-      borderRadius: 8,
-      controlHeight: 40,
+      borderRadius: 10,
+      controlHeight: 42,
     },
     Select: {
-      borderRadius: 8,
-      controlHeight: 40,
+      borderRadius: 10,
+      controlHeight: 42,
     },
     Tag: {
       borderRadius: 6,
     },
     Modal: {
-      borderRadius: 12,
+      borderRadius: 16,
     },
     Notification: {
-      borderRadius: 12,
+      borderRadius: 14,
     },
     Popover: {
-      borderRadius: 10,
+      borderRadius: 12,
     },
     Tooltip: {
       borderRadius: 6,
     },
     Segmented: {
-      borderRadius: 8,
+      borderRadius: 10,
       itemSelectedBg: isDark ? "#1668dc" : "#ffffff",
     },
     Dropdown: {
-      borderRadius: 10,
+      borderRadius: 12,
     },
   };
 

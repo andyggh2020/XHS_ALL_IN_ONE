@@ -173,7 +173,7 @@ export function AppShell() {
     </div>
   );
 
-  const siderWidth = collapsed ? 64 : 220;
+  const siderWidth = collapsed ? 64 : 240;
 
   // 侧栏内容（可复用到 Drawer 和桌面 Sider）
   const sidebarContent = (
@@ -310,7 +310,7 @@ export function AppShell() {
                 </Dropdown>
               </Space>
             </Header>
-            <Content style={{ padding: 24, minHeight: "calc(100vh - 50px)", overflow: "auto" }}>
+            <Content style={{ padding: 32, minHeight: "calc(100vh - 50px)", overflow: "auto" }}>
               <KeepAliveRouteOutlet include={[/\/platforms\/xhs\/discovery/, /\/platforms\/xhs\/crawler/]} />
             </Content>
           </Layout>

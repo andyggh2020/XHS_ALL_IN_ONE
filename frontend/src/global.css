@@ -1,16 +1,32 @@
 /* ===== Base ===== */
 html { scroll-behavior: smooth; }
-body { margin: 0; transition: background-color 0.3s ease, color 0.3s ease; }
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 #root { min-height: 100vh; }
 
-/* ===== Page entrance animation ===== */
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* ===== Animations ===== */
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.ant-layout-content > * { animation: fadeSlideUp 0.35s ease-out; }
-
-/* ===== Login page animations ===== */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 @keyframes loginLeft {
   from { opacity: 0; transform: translateX(-30px); }
   to { opacity: 1; transform: translateX(0); }
@@ -24,217 +40,153 @@ body { margin: 0; transition: background-color 0.3s ease, color 0.3s ease; }
   33% { transform: translate(30px, -30px) scale(1.05); }
   66% { transform: translate(-20px, 20px) scale(0.95); }
 }
+@keyframes sidebarIndicator {
+  to { opacity: 1; }
+}
+@keyframes cardGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22,104,220,0); }
+  50% { box-shadow: 0 0 20px 0 rgba(22,104,220,0.08); }
+}
 
-/* ===== Scrollbar ===== */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #434343; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #555; }
+/* ===== Page entrance ===== */
+.ant-layout-content > * { animation: fadeSlideUp 0.35s ease-out; }
 
-/* ===== Card ===== */
+/* ===== Card premium ===== */
 .ant-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  overflow: hidden;
+  position: relative;
 }
-.ant-card:hover { border-color: #1668dc30 !important; }
-.ant-card:not(.ant-card-hoverable):hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  backdrop-filter: blur(8px);
+/* Top subtle glow line */
+.ant-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 16px; right: 16px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
+.ant-card:hover::before { opacity: 1; }
 .ant-card-hoverable:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(22, 104, 220, 0.12);
-  border-color: #1668dc50 !important;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(22, 104, 220, 0.1) !important;
+  border-color: rgba(22,104,220,0.3) !important;
 }
+.ant-card-hoverable:hover::before { opacity: 1; animation: cardGlow 2s ease-in-out infinite; }
 
-/* ===== Statistic ===== */
-.ant-statistic {
-  transition: transform 0.2s ease;
-}
-.ant-statistic:hover { transform: translateY(-2px); }
-.ant-statistic-content { transition: all 0.3s ease; }
-.ant-statistic:hover .ant-statistic-content-value { color: #1668dc !important; }
+/* ===== Statistic hover ===== */
+.ant-statistic { transition: transform 0.25s ease; }
+.ant-statistic:hover { transform: translateY(-3px); }
+.ant-statistic:hover .ant-statistic-content-value { color: #4e8ff7 !important; }
 
 /* ===== Table ===== */
-.ant-table-wrapper { border-radius: 12px; overflow: hidden; }
+.ant-table-wrapper {
+  border-radius: 16px; overflow: hidden;
+  border: 1px solid transparent;
+}
 .ant-table-tbody > tr { transition: background 0.15s ease; }
-.ant-table-tbody > tr:hover > td { background-color: rgba(22, 104, 220, 0.03) !important; }
-/* Alternating row colors */
-.ant-table-tbody > tr:nth-child(even) > td { background-color: rgba(0,0,0,0.01); }
-.ant-table-tbody > tr:nth-child(even):hover > td { background-color: rgba(22, 104, 220, 0.04) !important; }
+.ant-table-tbody > tr:hover > td { background: rgba(22, 104, 220, 0.03) !important; }
+.ant-table-tbody > tr:nth-child(even) > td { background: rgba(0,0,0,0.015); }
 
-/* ===== Button ===== */
+/* ===== Button premium ===== */
 .ant-btn { transition: all 0.2s ease; position: relative; overflow: hidden; }
 .ant-btn-primary:not(:disabled):hover {
-  box-shadow: 0 4px 14px rgba(22, 104, 220, 0.3);
+  box-shadow: 0 4px 16px rgba(22, 104, 220, 0.35);
   transform: translateY(-1px);
 }
 .ant-btn-primary:not(:disabled):active { transform: scale(0.97); }
-.ant-btn-default:not(:disabled):hover { border-color: #1668dc60; color: #1668dc; }
-/* Button ripple on click */
+.ant-btn-default:not(:disabled):hover {
+  border-color: rgba(22,104,220,0.4);
+  color: #1668dc;
+  box-shadow: 0 2px 8px rgba(22,104,220,0.08);
+}
+
+/* ===== Button ripple ===== */
 .ant-btn::after {
   content: ''; position: absolute; inset: 0;
   border-radius: inherit;
   background: radial-gradient(circle, rgba(22,104,220,0.15) 1%, transparent 1%);
   background-position: center; background-repeat: no-repeat;
   background-size: 0; opacity: 0; pointer-events: none;
-  transition: none;
 }
-.ant-btn:active::after {
-  background-size: 1000%; opacity: 1;
-  transition: background 0.6s, opacity 0.3s;
-}
+.ant-btn:active::after { background-size: 1000%; opacity: 1; transition: background 0.6s, opacity 0.3s; }
 
-/* ===== Tag ===== */
-.ant-tag { transition: transform 0.15s ease, box-shadow 0.15s ease; border: none !important; }
-.ant-tag:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-}
-/* Colored tag gradient accent */
+/* ===== Tag premium ===== */
+.ant-tag { transition: all 0.2s ease; border: none !important; }
+.ant-tag:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .ant-tag-blue { background: linear-gradient(135deg, #1668dc15, #4e8ff710) !important; color: #1668dc !important; }
 .ant-tag-green { background: linear-gradient(135deg, #22c55e15, #4ade8010) !important; color: #16a34a !important; }
 .ant-tag-red { background: linear-gradient(135deg, #ef444415, #f8717110) !important; color: #dc2626 !important; }
 .ant-tag-gold { background: linear-gradient(135deg, #eab30815, #facc1510) !important; color: #ca8a04 !important; }
 .ant-tag-purple { background: linear-gradient(135deg, #a855f715, #c084fc10) !important; color: #9333ea !important; }
 
-/* ===== Menu ===== */
-.ant-menu-item { transition: background 0.2s ease, color 0.15s ease; border-radius: 8px !important; }
-.ant-menu-item .anticon { font-size: 15px !important; transition: transform 0.2s ease; }
+/* ===== Menu premium ===== */
+.ant-menu-item {
+  transition: background 0.2s ease, color 0.15s ease;
+  border-radius: 8px !important;
+}
+.ant-menu-item .anticon {
+  font-size: 15px !important;
+  transition: transform 0.2s ease;
+}
 .ant-menu-item:hover .anticon { transform: scale(1.1); }
-.ant-menu-item-selected .anticon { color: #1668dc; }
-
-/* ===== Input ===== */
-.ant-input-affix-wrapper {
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.ant-input-affix-wrapper:focus,
-.ant-input-affix-wrapper-focused {
-  border-color: #1668dc;
-  box-shadow: 0 0 0 3px rgba(22, 104, 220, 0.1);
-}
-.ant-input:hover { border-color: #1668dc80; }
-
-/* ===== Segmented ===== */
-.ant-segmented-item { transition: all 0.2s ease; }
-.ant-segmented-item-selected { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-/* ===== Progress ===== */
-.ant-progress-bg {
-  transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
-  border-radius: 4px !important;
-}
-
-/* ===== Spin ===== */
-.ant-spin-dot-item { background-color: #1668dc !important; }
-
-/* ===== Steps ===== */
-.ant-steps-item-title { transition: color 0.2s ease; }
-
-/* ===== Modal ===== */
-.ant-modal-content { overflow: hidden; }
-.ant-modal { transition: opacity 0.2s ease; }
-
-/* ===== Dropdown ===== */
-.ant-dropdown-menu { border-radius: 10px; padding: 4px; }
-.ant-dropdown-menu-item { border-radius: 6px; }
-
-/* ===== Skeleton ===== */
-.ant-skeleton-element { width: 100%; }
-.ant-skeleton-active .ant-skeleton-content .ant-skeleton-title,
-.ant-skeleton-active .ant-skeleton-content .ant-skeleton-paragraph > li {
-  background: linear-gradient(90deg, rgba(22,104,220,0.04) 25%, rgba(22,104,220,0.1) 50%, rgba(22,104,220,0.04) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ===== Empty state ===== */
-.ant-empty-image { opacity: 0.5; }
-
-/* ===== Sidebar ===== */
-.ant-layout-sider { transition: all 0.2s ease !important; }
-.ant-layout-sider .ant-layout-sider-children { position: relative; }
-/* Menu items with colored left border on active */
-.ant-menu-item-selected {
-  position: relative;
-}
+.ant-menu-item-selected .anticon { color: #4e8ff7; }
+/* Active indicator */
 .ant-menu-item-selected::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 6px;
-  bottom: 6px;
+  content: ''; position: absolute; left: 0; top: 6px; bottom: 6px;
   width: 3px;
   background: linear-gradient(180deg, #1668dc, #4e8ff7);
   border-radius: 0 3px 3px 0;
   opacity: 0;
   animation: sidebarIndicator 0.3s ease-out forwards;
 }
-@keyframes sidebarIndicator {
-  to { opacity: 1; }
-}
-/* Menu item icon colors */
-.ant-menu-item:nth-child(1) .anticon { color: #1668dc; }  /* 总览 */
-.ant-menu-item:nth-child(2) .anticon { color: #22c55e; }  /* 账号 */
-.ant-menu-item:nth-child(3) .anticon { color: #a855f7; }  /* 发现 */
-.ant-menu-item:nth-child(4) .anticon { color: #f59e0b; }  /* 抓取 */
-.ant-menu-item:nth-child(5) .anticon { color: #06b6d4; }  /* 关键词 */
-.ant-menu-item:nth-child(6) .anticon { color: #ef4444; }  /* 洞察 */
-.ant-menu-item:nth-child(7) .anticon { color: #ec4899; }  /* 竞品 */
-.ant-menu-item:nth-child(8) .anticon { color: #8b5cf6; }  /* 图片 */
-.ant-menu-item:nth-child(9) .anticon { color: #10b981; }  /* 视频 */
-.ant-menu-item:nth-child(10) .anticon { color: #f97316; } /* 内容库 */
-.ant-menu-item:nth-child(11) .anticon { color: #6366f1; } /* 草稿 */
-.ant-menu-item:nth-child(12) .anticon { color: #dc2626; } /* 发布 */
-.ant-menu-item:nth-child(13) .anticon { color: #0891b2; } /* 自动运营 */
-/* Footer menu icons */
-.ant-layout-sider .ant-menu:last-child .ant-menu-item:nth-child(1) .anticon { color: #6366f1; } /* 任务 */
-.ant-layout-sider .ant-menu:last-child .ant-menu-item:nth-child(2) .anticon { color: #8b5cf6; } /* 模型 */
-.ant-layout-sider .ant-menu:last-child .ant-menu-item:nth-child(3) .anticon { color: #6b7280; } /* 设置 */
-/* Admin menu icon */
-.ant-layout-sider .ant-menu .ant-menu-item .anticon { transition: transform 0.2s; }
-.ant-layout-sider .ant-menu .ant-menu-item:hover .anticon { transform: scale(1.15); }
-/* Collapsed mode: hide indicator */
 .ant-layout-sider-collapsed .ant-menu-item-selected::before { display: none; }
 
-/* ===== Header ===== */
+/* ===== Input premium ===== */
+.ant-input-affix-wrapper { transition: all 0.2s ease; }
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: #1668dc !important;
+  box-shadow: 0 0 0 3px rgba(22, 104, 220, 0.12) !important;
+}
+.ant-input:hover { border-color: rgba(22,104,220,0.4); }
+
+/* ===== Components ===== */
+.ant-segmented-item { transition: all 0.2s ease; }
+.ant-segmented-item-selected { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.ant-progress-bg { transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important; border-radius: 4px !important; }
+.ant-spin-dot-item { background-color: #1668dc !important; }
+.ant-steps-item-title { transition: color 0.2s ease; }
+.ant-modal-content { overflow: hidden; }
+.ant-modal-mask { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+
+/* ===== Dropdown ===== */
+.ant-dropdown-menu { border-radius: 12px; padding: 4px; }
+.ant-dropdown-menu-item { border-radius: 6px; }
+
+/* ===== Skeleton premium ===== */
+.ant-skeleton-element { width: 100%; }
+.ant-skeleton-active .ant-skeleton-content .ant-skeleton-title,
+.ant-skeleton-active .ant-skeleton-content .ant-skeleton-paragraph > li {
+  background: linear-gradient(90deg, rgba(22,104,220,0.04) 25%, rgba(22,104,220,0.12) 50%, rgba(22,104,220,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ===== Sidebar ===== */
+.ant-layout-sider { transition: all 0.2s ease !important; }
+
+/* ===== Misc ===== */
 .ant-layout-header { transition: background 0.3s ease, border-color 0.3s ease; }
-
-/* ===== List items ===== */
 .ant-list-item { transition: background 0.15s ease; }
-
-/* ===== Notification badge ===== */
 .ant-badge .ant-badge-count { box-shadow: none; }
-
-/* ===== Alert ===== */
-.ant-alert { border-radius: 8px; }
-.ant-alert-success { background: linear-gradient(135deg, #22c55e08, #4ade8004) !important; }
-.ant-alert-error { background: linear-gradient(135deg, #ef444408, #f8717104) !important; }
-.ant-alert-warning { background: linear-gradient(135deg, #eab30808, #facc1504) !important; }
-.ant-alert-info { background: linear-gradient(135deg, #1668dc08, #4e8ff704) !important; }
-
-/* ===== Checkbox ===== */
-.ant-checkbox-inner { transition: all 0.2s ease; }
-.ant-checkbox-checked .ant-checkbox-inner { background-color: #1668dc; border-color: #1668dc; }
-
-/* ===== Switch ===== */
-.ant-switch { transition: all 0.2s ease; }
-.ant-switch-checked { background-color: #1668dc !important; }
-
-/* ===== Avatar ===== */
+.ant-empty-image { opacity: 0.4; }
 .ant-avatar { transition: transform 0.2s ease; }
 .ant-avatar:hover { transform: scale(1.05); }
-
-/* ===== Image preview ===== */
 .ant-image { transition: transform 0.2s ease; }
 .ant-image:hover { transform: scale(1.02); }
-.ant-image-preview-img { transition: transform 0.3s ease; }
-
-/* ===== Tabs ===== */
 .ant-tabs-tab { transition: all 0.2s ease; }
 .ant-tabs-ink-bar { background: #1668dc !important; }
+.ant-checkbox-inner { transition: all 0.2s ease; }
+.ant-switch { transition: all 0.2s ease; }
