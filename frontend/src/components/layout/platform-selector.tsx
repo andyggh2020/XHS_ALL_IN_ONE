@@ -2,11 +2,13 @@ import { ArrowRightOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { Card, Col, Row, Tag, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
 
+import { useThemeColors } from "../../hooks/use-theme-colors";
 import type { PlatformMeta } from "../../types";
 
 const { Text, Title } = Typography;
 
 export function PlatformSelector({ platforms }: { platforms: PlatformMeta[] }) {
+  const c = useThemeColors();
   const navigate = useNavigate();
 
   return (
@@ -21,7 +23,7 @@ export function PlatformSelector({ platforms }: { platforms: PlatformMeta[] }) {
             <Card
               hoverable
               style={{
-                borderColor: "#303030",
+                borderColor: c.cardBorder,
                 cursor: "pointer",
               }}
               styles={{
@@ -81,11 +83,11 @@ export function PlatformSelector({ platforms }: { platforms: PlatformMeta[] }) {
                   </Tag>
                   {platform.enabled ? (
                     <ArrowRightOutlined
-                      style={{ color: "rgba(255,255,255,0.45)", fontSize: 14 }}
+                      style={{ color: c.textTertiary, fontSize: 14 }}
                     />
                   ) : (
                     <ClockCircleOutlined
-                      style={{ color: "rgba(255,255,255,0.25)", fontSize: 14 }}
+                      style={{ color: c.textMuted, fontSize: 14 }}
                     />
                   )}
                 </div>

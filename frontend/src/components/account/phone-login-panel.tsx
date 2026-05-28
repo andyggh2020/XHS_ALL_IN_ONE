@@ -2,6 +2,7 @@ import { Alert, Button, Checkbox, Form, Input, Space, Typography } from "antd";
 import { MessageOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 
+import { useThemeColors } from "../../hooks/use-theme-colors";
 import { confirmXhsPhoneLogin, sendXhsPhoneCode } from "../../lib/api";
 import type { PlatformAccount } from "../../types";
 
@@ -15,6 +16,7 @@ type PhoneLoginPanelProps = {
 const PHONE_CODE_COOLDOWN_SECONDS = 120;
 
 export function PhoneLoginPanel({ accountType, onConfirmed }: PhoneLoginPanelProps) {
+  const c = useThemeColors();
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -98,15 +100,15 @@ export function PhoneLoginPanel({ accountType, onConfirmed }: PhoneLoginPanelPro
 
   return (
     <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-      <Text style={{ color: "rgba(255,255,255,0.65)" }}>{statusText}</Text>
+      <Text style={{ color: c.textSecondary }}>{statusText}</Text>
 
       <Form layout="vertical">
-        <Form.Item label={<span style={{ color: "rgba(255,255,255,0.88)" }}>手机号</span>}>
+        <Form.Item label={<span style={{ color: c.textPrimary }}>手机号</span>}>
           <Input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="请输入手机号"
-            style={{ background: "#1f1f1f", borderColor: "#303030", color: "rgba(255,255,255,0.88)" }}
+            style={{ background: c.cardBg, borderColor: c.cardBorder, color: c.textPrimary }}
           />
         </Form.Item>
       </Form>
@@ -115,29 +117,23 @@ export function PhoneLoginPanel({ accountType, onConfirmed }: PhoneLoginPanelPro
         <Checkbox
           checked={syncCreator}
           onChange={(event) => setSyncCreator(event.target.checked)}
-          style={{ color: "rgba(255,255,255,0.88)" }}
+          style={{ color: c.textPrimary }}
         >
           登录 PC 后同步 Creator 账号
         </Checkbox>
       ) : null}
 
-      <Button
-        block
-        icon={<MessageOutlined />}
-        onClick={handleSendCode}
-        disabled={isSending || isCoolingDown}
-        loading={isSending}
-      >
+      <Button block icon={<MessageOutlined />} onClick={handleSendCode} disabled={isSending || isCoolingDown} loading={isSending}>
         {isSending ? "发送中..." : isCoolingDown ? `${cooldownSeconds} 秒后重发` : "发送验证码"}
       </Button>
 
       <Form layout="vertical">
-        <Form.Item label={<span style={{ color: "rgba(255,255,255,0.88)" }}>验证码</span>}>
+        <Form.Item label={<span style={{ color: c.textPrimary }}>验证码</span>}>
           <Input
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="请输入验证码"
-            style={{ background: "#1f1f1f", borderColor: "#303030", color: "rgba(255,255,255,0.88)" }}
+            style={{ background: c.cardBg, borderColor: c.cardBorder, color: c.textPrimary }}
           />
         </Form.Item>
       </Form>

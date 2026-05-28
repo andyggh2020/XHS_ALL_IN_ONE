@@ -222,7 +222,7 @@ export function XhsAnalyticsPage() {
                     {metric.icon}
                   </span>
                 }
-                styles={{ content: { fontSize: 28, fontWeight: 600, color: "#e8e8e8" } }}
+                styles={{ content: { fontSize: 28, fontWeight: 600, color: c.textPrimary } }}
               />
             </Card>
           </Col>
@@ -309,7 +309,7 @@ export function XhsAnalyticsPage() {
                           <List.Item style={{ padding: "8px 0", border: "none" }}>
                             <div style={{ width: "100%" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                                <Text style={{ color: "#e8e8e8", fontSize: 13 }}>#{topic.keyword}</Text>
+                                <Text style={{ color: c.textPrimary, fontSize: 13 }}>#{topic.keyword}</Text>
                                 <Text type="secondary" style={{ fontSize: 12 }}>
                                   {topic.notes} 篇 / {formatNumber(topic.engagement)} 互动
                                 </Text>

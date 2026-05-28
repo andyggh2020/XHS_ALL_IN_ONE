@@ -3,6 +3,7 @@ import { ReloadOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 
+import { useThemeColors } from "../../hooks/use-theme-colors";
 import { createXhsCreatorQrLoginSession, createXhsPcQrLoginSession, pollXhsLoginSession } from "../../lib/api";
 import type { PlatformAccount, XhsQrLoginSession } from "../../types";
 
@@ -14,6 +15,7 @@ type QrLoginPanelProps = {
 };
 
 export function QrLoginPanel({ accountType, onConfirmed }: QrLoginPanelProps) {
+  const c = useThemeColors();
   const [session, setSession] = useState<XhsQrLoginSession | null>(null);
   const [statusText, setStatusText] = useState("准备生成二维码");
   const [isLoading, setIsLoading] = useState(false);
@@ -92,10 +94,10 @@ export function QrLoginPanel({ accountType, onConfirmed }: QrLoginPanelProps) {
             justifyContent: "center",
             padding: 24,
             minHeight: 220,
-            background: "#1f1f1f",
+            background: c.cardBg,
           },
         }}
-        style={{ borderColor: "#303030" }}
+        style={{ borderColor: c.cardBorder }}
       >
         {session?.qr_image_data_url ? (
           <img
@@ -111,9 +113,9 @@ export function QrLoginPanel({ accountType, onConfirmed }: QrLoginPanelProps) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "#262626",
+              background: c.cardBg4,
               borderRadius: 8,
-              color: "rgba(255,255,255,0.3)",
+              color: c.textMuted,
               fontSize: 28,
               fontWeight: 700,
             }}

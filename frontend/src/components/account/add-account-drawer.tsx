@@ -2,6 +2,7 @@ import { Drawer, Segmented, message } from "antd";
 import { useState } from "react";
 
 import type { PlatformAccount } from "../../types";
+import { useThemeColors } from "../../hooks/use-theme-colors";
 import { CookieImportPanel } from "./cookie-import-panel";
 import { PhoneLoginPanel } from "./phone-login-panel";
 import { QrLoginPanel } from "./qr-login-panel";
@@ -27,6 +28,7 @@ const loginMethodOptions = [
 ];
 
 export function AddAccountDrawer({ open, onClose, onBound }: AddAccountDrawerProps) {
+  const c = useThemeColors();
   const [accountType, setAccountType] = useState<AccountType>("pc");
   const [method, setMethod] = useState<LoginMethod>("qr");
 
@@ -40,10 +42,10 @@ export function AddAccountDrawer({ open, onClose, onBound }: AddAccountDrawerPro
     <Drawer
       title={
         <div>
-          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>
+          <div style={{ fontSize: 12, color: c.textTertiary, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>
             XHS Account
           </div>
-          <div style={{ fontSize: 18, fontWeight: 600, color: "rgba(255,255,255,0.88)" }}>添加小红书账号</div>
+          <div style={{ fontSize: 18, fontWeight: 600, color: c.textPrimary }}>添加小红书账号</div>
         </div>
       }
       placement="right"
@@ -52,8 +54,8 @@ export function AddAccountDrawer({ open, onClose, onBound }: AddAccountDrawerPro
       onClose={onClose}
       destroyOnClose
       styles={{
-        header: { background: "#1f1f1f", borderBottom: "1px solid #303030" },
-        body: { background: "#141414", padding: 24 },
+        header: { background: c.cardBg2, borderBottom: `1px solid ${c.cardBorder}` },
+        body: { background: c.cardBg3, padding: 24 },
       }}
     >
       <div style={{ marginBottom: 20 }}>

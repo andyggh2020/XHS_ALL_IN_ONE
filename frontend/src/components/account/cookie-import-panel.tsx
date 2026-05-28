@@ -2,6 +2,7 @@ import { Alert, Button, Checkbox, Form, Input, Space } from "antd";
 import { ImportOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
+import { useThemeColors } from "../../hooks/use-theme-colors";
 import { importXhsCookieAccount } from "../../lib/api";
 import type { PlatformAccount } from "../../types";
 
@@ -11,6 +12,7 @@ type CookieImportPanelProps = {
 };
 
 export function CookieImportPanel({ accountType, onImported }: CookieImportPanelProps) {
+  const c = useThemeColors();
   const [cookieString, setCookieString] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,13 +44,13 @@ export function CookieImportPanel({ accountType, onImported }: CookieImportPanel
   return (
     <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
       <Form layout="vertical">
-        <Form.Item label={<span style={{ color: "rgba(255,255,255,0.88)" }}>Cookie 字符串</span>}>
+        <Form.Item label={<span style={{ color: c.textPrimary }}>Cookie 字符串</span>}>
           <Input.TextArea
             value={cookieString}
             onChange={(e) => setCookieString(e.target.value)}
             placeholder="a1=...; web_session=...;"
             rows={6}
-            style={{ background: "#1f1f1f", borderColor: "#303030", color: "rgba(255,255,255,0.88)" }}
+            style={{ background: c.cardBg, borderColor: c.cardBorder, color: c.textPrimary }}
           />
         </Form.Item>
       </Form>
@@ -57,7 +59,7 @@ export function CookieImportPanel({ accountType, onImported }: CookieImportPanel
         <Checkbox
           checked={syncCreator}
           onChange={(event) => setSyncCreator(event.target.checked)}
-          style={{ color: "rgba(255,255,255,0.88)" }}
+          style={{ color: c.textPrimary }}
         >
           导入 PC Cookie 后同步 Creator 账号
         </Checkbox>
