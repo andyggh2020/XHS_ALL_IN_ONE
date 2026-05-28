@@ -17,7 +17,11 @@ from backend.app.services.scheduler_service import run_due_auto_tasks, shutdown_
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db()
+    try:
+        init_db()
+    except Exception as e:
+        from loguru import logger
+        logger.exception("Database initialization failed: {}", e)
     settings = get_settings()
     scheduler = None
     if settings.scheduler_enabled:
