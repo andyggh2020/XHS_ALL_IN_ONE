@@ -10,6 +10,11 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.2",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@tailwindcss/vite": "^4.3.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.1.0",
     "@babel/helper-validator-option": "^7.25.9",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
