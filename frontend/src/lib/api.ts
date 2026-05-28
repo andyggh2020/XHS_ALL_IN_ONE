@@ -878,6 +878,19 @@ export async function runAutoTask(taskId: number): Promise<AutoTaskRunResult> {
   return response.data;
 }
 
+// Global Search
+export type SearchResult = {
+  notes: { id: number; title: string; author: string; url: string }[];
+  accounts: { id: number; nickname: string; sub_type: string; url: string }[];
+  publish_jobs: { id: number; title: string; status: string; url: string }[];
+  tasks: { id: number; task_type: string; status: string; url: string }[];
+};
+
+export async function globalSearch(q: string): Promise<SearchResult> {
+  const response = await http.get<SearchResult>("/search", { params: { q, limit: 5 } });
+  return response.data;
+}
+
 // Admin & Membership
 
 export async function fetchAdminUsers(params?: { q?: string; page?: number; page_size?: number }): Promise<Paginated<AdminUserItem>> {

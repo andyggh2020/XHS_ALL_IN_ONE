@@ -47,6 +47,7 @@ import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import KeepAliveRouteOutlet from "keepalive-for-react-router";
 
+import { SearchModal } from "../../components/ui/search-modal";
 import { useAuth } from "../../hooks/use-auth";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { useThemeMode } from "../../app/providers";
@@ -97,8 +98,23 @@ export function AppShell() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const colors = {
     border: isDark ? "#303030" : "#e8e8e8",
@@ -247,6 +263,7 @@ export function AppShell() {
                 <span style={{ fontWeight: 600, fontSize: 14, color: colors.logoText }}>小红书矩阵运营</span>
               </Space>
               <Space size={8}>
+                <Button type="text" icon={<SearchOutlined style={{ fontSize: 15 }} />} onClick={() => setSearchOpen(true)} style={{ opacity: 0.65 }} />
                 <Button type="text" icon={themeMode === "dark" ? <SunOutlined style={{ fontSize: 15 }} /> : <MoonOutlined style={{ fontSize: 15 }} />} onClick={toggleTheme} style={{ opacity: 0.65 }} />
                 <Badge count={unreadCount} size="small" offset={[-2, 2]}>
                   <Button type="text" icon={<BellOutlined style={{ fontSize: 15 }} />} style={{ opacity: 0.65 }} />
@@ -284,6 +301,7 @@ export function AppShell() {
               position: "sticky", top: 0, zIndex: 10,
             }}>
               <Space size={10}>
+                <Button type="text" icon={<SearchOutlined style={{ fontSize: 15 }} />} onClick={() => setSearchOpen(true)} style={{ opacity: 0.65 }} title="搜索 (Cmd+K)" />
                 <Button type="text" icon={themeMode === "dark" ? <SunOutlined style={{ fontSize: 15 }} /> : <MoonOutlined style={{ fontSize: 15 }} />} onClick={toggleTheme} style={{ opacity: 0.65 }} />
                 <Dropdown dropdownRender={() => notificationDropdownContent} trigger={["click"]} placement="bottomRight">
                   <Badge count={unreadCount} size="small" offset={[-2, 2]}>
@@ -298,6 +316,7 @@ export function AppShell() {
           </Layout>
         </>
       )}
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </Layout>
   );
 }
