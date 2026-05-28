@@ -289,7 +289,7 @@ export function XhsLibraryPage() {
     catch { setBatchActionMessage("批量创建草稿失败。"); } finally { setIsBatchWorking(false); }
   }
 
-  async function exportSelectedNotes(format: "json" | "csv") {
+  async function exportSelectedNotes(format: "json" | "csv" | "xlsx") {
     if (!selectedNoteIds.length) { setBatchActionMessage("请先选择笔记。"); return; }
     setIsBatchWorking(true); setBatchActionMessage(null);
     try { const r = await exportSavedNotes({ note_ids: selectedNoteIds, format }); setLatestExport(r); setBatchActionMessage(`已导出 ${r.exported_count} 条笔记。`); }
@@ -384,6 +384,7 @@ export function XhsLibraryPage() {
             <Button icon={<CheckSquareOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} onClick={createBatchRewriteDrafts} size="small">批量加入草稿工坊</Button>
             <Button type="primary" icon={<DownloadOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} onClick={() => exportSelectedNotes("json")} size="small">JSON</Button>
             <Button icon={<DownloadOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} onClick={() => exportSelectedNotes("csv")} size="small">CSV</Button>
+            <Button icon={<DownloadOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} onClick={() => exportSelectedNotes("xlsx")} size="small">Excel</Button>
             {latestExport && <Button icon={<DownloadOutlined />} disabled={isBatchWorking} onClick={downloadLatestExport} size="small">下载</Button>}
             <Popconfirm title={`确定删除选中的 ${selectedNoteIds.length} 条笔记？`} onConfirm={batchDeleteNotes}>
               <Button danger icon={<DeleteOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} size="small">批量删除</Button>

@@ -60,7 +60,7 @@ class BatchCreateDraftsRequest(BaseModel):
 
 class ExportNotesRequest(BaseModel):
     note_ids: list[int] = Field(min_length=1)
-    format: Literal["json", "csv"] = "json"
+    format: Literal["json", "csv", "xlsx"] = "json"
 
 
 def _serialize_tag(tag: Tag) -> dict:
@@ -567,6 +567,27 @@ def export_notes(
     file_path = export_dir / file_name
     if payload.format == "csv":
         file_path.write_text("\ufeff" + _build_notes_csv(db, notes), encoding="utf-8")
+    elif payload.format == "xlsx":
+        from openpyxl import Workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "笔记导出"
+        headers = ["ID", "标题", "内容摘要", "作者", "标签", "创建时间"]
+        ws.append(headers)
+        for note in notes:
+            tags = ", ".join(t.name for t in note.tags) if hasattr(note, "tags") and note.tags else ""
+            ws.append([
+                note.id, note.title or "",
+                (note.content or "")[:200],
+                note.author_name or "",
+                tags,
+                note.created_at.isoformat() if note.created_at else "",
+            ])
+        # Auto-width columns
+        for col in ws.columns:
+            max_len = max((len(str(cell.value or "")) for cell in col), default=10)
+            ws.column_dimensions[col[0].column_letter].width = min(max_len + 4, 60)
+        wb.save(str(file_path))
     else:
         export_payload = {
             "platform": "xhs",

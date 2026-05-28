@@ -307,7 +307,7 @@ export type BenchmarkCreateDraftsResponse = BatchCreateDraftsResponse;
 
 export type NotesExportPayload = {
   note_ids: number[];
-  format?: "json" | "csv";
+  format?: "json" | "csv" | "xlsx";
 };
 
 export type NotesExportResponse = {
