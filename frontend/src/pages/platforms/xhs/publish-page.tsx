@@ -24,6 +24,7 @@ import {
   Popconfirm,
   Row,
   Select,
+  Skeleton,
   Space,
   Spin,
   Tag,
@@ -292,9 +293,8 @@ export function XhsPublishPage() {
 
       {isLoading ? (
         <Card style={panelStyle} styles={{ body: cardBodyStyle }}>
-          <div style={{ textAlign: "center", padding: 48 }}>
-            <Spin size="large" />
-            <Paragraph style={{ color: c.textTertiary, marginTop: 16 }}>正在加载发布任务...</Paragraph>
+          <div style={{ padding: 24 }}>
+            <Skeleton active paragraph={{ rows: 4 }} />
           </div>
         </Card>
       ) : jobs.length === 0 ? (

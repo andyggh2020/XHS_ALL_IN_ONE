@@ -10,6 +10,7 @@ import { AddAccountDrawer } from "../../../components/account/add-account-drawer
 import { checkAccount, deleteAccount, fetchAccounts } from "../../../lib/api";
 import { formatShanghaiTime } from "../../../lib/time";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
+import { ListSkeleton } from "../../../components/ui/skeletons";
 import type { PlatformAccount } from "../../../types";
 
 const { Title, Text } = Typography;
@@ -105,7 +106,7 @@ export function XhsAccountsPage() {
       >
         {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
         {isLoading ? (
-          <div style={{ textAlign: "center", padding: "48px 0" }}><Spin size="large" /></div>
+          <ListSkeleton rows={4} />
         ) : accounts.length === 0 ? (
           <Empty
             image={<SafetyCertificateOutlined style={{ fontSize: 48, color: c.textMuted }} />}
