@@ -261,11 +261,11 @@ export function XhsDiscoveryPage() {
                       {commentPreviewByNoteId[note.note_id] && (
                         <div style={{ marginTop: 8, borderTop: "1px solid #303030", paddingTop: 8 }} onClick={stopCardClick}>
                           {commentPreviewByNoteId[note.note_id].length === 0 ? <Text type="secondary" style={{ fontSize: 12 }}>暂无评论</Text> : null}
-                          {commentPreviewByNoteId[note.note_id].filter((c) => !c.parent_comment_id).slice(0, 4).map((c) => (
-                            <div key={c.comment_id} style={{ marginBottom: 6, fontSize: 12 }}>
-                              <Text strong style={{ fontSize: 12 }}>{c.user_name}</Text> <Text type="secondary" style={{ fontSize: 11 }}>{c.created_at_remote} · {c.like_count} likes</Text>
-                              <div style={{ color: c.textSecondary }}>{c.content}</div>
-                              {getChildComments(note.note_id, c.comment_id).map((r) => (
+                          {commentPreviewByNoteId[note.note_id].filter((cm) => !cm.parent_comment_id).slice(0, 4).map((cm) => (
+                            <div key={cm.comment_id} style={{ marginBottom: 6, fontSize: 12 }}>
+                              <Text strong style={{ fontSize: 12 }}>{cm.user_name}</Text> <Text type="secondary" style={{ fontSize: 11 }}>{cm.created_at_remote} · {cm.like_count} likes</Text>
+                              <div style={{ color: c.textSecondary }}>{cm.content}</div>
+                              {getChildComments(note.note_id, cm.comment_id).map((r) => (
                                 <div key={r.comment_id} style={{ marginLeft: 16, marginTop: 4 }}>
                                   <Text strong style={{ fontSize: 11 }}>{r.user_name}</Text> <Text type="secondary" style={{ fontSize: 11 }}>{r.like_count} likes</Text>
                                   <div style={{ color: c.textSecondary, fontSize: 12 }}>{r.content}</div>
@@ -354,11 +354,11 @@ export function XhsDiscoveryPage() {
             {commentPreviewByNoteId[selectedNote.note_id] && (
               <Card size="small" title="评论预览" style={{ background: c.cardBg }}>
                 {commentPreviewByNoteId[selectedNote.note_id].length === 0 ? <Text type="secondary">暂无评论</Text> : null}
-                {commentPreviewByNoteId[selectedNote.note_id].filter((c) => !c.parent_comment_id).map((c) => (
-                  <div key={c.comment_id} style={{ marginBottom: 12, paddingBottom: 8, borderBottom: "1px solid #303030" }}>
-                    <Space><Text strong style={{ fontSize: 13 }}>{c.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{c.created_at_remote} · {c.like_count} likes</Text></Space>
-                    <div style={{ color: c.textSecondary, fontSize: 13, marginTop: 2 }}>{c.content}</div>
-                    {getChildComments(selectedNote.note_id, c.comment_id).map((r) => (
+                {commentPreviewByNoteId[selectedNote.note_id].filter((cm) => !cm.parent_comment_id).map((cm) => (
+                  <div key={cm.comment_id} style={{ marginBottom: 12, paddingBottom: 8, borderBottom: "1px solid #303030" }}>
+                    <Space><Text strong style={{ fontSize: 13 }}>{cm.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{cm.created_at_remote} · {cm.like_count} likes</Text></Space>
+                    <div style={{ color: c.textSecondary, fontSize: 13, marginTop: 2 }}>{cm.content}</div>
+                    {getChildComments(selectedNote.note_id, cm.comment_id).map((r) => (
                       <div key={r.comment_id} style={{ marginLeft: 20, marginTop: 6, paddingLeft: 8, borderLeft: "2px solid #303030" }}>
                         <Space><Text strong style={{ fontSize: 12 }}>{r.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{r.like_count} likes</Text></Space>
                         <div style={{ color: c.textSecondary, fontSize: 12 }}>{r.content}</div>

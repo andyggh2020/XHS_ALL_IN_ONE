@@ -146,7 +146,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                 <div style={{ padding: "6px 16px", fontSize: 11, color: c.textTertiary, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>
                   {group.icon} {group.key}
                 </div>
-                {group.items.map((item, idx) => {
+                {group.items.map((item: any, idx: number) => {
                   const flatIdx = flatItems.findIndex((f) => f.label.includes(item.title || item.nickname || item.task_type));
                   const isSelected = flatIdx === selectedIndex;
                   return (

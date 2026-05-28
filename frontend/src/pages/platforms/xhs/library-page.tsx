@@ -504,11 +504,11 @@ export function XhsLibraryPage() {
                 {commentsError && <Alert message={commentsError} type="error" showIcon style={{ marginBottom: 8 }} />}
                 {isCommentsLoading && <Spin size="small" />}
                 {topLevelComments.length === 0 && !isCommentsLoading ? <Text type="secondary">暂无评论</Text> : null}
-                {topLevelComments.map((c) => (
-                  <div key={c.comment_id} style={{ marginBottom: 10, paddingBottom: 8, borderBottom: "1px solid #303030" }}>
-                    <Space><Text strong style={{ fontSize: 13 }}>{c.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{c.created_at_remote} · {c.like_count} likes</Text></Space>
-                    <div style={{ color: c.textSecondary, fontSize: 13, marginTop: 2 }}>{c.content}</div>
-                    {childComments(c.comment_id).map((r) => (
+                {topLevelComments.map((cm) => (
+                  <div key={cm.comment_id} style={{ marginBottom: 10, paddingBottom: 8, borderBottom: "1px solid #303030" }}>
+                    <Space><Text strong style={{ fontSize: 13 }}>{cm.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{cm.created_at_remote} · {cm.like_count} likes</Text></Space>
+                    <div style={{ color: c.textSecondary, fontSize: 13, marginTop: 2 }}>{cm.content}</div>
+                    {childComments(cm.comment_id).map((r) => (
                       <div key={r.comment_id} style={{ marginLeft: 20, marginTop: 4, paddingLeft: 8, borderLeft: "2px solid #303030" }}>
                         <Space><Text strong style={{ fontSize: 12 }}>{r.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{r.like_count} likes</Text></Space>
                         <div style={{ color: c.textSecondary, fontSize: 12 }}>{r.content}</div>
