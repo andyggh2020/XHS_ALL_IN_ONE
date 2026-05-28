@@ -34,6 +34,7 @@ import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 
+import { BatchActionsBar } from "../../../components/ui/batch-actions";
 import { PageHeader } from "../../../components/layout/app-shell";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
@@ -100,6 +101,7 @@ export function XhsPublishPage() {
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -268,6 +270,24 @@ export function XhsPublishPage() {
     }
   }
 
+  async function handleBatchDelete(ids: number[]) {
+    setError(null);
+    setMessage(null);
+    try {
+      await Promise.all(ids.map((id) => deletePublishJob(id)));
+      setJobs((current) => current.filter((j) => !ids.includes(j.id)));
+      setSelectedIds([]);
+      if (selectedJobId && ids.includes(selectedJobId)) {
+        setSelectedJobId(null);
+        setAssets([]);
+        setSelectedAccountId(null);
+      }
+      setMessage(`已删除 ${ids.length} 个发布任务。`);
+    } catch {
+      setError("批量删除部分失败，请刷新后重试。");
+    }
+  }
+
   useEffect(() => {
     void loadJobs();
     void loadAccounts();
@@ -315,6 +335,14 @@ export function XhsPublishPage() {
         <Row gutter={16}>
           {/* Left: Job List */}
           <Col xs={24} lg={7}>
+            <BatchActionsBar
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
+              allIds={filteredJobs.map((j) => j.id)}
+              actions={[
+                { key: "delete", label: "删除", danger: true, icon: <DeleteOutlined />, onClick: (ids) => handleBatchDelete(ids), confirm: "确定删除选中的发布任务？" },
+              ]}
+            />
             <Card
               title={
                 <Space>
