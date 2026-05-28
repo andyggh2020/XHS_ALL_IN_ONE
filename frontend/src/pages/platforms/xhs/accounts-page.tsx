@@ -11,6 +11,7 @@ import { checkAccount, deleteAccount, fetchAccounts } from "../../../lib/api";
 import { formatShanghaiTime } from "../../../lib/time";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { ListSkeleton } from "../../../components/ui/skeletons";
+import { GuideEmpty } from "../../../components/ui/empty-states";
 import type { PlatformAccount } from "../../../types";
 
 const { Title, Text } = Typography;
@@ -108,18 +109,15 @@ export function XhsAccountsPage() {
         {isLoading ? (
           <ListSkeleton rows={4} />
         ) : accounts.length === 0 ? (
-          <Empty
-            image={<SafetyCertificateOutlined style={{ fontSize: 48, color: c.textMuted }} />}
-            imageStyle={{ height: 64 }}
-            description={
-              <Space orientation="vertical" size={4}>
-                <Text strong style={{ color: c.textSecondary }}>还没有绑定小红书账号</Text>
-                <Text style={{ color: c.textTertiary, fontSize: 13 }}>先绑定一个 PC 账号用于搜索抓取；Creator 账号用于发布。</Text>
-              </Space>
-            }
-          >
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setDrawerOpen(true)}>添加账号</Button>
-          </Empty>
+          <div style={{ padding: "32px 0" }}>
+            <GuideEmpty
+              icon="🔗"
+              title="还没有绑定小红书账号"
+              description="先绑定 PC 端账号用于搜索抓取，Creator 账号用于发布。"
+              actions={[{ label: "添加账号", icon: <PlusOutlined />, onClick: () => setDrawerOpen(true) }]}
+              tips={["PC 账号用于搜索和抓取笔记数据", "Creator 账号用于发布笔记到小红书", "支持 Cookie 导入和扫码登录"]}
+            />
+          </div>
         ) : (
           <Row gutter={[16, 16]}>
             {accounts.map((account) => {
