@@ -120,12 +120,14 @@ class Settings(BaseSettings):
         model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     def model_post_init(self, __context: Any) -> None:
-        # Auto-detect Vercel Postgres from env vars set by Vercel integration
-        pg_url = os.environ.get("POSTGRES_URL") or ""
-        if pg_url:
-            object.__setattr__(self, "database_url", pg_url.replace("postgres://", "postgresql+pg8000://"))
-            object.__setattr__(self, "database_type", "postgresql")
-            return
+        # Only auto-detect Vercel Postgres when database_type is not explicitly sqlite
+        should_auto_pg = self.database_type != "sqlite"
+        if should_auto_pg:
+            pg_url = os.environ.get("POSTGRES_URL") or ""
+            if pg_url:
+                object.__setattr__(self, "database_url", pg_url.replace("postgres://", "postgresql+pg8000://"))
+                object.__setattr__(self, "database_type", "postgresql")
+                return
         # Build database_url from component fields if not explicitly set
         if not self.database_url:
             if self.database_type == "mysql":
