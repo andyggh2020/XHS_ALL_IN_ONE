@@ -2,10 +2,6 @@
   "buildCommand": "cd frontend && npm install && npm run build",
   "builds": [
     {
-      "src": "frontend/dist/**",
-      "use": "@vercel/static"
-    },
-    {
       "src": "main.py",
       "use": "@vercel/python"
     }
@@ -13,7 +9,7 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "main.py" },
     { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/(.*)", "dest": "main.py" }
   ],
   "env": {
     "VERCEL": "1",
@@ -21,6 +17,7 @@
     "DATABASE_TYPE": "sqlite",
     "SECRET_KEY": "vercel-deploy-change-me-in-production",
     "BACKEND_CORS_ORIGINS": "*",
-    "FRONTEND_SERVE_STATIC": "false"
+    "FRONTEND_SERVE_STATIC": "true",
+    "FRONTEND_BUILD_DIR": "./frontend/dist"
   }
 }
