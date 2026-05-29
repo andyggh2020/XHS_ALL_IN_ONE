@@ -8,10 +8,9 @@ _project_root = _api_root.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from starlette.responses import FileResponse
+from starlette.responses import FileResponse, JSONResponse
 
 from backend.app.api import accounts, admin, ai, auth, auto_tasks, drafts, files, keyword_groups, login_sessions, model_configs, notes, notifications, publish, search, tags, tasks
 from backend.app.api.platforms import registry
@@ -63,22 +62,18 @@ if not frontend_dist.is_dir():
 
 if frontend_dist.is_dir():
     print(f"[vercel] serving frontend from {frontend_dist}")
-    # Mount static files (serves index.html, assets/*, etc.)
-    app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
 
-    # SPA fallback middleware
-    @app.middleware("http")
-    async def _spa_fallback(request: Request, call_next):
-        response = await call_next(request)
-        path = request.url.path
-        if (
-            response.status_code == 404
-            and not path.startswith("/api")
-            and "." not in path.split("/")[-1]
-        ):
-            idx = frontend_dist / "index.html"
-            if idx.exists():
-                return FileResponse(str(idx))
-        return response
+    # Catch-all route: serve index.html for any non-API path
+    @app.api_route("/{path:path}", methods=["GET"])
+    async def _serve_frontend(path: str):
+        if path.startswith("api/") or path.startswith("api"):
+            from fastapi.responses import JSONResponse
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+        idx = frontend_dist / "index.html"
+        if idx.exists():
+            return FileResponse(str(idx))
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
 else:
     print(f"[vercel] WARNING: frontend_dist NOT FOUND at {frontend_dist}")
