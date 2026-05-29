@@ -1,13 +1,6 @@
+# Vercel 部署时排除不需要的文件
+# 注意：不要排除前端构建所需文件（package.json, tsconfig, vite.config 等）
 frontend/node_modules/
-frontend/public/
-frontend/src/
-frontend/package.json
-frontend/package-lock.json
-frontend/tsconfig.json
-frontend/tsconfig.node.json
-frontend/vite.config.ts
-frontend/diagnose.mjs
-frontend/index.html
 node_modules/
 author/
 static/
@@ -24,6 +17,4 @@ __pycache__/
 README.md
 docker-compose.yml
 Dockerfile
-package.json
-package-lock.json
 check_db.py
