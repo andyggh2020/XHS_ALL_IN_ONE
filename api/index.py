@@ -19,7 +19,16 @@ from backend.app.core.config import get_settings
 from backend.app.core.database import init_db as _init_db
 
 settings = get_settings()
-_init_db()  # Create tables and seed default admin user
+
+# Initialize database - catch errors so the app still starts
+_db_init_ok = True
+_db_init_error = ""
+try:
+    _init_db()
+except Exception as _e:
+    _db_init_ok = False
+    _db_init_error = f"{type(_e).__name__}: {_e}"
+
 app = FastAPI(title=settings.api_title)
 
 origins = [o.strip() for o in settings.backend_cors_origins.split(",") if o.strip()]
@@ -27,7 +36,7 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "spider-xhs"}
+    return {"status": "ok", "service": "spider-xhs", "db_ok": _db_init_ok}
 
 @app.get("/api/_debug")
 def _debug():
@@ -35,6 +44,8 @@ def _debug():
     frontend_dirs = list(cwd.rglob("dist/index.html"))
     return {
         "cwd": str(cwd),
+        "db_init_ok": _db_init_ok,
+        "db_init_error": _db_init_error,
         "frontend_dist_exists": (cwd / "frontend" / "dist").is_dir(),
         "public_exists": (cwd / "public").is_dir(),
         "dist_index_html_exists": (cwd / "frontend" / "dist" / "index.html").exists(),
