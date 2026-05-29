@@ -1,16 +1,15 @@
 {
   "buildCommand": "cd frontend && npm install && npm run build",
   "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python"
-    }
+    { "src": "frontend/dist/**", "use": "@vercel/static" },
+    { "src": "api/index.py", "use": "@vercel/python" }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "api/index.py"
-    }
+    { "src": "/assets/(.*)", "dest": "/frontend/dist/assets/$1" },
+    { "src": "/favicon\\.svg", "dest": "/frontend/dist/favicon.svg" },
+    { "src": "/logo\\.jpg", "dest": "/frontend/dist/logo.jpg" },
+    { "src": "/api/(.*)", "dest": "api/index.py" },
+    { "src": "/(.*)", "dest": "api/index.py" }
   ],
   "env": {
     "VERCEL": "1",

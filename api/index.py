@@ -1,16 +1,13 @@
-"""Vercel Serverless Function entry point.
-
-All API routes are handled by the FastAPI app from backend.app.main.
-"""
+"""Vercel Serverless Function entry point."""
 import os
 import sys
 from pathlib import Path
 
-# Ensure project root is in sys.path for imports like backend.app.*
 _api_root = Path(__file__).resolve().parent
 _project_root = _api_root.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -31,38 +28,11 @@ app = FastAPI(title=settings.api_title)
 origins = [o.strip() for o in settings.backend_cors_origins.split(",") if o.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-# Health check
-@app.get("/api/health", tags=["health"])
+@app.get("/api/health")
 def health():
     return {"status": "ok", "service": "spider-xhs"}
 
-# Debug: check if frontend files exist
-@app.get("/api/debug", tags=["debug"])
-def debug():
-    import os
-    root = Path(__file__).resolve().parent
-    paths_to_check = [
-        ("root", root),
-        ("root/frontend", root / "frontend"),
-        ("root/frontend/dist", root / "frontend" / "dist"),
-        ("root/frontend/dist/index.html", root / "frontend" / "dist" / "index.html"),
-        ("root/public", root / "public"),
-        ("root/public/index.html", root / "public" / "index.html"),
-        ("cwd", Path.cwd()),
-        ("cwd/frontend/dist", Path.cwd() / "frontend" / "dist"),
-    ]
-    result = {}
-    for name, p in paths_to_check:
-        result[name] = {"exists": p.exists(), "is_dir": p.is_dir() if p.exists() else None}
-        if p.exists() and p.is_dir():
-            try:
-                result[name]["files"] = [str(f.relative_to(p)) for f in p.iterdir()][:20]
-            except Exception:
-                result[name]["files"] = "error listing"
-    result["env_debug"] = {k: v for k, v in sorted(os.environ.items()) if "VERCEL" in k or "FRONTEND" in k or "DATABASE" in k or "SECRET" in k}
-    return result
-
-# Import all API routes
+# Register all API routes
 app.include_router(registry.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(accounts.router, prefix="/api")
@@ -86,27 +56,17 @@ app.include_router(auto_tasks.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 
-# Serve frontend static files + SPA fallback
-frontend_candidates = [
-    Path(__file__).resolve().parent / "frontend" / "dist",
-    Path(__file__).resolve().parent.parent / "frontend" / "dist",
-    Path.cwd() / "frontend" / "dist",
-    Path(__file__).resolve().parent / "public",
-    Path(__file__).resolve().parent.parent / "public",
-    Path.cwd() / "public",
-]
+# Try to find frontend build directory
+frontend_dist = Path.cwd() / "frontend" / "dist"
+if not frontend_dist.is_dir():
+    frontend_dist = _project_root / "frontend" / "dist"
 
-frontend_dist = None
-for candidate in frontend_candidates:
-    if candidate.is_dir() and (candidate / "index.html").exists():
-        frontend_dist = candidate
-        break
-
-print(f"[vercel] frontend_dist = {frontend_dist}")
-
-if frontend_dist:
+if frontend_dist.is_dir():
+    print(f"[vercel] serving frontend from {frontend_dist}")
+    # Mount static files (serves index.html, assets/*, etc.)
     app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
 
+    # SPA fallback middleware
     @app.middleware("http")
     async def _spa_fallback(request: Request, call_next):
         response = await call_next(request)
@@ -116,5 +76,9 @@ if frontend_dist:
             and not path.startswith("/api")
             and "." not in path.split("/")[-1]
         ):
-            return FileResponse(str(frontend_dist / "index.html"))
+            idx = frontend_dist / "index.html"
+            if idx.exists():
+                return FileResponse(str(idx))
         return response
+else:
+    print(f"[vercel] WARNING: frontend_dist NOT FOUND at {frontend_dist}")
