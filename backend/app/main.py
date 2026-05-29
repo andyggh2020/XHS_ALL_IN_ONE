@@ -75,7 +75,11 @@ def create_app() -> FastAPI:
 
     # Serve pre-built frontend in production / Docker
     if settings.frontend_serve_static:
-        frontend_dist = Path(settings.frontend_build_dir)
+        # Use absolute path relative to this file for maximum compatibility (Vercel, Docker, local)
+        backend_root = Path(__file__).resolve().parent.parent.parent
+        frontend_dist = backend_root / "frontend" / "dist"
+        if not frontend_dist.is_dir():
+            frontend_dist = Path(settings.frontend_build_dir)
         if frontend_dist.is_dir():
             from starlette.responses import FileResponse
 
