@@ -63,17 +63,16 @@ if not frontend_dist.is_dir():
 if frontend_dist.is_dir():
     print(f"[vercel] serving frontend from {frontend_dist}")
 
-    # Catch-all route: serve index.html for any non-API path
+    # Catch-all: serve index.html for paths not matched by API routes
+    # Note: Vercel rewrites all routes to /api/index.py before reaching here,
+    # so we ignore the path parameter and always serve index.html.
+    from fastapi.responses import JSONResponse as _JSONResponse
+    
     @app.api_route("/{path:path}", methods=["GET"])
     async def _serve_frontend(path: str):
-        if path.startswith("api/") or path.startswith("api"):
-            from fastapi.responses import JSONResponse
-            return JSONResponse({"detail": "Not Found"}, status_code=404)
-
         idx = frontend_dist / "index.html"
         if idx.exists():
             return FileResponse(str(idx))
-        from fastapi.responses import JSONResponse
-        return JSONResponse({"detail": "Not Found"}, status_code=404)
+        return _JSONResponse({"detail": "Not Found"}, status_code=404)
 else:
     print(f"[vercel] WARNING: frontend_dist NOT FOUND at {frontend_dist}")
