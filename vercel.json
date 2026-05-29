@@ -1,13 +1,7 @@
 {
   "buildCommand": "cd frontend && npm install && npm run build && mkdir -p ../public && cp -r dist/. ../public/",
-  "builds": [
-    { "src": "public/**", "use": "@vercel/static" },
-    { "src": "api/index.py", "use": "@vercel/python" }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "api/index.py" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "env": {
     "VERCEL": "1",
