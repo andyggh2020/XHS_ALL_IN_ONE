@@ -1,5 +1,6 @@
 {
   "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
   "builds": [
     {
       "src": "main.py",
@@ -7,17 +8,16 @@
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "main.py"
-    }
+    { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "main.py" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ],
   "env": {
+    "VERCEL": "1",
     "DATABASE_SQLITE_PATH": "/tmp/spider_xhs.db",
     "DATABASE_TYPE": "sqlite",
     "SECRET_KEY": "vercel-deploy-change-me-in-production",
     "BACKEND_CORS_ORIGINS": "*",
-    "FRONTEND_SERVE_STATIC": "true",
-    "FRONTEND_BUILD_DIR": "./frontend/dist"
+    "FRONTEND_SERVE_STATIC": "false"
   }
 }
