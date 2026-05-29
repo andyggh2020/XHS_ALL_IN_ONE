@@ -1,4 +1,6 @@
-"""Vercel Serverless Function entry point."""
+"""Vercel Serverless Function entry point.
+Cache-busting marker: rebuild-20260529-1945
+"""
 import os
 import sys
 from pathlib import Path
