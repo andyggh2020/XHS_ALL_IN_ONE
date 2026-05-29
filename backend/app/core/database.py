@@ -12,22 +12,24 @@ class Base(DeclarativeBase):
 
 settings = get_settings()
 
+# Vercel's Prisma Postgres integration injects DATABASE_URL env var which overrides
+# our sqlite config. Explicitly use sqlite when DATABASE_TYPE is set to sqlite.
 _connect_args = {}
-if settings.database_url.startswith("sqlite"):
-    _connect_args["check_same_thread"] = False
-    import os
-    db_path = settings.database_url.replace("sqlite:///", "")
+_database_url = settings.database_url
+if settings.database_type == "sqlite":
+    import os as _os
+    db_path = settings.database_sqlite_path
     try:
-        os.makedirs(os.path.dirname(os.path.abspath(db_path)) or ".", exist_ok=True)
+        _os.makedirs(_os.path.dirname(_os.path.abspath(db_path)) or ".", exist_ok=True)
     except OSError:
-        # On read-only filesystems (e.g. Vercel), fall back to /tmp
         import tempfile
-        db_name = os.path.basename(db_path) or "spider_xhs.db"
-        db_path = os.path.join(tempfile.gettempdir(), db_name)
-        settings.database_url = f"sqlite:///{db_path}"
-        os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
+        db_name = _os.path.basename(db_path) or "spider_xhs.db"
+        db_path = _os.path.join(tempfile.gettempdir(), db_name)
+        _os.makedirs(_os.path.dirname(_os.path.abspath(db_path)), exist_ok=True)
+    _database_url = f"sqlite:///{db_path}"
+    _connect_args["check_same_thread"] = False
 
-engine = create_engine(settings.database_url, connect_args=_connect_args)
+engine = create_engine(_database_url, connect_args=_connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
