@@ -1,14 +1,22 @@
 {
-  "buildCommand": "cd frontend && npm install && npm run build && mkdir -p ../public && cp -r dist/. ../public/",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
   ],
   "env": {
     "VERCEL": "1",
     "DATABASE_SQLITE_PATH": "/tmp/spider_xhs.db",
     "DATABASE_TYPE": "sqlite",
     "SECRET_KEY": "vercel-deploy-change-me-in-production",
-    "BACKEND_CORS_ORIGINS": "*",
-    "FRONTEND_SERVE_STATIC": "false"
+    "BACKEND_CORS_ORIGINS": "*"
   }
 }
