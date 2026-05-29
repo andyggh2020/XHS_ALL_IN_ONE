@@ -3,7 +3,6 @@
 frontend/node_modules/
 node_modules/
 author/
-static/
 tests/
 data/
 .venv/
