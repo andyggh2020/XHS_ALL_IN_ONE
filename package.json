@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "vercel-build": "cd frontend && npm ci --no-audit --no-fund 2>/dev/null || npm install --no-audit --no-fund && npm run build",
-    "build": "cd frontend && npm install && npm run build"
+    "vercel-build": "cd frontend && npm ci --no-audit --no-fund 2>/dev/null || npm install --no-audit --no-fund && npm run build && mkdir -p ../dist && cp -r dist/. ../dist/",
+    "build": "cd frontend && npm install && npm run build && mkdir -p ../dist && cp -r dist/. ../dist/"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
