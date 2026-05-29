@@ -16,8 +16,10 @@ from backend.app.api import accounts, admin, ai, auth, auto_tasks, drafts, files
 from backend.app.api.platforms import registry
 from backend.app.api.platforms.xhs import analytics, crawl, creator, monitoring, pc
 from backend.app.core.config import get_settings
+from backend.app.core.database import init_db as _init_db
 
 settings = get_settings()
+_init_db()  # Create tables and seed default admin user
 app = FastAPI(title=settings.api_title)
 
 origins = [o.strip() for o in settings.backend_cors_origins.split(",") if o.strip()]
