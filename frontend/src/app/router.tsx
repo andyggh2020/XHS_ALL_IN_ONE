@@ -16,7 +16,7 @@ import { XhsBenchmarksPage } from "../pages/platforms/xhs/benchmarks-page";
 import { XhsDashboard } from "../pages/platforms/xhs/xhs-dashboard";
 import { XhsCrawlerPage } from "../pages/platforms/xhs/crawler-page";
 import { XhsDiscoveryPage } from "../pages/platforms/xhs/discovery-page";
-import { XhsDraftsPage } from "../pages/platforms/xhs/rewrite-page";
+import { XhsDraftsPage } from "../pages/platforms/xhs/drafts-page";
 import { XhsKeywordsPage } from "../pages/platforms/xhs/keywords-page";
 import { XhsLibraryPage } from "../pages/platforms/xhs/library-page";
 import { XhsMonitoringPage } from "../pages/platforms/xhs/monitoring-page";

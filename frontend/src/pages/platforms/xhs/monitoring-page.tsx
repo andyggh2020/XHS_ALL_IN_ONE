@@ -23,7 +23,7 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 
-import { PageHeader } from "../../../components/layout/app-shell";
+import { PageShell } from "../../../components/layout/app-shell";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   createMonitoringTarget,
@@ -214,21 +214,19 @@ export function XhsMonitoringPage() {
   }
 
   return (
-    <div>
-      <PageHeader
-        eyebrow="XHS Monitoring"
-        title="竞品监控"
-        description="维护关键词、账号、品牌和笔记 URL 目标，后续可接入定时抓取和趋势快照。"
-        action={
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={loadTargets}
-            loading={isLoading}
-          >
-            刷新
-          </Button>
-        }
-      />
+    <PageShell
+      title="竞品监控"
+      description="维护关键词、账号、品牌和笔记 URL 目标，后续可接入定时抓取和趋势快照。"
+      action={
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={loadTargets}
+          loading={isLoading}
+        >
+          刷新
+        </Button>
+      }
+    >
 
       <Card
         style={{ background: c.cardBg, borderColor: c.cardBorder, marginBottom: 24 }}
@@ -398,6 +396,6 @@ export function XhsMonitoringPage() {
           ))}
         </Row>
       )}
-    </div>
+    </PageShell>
   );
 }

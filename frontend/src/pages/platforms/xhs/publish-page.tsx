@@ -35,7 +35,7 @@ import type { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 
 import { BatchActionsBar } from "../../../components/ui/batch-actions";
-import { PageHeader } from "../../../components/layout/app-shell";
+import { PageShell } from "../../../components/layout/app-shell";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   deletePublishJob,
@@ -296,17 +296,15 @@ export function XhsPublishPage() {
   const scheduledDayjs: Dayjs | null = scheduledAt ? dayjs(scheduledAt) : null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <PageHeader
-        eyebrow="XHS Publish"
-        title="发布中心"
-        description="预览草稿内容，配置发布参数后触发 Creator 发布。内容修改请前往草稿工坊。"
-        action={
-          <Button icon={<ReloadOutlined />} onClick={loadJobs} loading={isLoading}>
-            刷新
-          </Button>
-        }
-      />
+    <PageShell
+      title="发布中心"
+      description="预览草稿内容，配置发布参数后触发 Creator 发布。内容修改请前往草稿工坊。"
+      action={
+        <Button icon={<ReloadOutlined />} onClick={loadJobs} loading={isLoading}>
+          刷新
+        </Button>
+      }
+    >
 
       {error && <Alert type="error" message={error} showIcon closable onClose={() => setError(null)} />}
       {message && <Alert type="success" message={message} showIcon closable onClose={() => setMessage(null)} />}
@@ -591,6 +589,6 @@ export function XhsPublishPage() {
           </Col>
         </Row>
       )}
-    </div>
+    </PageShell>
   );
 }

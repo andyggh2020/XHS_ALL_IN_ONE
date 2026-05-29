@@ -24,7 +24,7 @@ import {
 } from "antd";
 import { useCallback, useEffect, useState } from "react";
 
-import { PageHeader } from "../../../components/layout/app-shell";
+import { PageShell } from "../../../components/layout/app-shell";
 import {
   createMonitoringTarget,
   deleteMonitoringTarget,
@@ -250,21 +250,19 @@ export function XhsBenchmarksPage() {
   ];
 
   return (
-    <div>
-      <PageHeader
-        eyebrow="Competitive Analysis"
-        title="竞品分析"
-        description="导入笔记链接追踪互动数据变化，洞察竞品内容表现。"
-        action={
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={loadTargets}
-            loading={isLoading}
-          >
-            刷新
-          </Button>
-        }
-      />
+    <PageShell
+      title="竞品分析"
+      description="导入笔记链接追踪互动数据变化，洞察竞品内容表现。"
+      action={
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={loadTargets}
+          loading={isLoading}
+        >
+          刷新
+        </Button>
+      }
+    >
 
       {/* Add Target Section */}
       <Card size="small" style={{ background: c.cardBg, borderColor: c.cardBorder, marginBottom: 24 }}>
@@ -499,6 +497,6 @@ export function XhsBenchmarksPage() {
           })}
         </Row>
       )}
-    </div>
+    </PageShell>
   );
 }

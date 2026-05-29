@@ -510,6 +510,37 @@ export function AppShell() {
   );
 }
 
+/**
+ * 统一的页面外壳组件 — 提供渐变色页头 + 内容容器。
+ * 所有页面（shadcn / antd）都应使用此组件保持视觉一致性。
+ */
+export function PageShell({
+  title,
+  description,
+  action,
+  children,
+}: {
+  title: string;
+  description: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="bg-page-header-feigua -mx-8 -mt-8 px-8 pt-8 pb-2 mb-6 border-b border-border/50">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight mb-1.5">{title}</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+          </div>
+          {action && <div className="shrink-0">{action}</div>}
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export function PageHeader(props: { eyebrow: string; title: string; description: string; action?: ReactNode }) {
   const { eyebrow, title, description, action } = props;
   return (

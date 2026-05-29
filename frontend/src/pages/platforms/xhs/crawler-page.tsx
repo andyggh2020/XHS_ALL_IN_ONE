@@ -1,4 +1,5 @@
 import { Check, CheckCircle, ChevronDown, ChevronRight, Clock, Download, ExternalLink, FileText, Heart, Image, KeyRound, Link as LinkIcon, Loader2, MessageSquare, Play, Plus, RefreshCw, Search, Send, Settings, Shield, Star, Target, Trash2, User, X, Zap, BarChart3, Bot, Database } from "lucide-react";
+import { CrawlProgress } from "../../../components/ui/crawl-progress";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
@@ -400,11 +401,20 @@ export function XhsCrawlerPage() {
 
       <Card className="mb-6">
         <CardHeader className="p-6 pb-0">
-          <div className="flex items-center gap-3">
-            <h5 className="text-base font-semibold m-0">抓取结果</h5>
-            <span className="text-sm text-muted-foreground">
-              成功 {successCount} · 失败 {failedCount}{isRunning && progressMsg ? ` · ${progressMsg}` : ""}{isRunning ? " · 抓取中..." : ""}
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h5 className="text-base font-semibold m-0">抓取结果</h5>
+              <span className="text-sm text-muted-foreground">
+                {(isRunning || items.length > 0) && `${items.length} 条`}
+              </span>
+            </div>
+            <CrawlProgress
+              successCount={successCount}
+              failedCount={failedCount}
+              isRunning={isRunning}
+              progressMsg={progressMsg}
+              className="flex-1 max-w-md ml-4"
+            />
           </div>
         </CardHeader>
         <CardContent className="p-6">

@@ -30,7 +30,7 @@ import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { PageHeader } from "../../../components/layout/app-shell";
+import { PageShell } from "../../../components/layout/app-shell";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import {
   createXhsAnalyticsReport,
@@ -174,31 +174,29 @@ export function XhsAnalyticsPage() {
   const termSizes = [18, 16, 15, 14, 13, 12];
 
   return (
-    <div>
+    <PageShell
+      title="数据洞察"
+      description="基于已保存笔记、标签和评论生成可执行的内容机会视图。"
+      action={
+        <Space>
+          <Button
+            icon={<DownloadOutlined />}
+            onClick={generateReport}
+            loading={isGeneratingReport}
+          >
+            生成报告
+          </Button>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={loadAnalytics}
+            loading={isLoading}
+          >
+            刷新
+          </Button>
+        </Space>
+      }
+    >
       <Alert type="info" showIcon message="数据洞察模块正在开发优化中，当前为基础版本，更多分析维度即将上线。" style={{ marginBottom: 16 }} />
-      <PageHeader
-        eyebrow="XHS Analytics"
-        title="数据洞察"
-        description="基于已保存笔记、标签和评论生成可执行的内容机会视图。"
-        action={
-          <Space>
-            <Button
-              icon={<DownloadOutlined />}
-              onClick={generateReport}
-              loading={isGeneratingReport}
-            >
-              生成报告
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={loadAnalytics}
-              loading={isLoading}
-            >
-              刷新
-            </Button>
-          </Space>
-        }
-      />
 
       {/* ---- Top metric cards ---- */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -425,6 +423,6 @@ export function XhsAnalyticsPage() {
           </Card>
         </>
       )}
-    </div>
+    </PageShell>
   );
 }

@@ -24,7 +24,7 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 
-import { PageHeader } from "../../../components/layout/app-shell";
+import { PageShell } from "../../../components/layout/app-shell";
 import {
   createKeywordGroup,
   deleteKeywordGroup,
@@ -179,21 +179,19 @@ export function XhsKeywordsPage() {
   }
 
   return (
-    <div>
-      <PageHeader
-        eyebrow="XHS Keywords"
-        title="关键词组"
-        description="维护选题、赛道和品牌关键词组，从已保存笔记中观察命中量和互动机会。"
-        action={
-          <Button
-            icon={<ReloadOutlined />}
-            disabled={isLoading}
-            onClick={loadGroups}
-          >
-            刷新
-          </Button>
-        }
-      />
+    <PageShell
+      title="关键词组"
+      description="维护选题、赛道和品牌关键词组，从已保存笔记中观察命中量和互动机会。"
+      action={
+        <Button
+          icon={<ReloadOutlined />}
+          disabled={isLoading}
+          onClick={loadGroups}
+        >
+          刷新
+        </Button>
+      }
+    >
 
       <Card
         style={{ background: c.cardBg, borderColor: c.cardBorder, marginBottom: 24 }}
@@ -366,6 +364,6 @@ export function XhsKeywordsPage() {
           })}
         </Row>
       )}
-    </div>
+    </PageShell>
   );
 }
