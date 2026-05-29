@@ -142,7 +142,7 @@ export function XhsDashboard() {
       {/* Quick Actions (old style removed) */}
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {metrics.map((metric) => (
           <div key={metric.label} className="stat-card-clean p-4">
             <div className="flex items-start justify-between mb-3">

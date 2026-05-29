@@ -211,7 +211,7 @@ export function XhsAccountsPage() {
                       </div>
 
                       {isCreator ? (
-                        <div className="grid grid-cols-2 gap-4" style={{ marginBottom: 12 }}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" style={{ marginBottom: 12 }}>
                           <div>
                             <p style={{ color: c.textSecondary, fontSize: 12, margin: 0, marginBottom: 2 }}>类型</p>
                             <p style={{ color: c.textPrimary, fontSize: 14, fontWeight: 600, margin: 0 }}>Creator</p>
@@ -226,7 +226,7 @@ export function XhsAccountsPage() {
                           )}
                         </div>
                       ) : (
-                        <div className="grid grid-cols-4 gap-3" style={{ marginBottom: 12 }}>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" style={{ marginBottom: 12 }}>
                           <div>
                             <p style={{ color: c.textSecondary, fontSize: 12, margin: 0, marginBottom: 2 }}>类型</p>
                             <p style={{ color: c.textPrimary, fontSize: 14, fontWeight: 600, margin: 0 }}>PC</p>

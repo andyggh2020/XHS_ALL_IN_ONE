@@ -244,7 +244,7 @@ export function XhsCrawlerPage() {
       <Card className="mb-6">
         <CardContent className="p-6">
           <form onSubmit={(e) => void handleRun(e)}>
-            <div className="grid grid-cols-12 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
               <div className="col-span-8">
                 <label className="text-sm font-medium mb-1.5 block">PC 账号</label>
                 <select
@@ -300,7 +300,7 @@ export function XhsCrawlerPage() {
             </div>
 
             {mode === "search" ? (
-              <div className="grid grid-cols-12 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 mt-4">
                 <div className="col-span-3">
                   <label className="text-sm font-medium mb-1.5 block">搜索关键词</label>
                   <input

@@ -208,7 +208,7 @@ export function XhsDiscoveryPage() {
       <Card className="mb-6">
         <CardContent className="p-6">
           <form onSubmit={(e) => { e.preventDefault(); void runSearch(1, false); }}>
-            <div className="grid grid-cols-12 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
               <div className="col-span-3">
                 <p className="text-xs text-muted-foreground mb-1">搜索账号</p>
                 <select
@@ -265,7 +265,7 @@ export function XhsDiscoveryPage() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-12 gap-3 mt-3 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 mt-3 items-end">
               <div className="col-span-6">
                 <p className="text-xs text-muted-foreground mb-1">笔记 URL</p>
                 <input

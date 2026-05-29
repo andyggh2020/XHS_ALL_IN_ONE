@@ -38,14 +38,16 @@ export function Dialog({ open, onClose, children, className, width = 520 }: Dial
       />
       <div
         className={cn(
-          "relative z-50 mt-[5vh] mb-8 w-full rounded-2xl border shadow-2xl overflow-hidden",
+          "relative z-50 w-full rounded-2xl border shadow-2xl overflow-hidden",
           "bg-[color-mix(in_srgb,var(--card)_95%,var(--border))]",
           "dark:bg-[color-mix(in_srgb,var(--card)_85%,var(--border))]",
           "border-[var(--border)]",
+          "max-sm:rounded-none max-sm:min-h-[60vh] max-sm:mt-auto max-sm:mb-0 max-sm:border-b-0 max-sm:border-x-0",
+          "sm:mt-[5vh] sm:mb-8",
           className,
         )}
         style={{
-          maxWidth: typeof width === "number" ? width : width,
+          maxWidth: typeof width === "number" ? `${Math.min(width, window.innerWidth - 32)}px` : width,
           animation: "scaleIn 0.2s ease-out",
         }}
         onClick={(e) => e.stopPropagation()}
