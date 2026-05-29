@@ -1,44 +1,30 @@
-import {
-  CrownOutlined,
-  EditOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import {
-  Avatar,
-  Button,
-  Card,
-  Descriptions,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Typography,
-  message,
-} from "antd";
-import type { ColumnsType } from "antd/es/table";
+import { Crown, Edit3, RefreshCw, Search, User, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { PageHeader } from "../../components/layout/app-shell";
-import { useThemeColors } from "../../hooks/use-theme-colors";
+import { Avatar } from "../../components/ui/avatar";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Card } from "../../components/ui/card";
+import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { useToast } from "../../components/ui/toast";
 import { fetchAdminUsers, fetchMembershipPlans, updateUserMembership } from "../../lib/api";
 import type { AdminUserItem, MembershipPlan } from "../../types";
 
-const { Text } = Typography;
-
 const levelConfig: Record<string, { color: string; label: string }> = {
-  free: { color: "default", label: "免费版" },
-  pro: { color: "blue", label: "专业版" },
-  enterprise: { color: "purple", label: "企业版" },
+  free: { color: "secondary", label: "免费版" },
+  pro: { color: "default", label: "专业版" },
+  enterprise: { color: "default", label: "企业版" },
 };
 
+const levelOptions = [
+  { value: "free", label: "免费版 — 基础功能" },
+  { value: "pro", label: "专业版 — ¥99/月" },
+  { value: "enterprise", label: "企业版 — ¥299/月" },
+];
+
 export function AdminUsersPage() {
-  const c = useThemeColors();
+  const toast = useToast();
   const [users, setUsers] = useState<AdminUserItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -50,36 +36,27 @@ export function AdminUsersPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUserItem | null>(null);
   const [editLoading, setEditLoading] = useState(false);
-  const [form] = Form.useForm();
+  const [editMembershipLevel, setEditMembershipLevel] = useState("free");
+  const [editIsAdmin, setEditIsAdmin] = useState(false);
+  const [editExpiresInDays, setEditExpiresInDays] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetchAdminUsers({ q: search || undefined, page, page_size: 20 });
-      setUsers(res.items);
-      setTotal(res.total);
-    } catch {
-      // handled by interceptor
-    } finally {
-      setLoading(false);
-    }
+      setUsers(res.items); setTotal(res.total);
+    } catch { /* handled by interceptor */ }
+    finally { setLoading(false); }
   }, [search, page]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  useEffect(() => {
-    fetchMembershipPlans().then(setPlans).catch(() => {});
-  }, []);
+  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { fetchMembershipPlans().then(setPlans).catch(() => {}); }, []);
 
   const handleEdit = (user: AdminUserItem) => {
     setEditingUser(user);
-    form.setFieldsValue({
-      membership_level: user.membership_level,
-      is_admin: user.is_admin,
-      expires_in_days: undefined,
-    });
+    setEditMembershipLevel(user.membership_level);
+    setEditIsAdmin(user.is_admin);
+    setEditExpiresInDays("");
     setEditOpen(true);
   };
 
@@ -87,89 +64,17 @@ export function AdminUsersPage() {
     if (!editingUser) return;
     setEditLoading(true);
     try {
-      const values = await form.validateFields();
       await updateUserMembership(editingUser.id, {
-        membership_level: values.membership_level,
-        is_admin: values.is_admin,
-        expires_in_days: values.expires_in_days,
+        membership_level: editMembershipLevel,
+        is_admin: editIsAdmin,
+        expires_in_days: editExpiresInDays ? parseInt(editExpiresInDays) : undefined,
       });
-      message.success("修改成功");
+      toast.success("修改成功");
       setEditOpen(false);
       void load();
-    } catch {
-      // form validation or api error handled by interceptor
-    } finally {
-      setEditLoading(false);
-    }
+    } catch { /* handled by interceptor */ }
+    finally { setEditLoading(false); }
   };
-
-  const columns: ColumnsType<AdminUserItem> = [
-    {
-      title: "用户",
-      dataIndex: "username",
-      key: "username",
-      render: (name: string, record) => (
-        <Space>
-          <Avatar size={28} icon={<UserOutlined />} style={{ background: "#1668dc", flexShrink: 0 }}>
-            {name[0]?.toUpperCase()}
-          </Avatar>
-          <Space size={4}>
-            <Text strong style={{ color: c.textPrimary }}>{name}</Text>
-            {record.is_admin && (
-              <Tag color="gold" style={{ fontSize: 10, lineHeight: "16px", padding: "0 4px" }}>
-                管理员
-              </Tag>
-            )}
-          </Space>
-        </Space>
-      ),
-    },
-    {
-      title: "会员等级",
-      dataIndex: "membership_level",
-      key: "membership_level",
-      render: (level: string) => {
-        const cfg = levelConfig[level] ?? { color: "default", label: level };
-        return (
-          <Space>
-            {level !== "free" && <CrownOutlined style={{ color: level === "enterprise" ? "#7c3aed" : "#1668dc" }} />}
-            <Tag color={cfg.color}>{cfg.label}</Tag>
-          </Space>
-        );
-      },
-    },
-    {
-      title: "到期时间",
-      dataIndex: "membership_expires_at",
-      key: "membership_expires_at",
-      render: (val: string | null) => {
-        if (!val) return <Text style={{ color: c.textTertiary }}>永久</Text>;
-        const d = new Date(val);
-        const expired = d.getTime() < Date.now();
-        return (
-          <Text style={{ color: expired ? "#ef4444" : c.textSecondary }}>
-            {d.toLocaleDateString("zh-CN")}
-            {expired && <Tag color="red" style={{ marginLeft: 6, fontSize: 10 }}>已过期</Tag>}
-          </Text>
-        );
-      },
-    },
-    {
-      title: "注册时间",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (val: string) => new Date(val).toLocaleDateString("zh-CN"),
-    },
-    {
-      title: "操作",
-      key: "action",
-      render: (_, record) => (
-        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-          编辑
-        </Button>
-      ),
-    },
-  ];
 
   return (
     <div>
@@ -178,109 +83,164 @@ export function AdminUsersPage() {
         title="用户管理"
         description="管理平台用户、会员等级和权限"
         action={
-          <Space>
-            <Input
-              prefix={<SearchOutlined />}
-              placeholder="搜索用户名"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              allowClear
-              style={{ width: 200 }}
-            />
-            <Button icon={<ReloadOutlined />} onClick={() => void load()}>
-              刷新
+          <div className="flex gap-2">
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                placeholder="搜索用户名"
+                className="w-[200px] h-9 pl-9 pr-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <Button variant="outline" size="sm" onClick={() => void load()}>
+              <RefreshCw size={14} className="mr-1" />刷新
             </Button>
-          </Space>
+          </div>
         }
       />
 
-      <Card style={{ background: c.cardBg, borderColor: c.cardBorder }}>
-        <Table
-          columns={columns}
-          dataSource={users}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            current: page,
-            total,
-            pageSize: 20,
-            onChange: setPage,
-            showTotal: (t) => `共 ${t} 个用户`,
-          }}
-          locale={{ emptyText: "暂无用户数据" }}
-        />
+      <Card>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left">
+                <th className="p-4 font-medium text-muted-foreground">用户</th>
+                <th className="p-4 font-medium text-muted-foreground">会员等级</th>
+                <th className="p-4 font-medium text-muted-foreground">到期时间</th>
+                <th className="p-4 font-medium text-muted-foreground">注册时间</th>
+                <th className="p-4 font-medium text-muted-foreground">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => {
+                const cfg = levelConfig[user.membership_level] || { color: "secondary", label: user.membership_level };
+                return (
+                  <tr key={user.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-7 h-7 text-[10px]" fallback={user.username[0]?.toUpperCase() || "U"} />
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium">{user.username}</span>
+                          {user.is_admin && <ShieldCheck size={14} className="text-amber-500" />}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-1.5">
+                        {user.membership_level !== "free" && <Crown size={14} className={user.membership_level === "enterprise" ? "text-purple-500" : "text-primary"} />}
+                        <Badge variant={cfg.color as any}>{cfg.label}</Badge>
+                      </div>
+                    </td>
+                    <td className="p-4 text-muted-foreground">
+                      {user.membership_expires_at ? (() => {
+                        const d = new Date(user.membership_expires_at);
+                        const expired = d.getTime() < Date.now();
+                        return <span className={expired ? "text-destructive" : ""}>{d.toLocaleDateString("zh-CN")}{expired && <Badge variant="destructive" className="ml-1.5">已过期</Badge>}</span>;
+                      })() : <span className="text-muted-foreground">永久</span>}
+                    </td>
+                    <td className="p-4 text-muted-foreground">{new Date(user.created_at).toLocaleDateString("zh-CN")}</td>
+                    <td className="p-4">
+                      <Button size="sm" variant="ghost" onClick={() => handleEdit(user)}>
+                        <Edit3 size={14} className="mr-0.5" />编辑
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {!loading && users.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground text-sm">暂无用户数据</div>
+          )}
+          {loading && (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full" />
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        {total > 20 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+            <span className="text-xs text-muted-foreground">共 {total} 个用户</span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>上一页</Button>
+              <Button size="sm" variant="outline" disabled={page * 20 >= total} onClick={() => setPage((p) => p + 1)}>下一页</Button>
+            </div>
+          </div>
+        )}
       </Card>
 
-      <Modal
-        title="编辑会员信息"
-        open={editOpen}
-        onOk={handleSave}
-        onCancel={() => setEditOpen(false)}
-        confirmLoading={editLoading}
-        okText="保存"
-        cancelText="取消"
-        destroyOnClose
-      >
-        {editingUser && (
-          <div style={{ marginBottom: 20 }}>
-            <Descriptions column={1} size="small">
-              <Descriptions.Item label="用户">
-                <Space>
-                  <Avatar size={22} icon={<UserOutlined />} style={{ background: "#1668dc" }}>
-                    {editingUser.username[0]?.toUpperCase()}
-                  </Avatar>
-                  <Text strong>{editingUser.username}</Text>
-                </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="ID">{editingUser.id}</Descriptions.Item>
-            </Descriptions>
-          </div>
-        )}
-
-        <Form form={form} layout="vertical">
-          <Form.Item name="membership_level" label="会员等级" rules={[{ required: true, message: "请选择会员等级" }]}>
-            <Select
-              options={[
-                { label: "免费版 — 基础功能", value: "free" },
-                { label: "专业版 — ¥99/月", value: "pro" },
-                { label: "企业版 — ¥299/月", value: "enterprise" },
-              ]}
-            />
-          </Form.Item>
-
-          <Form.Item name="is_admin" label="管理员权限" valuePropName="checked">
-            <Select
-              options={[
-                { label: "普通用户", value: false },
-                { label: "管理员", value: true },
-              ]}
-            />
-          </Form.Item>
-
-          <Form.Item name="expires_in_days" label="会员有效期（天）" extra="留空则不修改到期时间。免费版自动设为永久。">
-            <InputNumber min={1} max={3650} placeholder="如：30 / 365" style={{ width: "100%" }} />
-          </Form.Item>
-        </Form>
-
-        {plans.length > 0 && (
-          <div style={{ marginTop: 16, padding: 12, background: c.cardBg3 || "#141414", borderRadius: 8 }}>
-            <Text strong style={{ fontSize: 12, color: c.textSecondary, display: "block", marginBottom: 8 }}>
-              方案对比
-            </Text>
-            {plans.map((plan) => (
-              <div key={plan.level} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <Tag color={levelConfig[plan.level]?.color}>{plan.name}</Tag>
-                <Text style={{ fontSize: 12, color: c.textTertiary }}>
-                  ¥{plan.price_monthly}/月 · {plan.features.slice(0, 3).join("、")}
-                </Text>
+      {/* Edit Modal */}
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)}>
+        <DialogHeader onClose={() => setEditOpen(false)}>
+          <DialogTitle>编辑会员信息</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          {editingUser && (
+            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-border">
+              <Avatar className="w-8 h-8 text-xs" fallback={editingUser.username[0]?.toUpperCase() || "U"} />
+              <div>
+                <p className="font-medium">{editingUser.username}</p>
+                <p className="text-xs text-muted-foreground">ID: {editingUser.id}</p>
               </div>
-            ))}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1.5">会员等级</label>
+              <select
+                value={editMembershipLevel}
+                onChange={(e) => setEditMembershipLevel(e.target.value)}
+                className="w-full h-10 rounded-xl border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {levelOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">管理员权限</label>
+              <select
+                value={editIsAdmin ? "true" : "false"}
+                onChange={(e) => setEditIsAdmin(e.target.value === "true")}
+                className="w-full h-10 rounded-xl border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="false">普通用户</option>
+                <option value="true">管理员</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">会员有效期（天）</label>
+              <input
+                type="number"
+                value={editExpiresInDays}
+                onChange={(e) => setEditExpiresInDays(e.target.value)}
+                placeholder="如：30 / 365"
+                min={1} max={3650}
+                className="w-full h-10 rounded-xl border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <p className="text-xs text-muted-foreground mt-1">留空则不修改到期时间。免费版自动设为永久。</p>
+            </div>
           </div>
-        )}
-      </Modal>
+
+          {plans.length > 0 && (
+            <div className="mt-4 p-3 rounded-xl bg-muted/30">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">方案对比</p>
+              {plans.map((plan) => (
+                <div key={plan.level} className="flex items-center gap-2 mb-1">
+                  <Badge variant={(levelConfig[plan.level]?.color || "secondary") as any}>{plan.name}</Badge>
+                  <span className="text-xs text-muted-foreground">¥{plan.price_monthly}/月 · {plan.features.slice(0, 3).join("、")}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setEditOpen(false)}>取消</Button>
+          <Button onClick={handleSave} disabled={editLoading}>{editLoading ? "保存中..." : "保存"}</Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 }

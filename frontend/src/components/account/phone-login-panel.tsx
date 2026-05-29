@@ -1,12 +1,8 @@
-import { Alert, Button, Checkbox, Form, Input, Space, Typography } from "antd";
-import { MessageOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { CheckCircle, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
-
-import { useThemeColors } from "../../hooks/use-theme-colors";
+import { Button } from "../ui/button";
 import { confirmXhsPhoneLogin, sendXhsPhoneCode } from "../../lib/api";
 import type { PlatformAccount } from "../../types";
-
-const { Text } = Typography;
 
 type PhoneLoginPanelProps = {
   accountType: "pc" | "creator";
@@ -16,7 +12,6 @@ type PhoneLoginPanelProps = {
 const PHONE_CODE_COOLDOWN_SECONDS = 120;
 
 export function PhoneLoginPanel({ accountType, onConfirmed }: PhoneLoginPanelProps) {
-  const c = useThemeColors();
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -29,26 +24,17 @@ export function PhoneLoginPanel({ accountType, onConfirmed }: PhoneLoginPanelPro
   const isCoolingDown = cooldownSeconds > 0;
 
   useEffect(() => {
-    if (cooldownSeconds <= 0) {
-      return;
-    }
-
+    if (cooldownSeconds <= 0) return;
     const timer = window.setTimeout(() => {
       setCooldownSeconds((current) => Math.max(0, current - 1));
     }, 1000);
-
     return () => window.clearTimeout(timer);
   }, [cooldownSeconds]);
 
   async function handleSendCode() {
     setError(null);
-    if (isCoolingDown) {
-      return;
-    }
-    if (phone.trim().length < 6) {
-      setError("请输入有效手机号。");
-      return;
-    }
+    if (isCoolingDown) return;
+    if (phone.trim().length < 6) { setError("请输入有效手机号。"); return; }
 
     setIsSending(true);
     try {
@@ -60,23 +46,14 @@ export function PhoneLoginPanel({ accountType, onConfirmed }: PhoneLoginPanelPro
       setSessionId(result.session_id);
       setStatusText("验证码已发送，请查看手机短信");
       setCooldownSeconds(PHONE_CODE_COOLDOWN_SECONDS);
-    } catch {
-      setError("验证码发送失败。");
-    } finally {
-      setIsSending(false);
-    }
+    } catch { setError("验证码发送失败。"); }
+    finally { setIsSending(false); }
   }
 
   async function handleConfirm() {
     setError(null);
-    if (!sessionId) {
-      setError("请先发送验证码。");
-      return;
-    }
-    if (code.trim().length < 4) {
-      setError("请输入短信验证码。");
-      return;
-    }
+    if (!sessionId) { setError("请先发送验证码。"); return; }
+    if (code.trim().length < 4) { setError("请输入短信验证码。"); return; }
 
     setIsConfirming(true);
     try {
@@ -87,68 +64,69 @@ export function PhoneLoginPanel({ accountType, onConfirmed }: PhoneLoginPanelPro
         code: code.trim(),
         sync_creator: accountType === "pc" ? syncCreator : undefined
       });
-      if (result.account) {
-        onConfirmed(result.account);
-      }
+      if (result.account) onConfirmed(result.account);
       setStatusText("账号绑定成功");
-    } catch {
-      setError("验证码校验失败或已过期。");
-    } finally {
-      setIsConfirming(false);
-    }
+    } catch { setError("验证码校验失败或已过期。"); }
+    finally { setIsConfirming(false); }
   }
 
   return (
-    <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-      <Text style={{ color: c.textSecondary }}>{statusText}</Text>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[color-mix(in_srgb,var(--primary)_6%,transparent)] border border-[color-mix(in_srgb,var(--primary)_12%,var(--border))]">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span className="text-xs text-muted-foreground">{statusText}</span>
+      </div>
 
-      <Form layout="vertical">
-        <Form.Item label={<span style={{ color: c.textPrimary }}>手机号</span>}>
-          <Input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="请输入手机号"
-            style={{ background: c.cardBg, borderColor: c.cardBorder, color: c.textPrimary }}
+      <div>
+        <label className="block text-sm font-medium mb-1.5 text-foreground">手机号</label>
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="请输入手机号"
+          className="flex h-11 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:border-primary/50 focus-visible:shadow-[0_0_0_3px_var(--primary-ring)] transition-all"
+        />
+      </div>
+
+      {accountType === "pc" && (
+        <label className="flex items-center gap-2.5 cursor-pointer px-1 py-1.5 rounded-lg hover:bg-surface-hover transition-colors">
+          <input
+            type="checkbox"
+            checked={syncCreator}
+            onChange={(e) => setSyncCreator(e.target.checked)}
+            className="w-4 h-4 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]/30 bg-[var(--surface)]"
           />
-        </Form.Item>
-      </Form>
+          <span className="text-sm text-muted-foreground">登录 PC 后同步 Creator 账号</span>
+        </label>
+      )}
 
-      {accountType === "pc" ? (
-        <Checkbox
-          checked={syncCreator}
-          onChange={(event) => setSyncCreator(event.target.checked)}
-          style={{ color: c.textPrimary }}
-        >
-          登录 PC 后同步 Creator 账号
-        </Checkbox>
-      ) : null}
-
-      <Button block icon={<MessageOutlined />} onClick={handleSendCode} disabled={isSending || isCoolingDown} loading={isSending}>
+      <Button onClick={handleSendCode} disabled={isSending || isCoolingDown} className="w-full" variant="outline">
+        <MessageSquare size={16} className="mr-1.5" />
         {isSending ? "发送中..." : isCoolingDown ? `${cooldownSeconds} 秒后重发` : "发送验证码"}
       </Button>
 
-      <Form layout="vertical">
-        <Form.Item label={<span style={{ color: c.textPrimary }}>验证码</span>}>
-          <Input
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="请输入验证码"
-            style={{ background: c.cardBg, borderColor: c.cardBorder, color: c.textPrimary }}
-          />
-        </Form.Item>
-      </Form>
+      <div>
+        <label className="block text-sm font-medium mb-1.5 text-foreground">验证码</label>
+        <input
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder="请输入验证码"
+          className="flex h-11 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:border-primary/50 focus-visible:shadow-[0_0_0_3px_var(--primary-ring)] transition-all"
+        />
+      </div>
 
-      {error ? <Alert type="error" message={error} showIcon /> : null}
+      {error && (
+        <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive text-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
 
-      <Button
-        type="primary"
-        block
-        icon={<CheckCircleOutlined />}
-        onClick={handleConfirm}
-        loading={isConfirming}
-      >
+      <Button onClick={handleConfirm} disabled={isConfirming} className="w-full">
+        <CheckCircle size={16} className="mr-1.5" />
         {isConfirming ? "验证中..." : "确认绑定"}
       </Button>
-    </Space>
+    </div>
   );
 }

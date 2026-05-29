@@ -1,13 +1,13 @@
-import { Button, Empty, Space, Typography } from "antd";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
-const { Text, Title } = Typography;
+import { Button } from "./button";
+import { cn } from "../../lib/utils";
 
 type Action = {
   label: string;
   onClick: () => void;
-  type?: "primary" | "default";
+  variant?: "default" | "outline" | "gradient";
   icon?: ReactNode;
 };
 
@@ -22,40 +22,47 @@ type GuideEmptyProps = {
 /** 带操作引导的空状态组件 */
 export function GuideEmpty({ icon, title, description, actions, tips }: GuideEmptyProps) {
   return (
-    <Empty
-      image={icon ? <div style={{ fontSize: 48, opacity: 0.4 }}>{icon}</div> : Empty.PRESENTED_IMAGE_SIMPLE}
-      description={
-        <div style={{ maxWidth: 400, margin: "0 auto" }}>
-          <Title level={4} style={{ margin: "16px 0 8px", fontWeight: 600 }}>
-            {title}
-          </Title>
-          <Text type="secondary" style={{ fontSize: 14, display: "block", marginBottom: 20, lineHeight: 1.6 }}>
-            {description}
-          </Text>
-          {actions && actions.length > 0 && (
-            <Space size={12} wrap style={{ justifyContent: "center" }}>
-              {actions.map((action, i) => (
-                <Button key={i} type={action.type || "primary"} icon={action.icon} onClick={action.onClick}>
-                  {action.label}
-                </Button>
-              ))}
-            </Space>
-          )}
-          {tips && tips.length > 0 && (
-            <div style={{ marginTop: 24, textAlign: "left", background: "rgba(22,104,220,0.04)", borderRadius: 8, padding: "12px 16px" }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6, fontWeight: 600 }}>
-                快速上手
-              </Text>
-              {tips.map((tip, i) => (
-                <Text key={i} type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4, lineHeight: 1.6 }}>
-                  {i + 1}. {tip}
-                </Text>
-              ))}
-            </div>
-          )}
+    <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
+      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--primary)]/10 to-[var(--purple)]/10 flex items-center justify-center mb-6 ring-1 ring-[var(--primary)]/5 shadow-sm">
+        {icon ? (
+          <span className="text-3xl opacity-60">{icon}</span>
+        ) : (
+          <svg className="w-8 h-8 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" /><path d="M12 8h.01" />
+          </svg>
+        )}
+      </div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-sm text-muted-foreground max-w-md mb-8 leading-relaxed">{description}</p>
+      {actions && actions.length > 0 && (
+        <div className="flex flex-wrap gap-3 justify-center">
+          {actions.map((action, i) => (
+            <Button key={i} variant={action.variant || "default"} onClick={action.onClick}>
+              {action.icon && <span className="mr-1.5">{action.icon}</span>}
+              {action.label}
+            </Button>
+          ))}
         </div>
-      }
-    />
+      )}
+      {tips && tips.length > 0 && (
+        <div className="mt-8 text-left max-w-sm w-full">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="section-title mb-0 text-[11px]">快速上手</span>
+          </div>
+          <div className="space-y-2">
+            {tips.map((tip, i) => (
+              <div key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-[11px] font-bold shrink-0 mt-0.5">
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed">{tip}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -68,7 +75,7 @@ export function AccountsEmpty() {
       icon="🔗"
       title="还没有绑定账号"
       description="添加小红书 PC 端或创作者平台的 Cookie 账号，开始运营管理。"
-      actions={[{ label: "添加账号", onClick: () => {} /* open drawer */ }]}
+      actions={[{ label: "添加账号", onClick: () => navigate("/platforms/xhs/accounts") }]}
       tips={["点击「添加账号」按钮", "选择 PC 或 Creator 账号类型", "用扫码或 Cookie 导入绑定"]}
     />
   );

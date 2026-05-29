@@ -1,27 +1,16 @@
-import {
-  CheckOutlined,
-  CommentOutlined,
-  DatabaseOutlined,
-  HeartOutlined,
-  LeftOutlined,
-  LinkOutlined,
-  LoadingOutlined,
-  PlayCircleOutlined,
-  PictureOutlined,
-  ReloadOutlined,
-  RightOutlined,
-  SearchOutlined,
-  StarOutlined,
-} from "@ant-design/icons";
-import { Alert, Badge, Button, Card, Col, Descriptions, Drawer, Empty, Input, Row, Select, Space, Spin, Tag, Typography } from "antd";
+import { Check, CheckCircle, ChevronLeft, ChevronRight, Clock, Database, Download, ExternalLink, FileText, Heart, Image, KeyRound, Link as LinkIcon, Loader2, MessageSquare, Play, Plus, RefreshCw, Search, Send, Settings, Shield, Star, Target, Trash2, User, X, Zap, BarChart3, Bot } from "lucide-react";
+import { Button } from "../../../components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Badge } from "../../../components/ui/badge";
+import { Spinner } from "../../../components/ui/skeletons";
+import { Dialog, DialogBody, DialogHeader, DialogTitle, DialogFooter } from "../../../components/ui/dialog";
 import { FormEvent, MouseEvent, useEffect, useMemo, useState } from "react";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
+import { HeaderControls } from "../../../components/layout/header-controls";
 import { Link } from "react-router-dom";
 
 import { fetchAccounts, fetchSavedNoteIds, fetchXhsNoteComments, fetchXhsNoteDetail, saveXhsNotesToLibrary, searchXhsNotes } from "../../../lib/api";
 import type { NoteComment, PlatformAccount, XhsSearchNote, XhsSearchOptions } from "../../../types";
-
-const { Title, Text, Paragraph } = Typography;
 
 const sortOptions = [{ value: 0, label: "综合排序" }, { value: 1, label: "最新" }, { value: 2, label: "最多点赞" }, { value: 3, label: "最多评论" }, { value: 4, label: "最多收藏" }];
 const noteTypeOptions = [{ value: 0, label: "不限类型" }, { value: 1, label: "视频笔记" }, { value: 2, label: "普通笔记" }];
@@ -98,7 +87,7 @@ export function XhsDiscoveryPage() {
   const [loadingCommentNoteIds, setLoadingCommentNoteIds] = useState<string[]>([]);
 
   const pcAccounts = useMemo(() => accounts.filter((a) => a.platform === "xhs" && a.sub_type === "pc"), [accounts]);
-  const pcAccountOptions = useMemo(() => pcAccounts.map((a) => ({ value: a.id, label: `${a.nickname || `PC ${a.id}`} · ${a.status}` })), [pcAccounts]);
+  const pcAccountOptions = useMemo(() => pcAccounts.map((a) => ({ value: String(a.id), label: `${a.nickname || `PC ${a.id}`} · ${a.status}` })), [pcAccounts]);
 
   async function loadAccounts() {
     setIsLoadingAccounts(true); setError(null);
@@ -197,180 +186,371 @@ export function XhsDiscoveryPage() {
 
   return (
     <div>
-      <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-        <Col><Title level={4} style={{ margin: 0 }}>笔记发现</Title><Text type="secondary">按关键词或链接查找笔记，查看详情、评论和原文，保存到内容库</Text></Col>
-        <Col><Button icon={<ReloadOutlined />} onClick={loadAccounts} loading={isLoadingAccounts}>刷新账号</Button></Col>
-      </Row>
+      <div className="bg-page-header-feigua -mx-8 -mt-8 px-8 pt-8 pb-2 mb-6 border-b border-border/50">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight mb-1.5">笔记发现</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">按关键词或链接查找笔记，查看详情、评论和原文，保存到内容库</p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <Button onClick={loadAccounts} disabled={isLoadingAccounts}>
+                {isLoadingAccounts ? <Spinner size="sm" className="mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                刷新账号
+              </Button>
+              <HeaderControls />
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Card style={{ marginBottom: 24 }}>
-        <form onSubmit={(e) => { e.preventDefault(); void runSearch(1, false); }}>
-          <Row gutter={[12, 12]}>
-            <Col span={6}><div style={{ marginBottom: 4 }}><Text type="secondary" style={{ fontSize: 12 }}>搜索账号</Text></div><Select value={selectedAccountId} onChange={setSelectedAccountId} placeholder="选择 PC 账号" style={{ width: "100%" }} options={pcAccountOptions} /></Col>
-            <Col span={6}><div style={{ marginBottom: 4 }}><Text type="secondary" style={{ fontSize: 12 }}>关键词</Text></div><Input.Search value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="低卡早餐、通勤穿搭" loading={isSearching} onSearch={() => void runSearch(1, false)} enterButton /></Col>
-            <Col span={3}><div style={{ marginBottom: 4 }}><Text type="secondary" style={{ fontSize: 12 }}>排序</Text></div><Select value={filters.sort_type_choice} onChange={(v) => setFilters((c) => ({ ...c, sort_type_choice: v }))} style={{ width: "100%" }} options={sortOptions} /></Col>
-            <Col span={3}><div style={{ marginBottom: 4 }}><Text type="secondary" style={{ fontSize: 12 }}>类型</Text></div><Select value={filters.note_type} onChange={(v) => setFilters((c) => ({ ...c, note_type: v }))} style={{ width: "100%" }} options={noteTypeOptions} /></Col>
-            <Col span={3}><div style={{ marginBottom: 4 }}><Text type="secondary" style={{ fontSize: 12 }}>时间</Text></div><Select value={filters.note_time} onChange={(v) => setFilters((c) => ({ ...c, note_time: v }))} style={{ width: "100%" }} options={noteTimeOptions} /></Col>
-            <Col span={3}><div style={{ marginBottom: 4 }}><Text type="secondary" style={{ fontSize: 12 }}>范围</Text></div><Select value={filters.note_range} onChange={(v) => setFilters((c) => ({ ...c, note_range: v }))} style={{ width: "100%" }} options={noteRangeOptions} /></Col>
-          </Row>
-          <Row gutter={12} style={{ marginTop: 12 }} align="bottom">
-            <Col span={6}><div style={{ marginBottom: 4 }}><Text type="secondary" style={{ fontSize: 12 }}>笔记 URL</Text></div><Input value={noteUrl} onChange={(e) => setNoteUrl(e.target.value)} placeholder="https://www.xiaohongshu.com/explore/..." /></Col>
-            <Col><Button icon={<SearchOutlined />} loading={isFetchingUrl} disabled={noPcAccount} onClick={handleFetchUrlDetail}>URL 直查</Button></Col>
-          </Row>
-        </form>
-        {error && <Alert message={error} type="error" showIcon style={{ marginTop: 12 }} closable onClose={() => setError(null)} />}
-        {noPcAccount && <Empty description="还没有可用的 PC 账号" style={{ marginTop: 24 }}><Link to="/platforms/xhs/accounts"><Button type="primary" icon={<LinkOutlined />}>去绑定账号</Button></Link></Empty>}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <form onSubmit={(e) => { e.preventDefault(); void runSearch(1, false); }}>
+            <div className="grid grid-cols-12 gap-3">
+              <div className="col-span-3">
+                <p className="text-xs text-muted-foreground mb-1">搜索账号</p>
+                <select
+                  value={selectedAccountId ?? ""}
+                  onChange={(e) => setSelectedAccountId(e.target.value ? Number(e.target.value) : null)}
+                  className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                >
+                  <option value="">选择 PC 账号</option>
+                  {pcAccountOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div className="col-span-3">
+                <p className="text-xs text-muted-foreground mb-1">关键词</p>
+                <div className="flex gap-2">
+                  <input
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="低卡早餐、通勤穿搭"
+                    className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                  />
+                  <Button type="submit" size="sm" disabled={isSearching}>
+                    {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground mb-1">排序</p>
+                <select
+                  value={filters.sort_type_choice}
+                  onChange={(e) => setFilters((c) => ({ ...c, sort_type_choice: Number(e.target.value) }))}
+                  className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                >
+                  {sortOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground mb-1">类型</p>
+                <select
+                  value={filters.note_type}
+                  onChange={(e) => setFilters((c) => ({ ...c, note_type: Number(e.target.value) }))}
+                  className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                >
+                  {noteTypeOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground mb-1">时间</p>
+                <select
+                  value={filters.note_time}
+                  onChange={(e) => setFilters((c) => ({ ...c, note_time: Number(e.target.value) }))}
+                  className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                >
+                  {noteTimeOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-12 gap-3 mt-3 items-end">
+              <div className="col-span-6">
+                <p className="text-xs text-muted-foreground mb-1">笔记 URL</p>
+                <input
+                  value={noteUrl}
+                  onChange={(e) => setNoteUrl(e.target.value)}
+                  placeholder="https://www.xiaohongshu.com/explore/..."
+                  className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                />
+              </div>
+              <div className="col-span-2">
+                <Button type="button" onClick={handleFetchUrlDetail} disabled={noPcAccount || isFetchingUrl}>
+                  {isFetchingUrl ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+                  URL 直查
+                </Button>
+              </div>
+            </div>
+          </form>
+          {error && (
+            <div className="mt-3 p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm flex items-center gap-2">
+              <span className="flex-1">{error}</span>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 shrink-0">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+          {noPcAccount && (
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center mt-6">
+              <h3 className="text-lg font-semibold mb-2">还没有可用的 PC 账号</h3>
+              <Link to="/platforms/xhs/accounts"><Button><LinkIcon className="h-4 w-4 mr-2" />去绑定账号</Button></Link>
+            </div>
+          )}
+        </CardContent>
       </Card>
 
-      <Card title={<Space><Title level={5} style={{ margin: 0 }}>{searchedKeyword ? `"${searchedKeyword}" 的搜索结果` : "搜索结果"}</Title><Tag>{notes.length} 篇</Tag></Space>}>
-        {notes.length === 0 ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={searchedKeyword ? "这次搜索没有返回笔记。" : "输入关键词后，搜索结果会以笔记卡片显示在这里。"} />
-        ) : (
-          <>
-            <Row gutter={[16, 16]}>
-              {notes.map((note) => {
-                const coverUrl = getCoverUrl(note);
-                const originalUrl = getPreviewNoteUrl(note);
-                const kind = getNoteKindLabel(note);
-                return (
-                  <Col xs={12} sm={8} md={6} lg={4} xl={4} key={`${note.note_id}-${note.title}`}>
-                    <Card hoverable size="small" style={{ overflow: "hidden" }} onClick={() => void openDetail(note)}
-                      cover={
-                        <div style={{ position: "relative", background: c.cardBorder2 }}>
+      <Card className="mb-6">
+        <CardHeader className="p-6 pb-3">
+          <div className="flex items-center gap-3">
+            <h5 className="text-base font-semibold m-0">{searchedKeyword ? `"${searchedKeyword}" 的搜索结果` : "搜索结果"}</h5>
+            <Badge variant="secondary">{notes.length} 篇</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6 pt-3">
+          {notes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-sm text-muted-foreground">{searchedKeyword ? "这次搜索没有返回笔记。" : "输入关键词后，搜索结果会以笔记卡片显示在这里。"}</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {notes.map((note) => {
+                  const coverUrl = getCoverUrl(note);
+                  const originalUrl = getPreviewNoteUrl(note);
+                  const kind = getNoteKindLabel(note);
+                  return (
+                    <div className="col-span-1" key={`${note.note_id}-${note.title}`}>
+                      <Card className="overflow-hidden cursor-pointer" onClick={() => void openDetail(note)}>
+                        <div className="relative" style={{ background: c.cardBorder2 }}>
                           {coverUrl
-                            ? <img src={coverUrl} alt={note.title || "封面"} referrerPolicy="no-referrer" style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block" }} />
-                            : <div style={{ width: "100%", aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center", color: c.textMuted2, fontSize: 28 }}><PictureOutlined /></div>}
-                          <Tag color={kind === "视频" ? "purple" : "blue"} style={{ position: "absolute", top: 8, left: 8 }} icon={kind === "视频" ? <PlayCircleOutlined /> : <PictureOutlined />}>{kind}</Tag>
+                            ? <img src={coverUrl} alt={note.title || "封面"} referrerPolicy="no-referrer" className="w-full aspect-square object-cover block" />
+                            : <div className="w-full aspect-square flex items-center justify-center" style={{ color: c.textMuted2, fontSize: 28 }}><Image className="h-8 w-8" /></div>}
+                          <Badge variant={kind === "视频" ? "warning" : "default"} className="absolute top-2 left-2">
+                            {kind === "视频" ? <Play className="h-3 w-3 mr-1" /> : <Image className="h-3 w-3 mr-1" />}{kind}
+                          </Badge>
                         </div>
-                      }>
-                      <Card.Meta title={<Text ellipsis style={{ fontSize: 13 }}>{note.title || "未命名笔记"}</Text>} description={<><Text type="secondary" style={{ fontSize: 12 }}>{note.author_name || "未知作者"}</Text>{formatNoteTime(note) && <Text type="secondary" style={{ fontSize: 11, marginLeft: 8 }}>{formatNoteTime(note)}</Text>}</>} />
-                      <Space size={12} style={{ marginTop: 8, fontSize: 12, color: c.textTertiary }}>
-                        <span><HeartOutlined /> {formatMetric(note.likes)}</span>
-                        <span><StarOutlined /> {formatMetric(note.collects)}</span>
-                        <span><CommentOutlined /> {formatMetric(note.comments)}</span>
-                      </Space>
-                      <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }} onClick={stopCardClick}>
-                        <Button size="small" type={savedNoteIds.includes(note.note_id) ? "default" : "primary"} ghost={!savedNoteIds.includes(note.note_id)} icon={savedNoteIds.includes(note.note_id) ? <CheckOutlined /> : <DatabaseOutlined />} loading={savingNoteIds.includes(note.note_id)} disabled={savedNoteIds.includes(note.note_id)} onClick={() => void handleSaveNote(note)}>
-                          {savedNoteIds.includes(note.note_id) ? "已保存" : "保存"}
-                        </Button>
-                        <Button size="small" icon={<CommentOutlined />} loading={loadingCommentNoteIds.includes(note.note_id)} onClick={() => void handlePreviewComments(note)}>
-                          {commentPreviewByNoteId[note.note_id] ? "收起" : "评论"}
-                        </Button>
-                        {originalUrl && <Button size="small" icon={<LinkOutlined />} href={originalUrl} target="_blank" rel="noreferrer" onClick={stopCardClick}>原文</Button>}
-                      </div>
-                      {commentPreviewErrors[note.note_id] && <Alert message={commentPreviewErrors[note.note_id]} type="error" style={{ marginTop: 8, fontSize: 12 }} showIcon />}
-                      {commentPreviewByNoteId[note.note_id] && (
-                        <div style={{ marginTop: 8, borderTop: "1px solid #303030", paddingTop: 8 }} onClick={stopCardClick}>
-                          {commentPreviewByNoteId[note.note_id].length === 0 ? <Text type="secondary" style={{ fontSize: 12 }}>暂无评论</Text> : null}
-                          {commentPreviewByNoteId[note.note_id].filter((cm) => !cm.parent_comment_id).slice(0, 4).map((cm) => (
-                            <div key={cm.comment_id} style={{ marginBottom: 6, fontSize: 12 }}>
-                              <Text strong style={{ fontSize: 12 }}>{cm.user_name}</Text> <Text type="secondary" style={{ fontSize: 11 }}>{cm.created_at_remote} · {cm.like_count} likes</Text>
-                              <div style={{ color: c.textSecondary }}>{cm.content}</div>
-                              {getChildComments(note.note_id, cm.comment_id).map((r) => (
-                                <div key={r.comment_id} style={{ marginLeft: 16, marginTop: 4 }}>
-                                  <Text strong style={{ fontSize: 11 }}>{r.user_name}</Text> <Text type="secondary" style={{ fontSize: 11 }}>{r.like_count} likes</Text>
-                                  <div style={{ color: c.textSecondary, fontSize: 12 }}>{r.content}</div>
+                        <CardContent className="p-3">
+                          <p className="text-sm truncate">{note.title || "未命名笔记"}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">{note.author_name || "未知作者"}</span>
+                            {formatNoteTime(note) && <span className="text-xs text-muted-foreground">{formatNoteTime(note)}</span>}
+                          </div>
+                          <div className="flex gap-3 mt-2 text-xs" style={{ color: c.textTertiary }}>
+                            <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> {formatMetric(note.likes)}</span>
+                            <span className="flex items-center gap-1"><Star className="h-3 w-3" /> {formatMetric(note.collects)}</span>
+                            <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {formatMetric(note.comments)}</span>
+                          </div>
+                          <div className="mt-2 flex gap-1.5 flex-wrap" onClick={stopCardClick}>
+                            <Button size="sm" variant={savedNoteIds.includes(note.note_id) ? "outline" : "default"} disabled={savedNoteIds.includes(note.note_id)} onClick={() => void handleSaveNote(note)}>
+                              {savingNoteIds.includes(note.note_id) ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : savedNoteIds.includes(note.note_id) ? <Check className="h-3 w-3 mr-1" /> : <Database className="h-3 w-3 mr-1" />}
+                              {savedNoteIds.includes(note.note_id) ? "已保存" : "保存"}
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => void handlePreviewComments(note)}>
+                              {loadingCommentNoteIds.includes(note.note_id) ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <MessageSquare className="h-3 w-3 mr-1" />}
+                              {commentPreviewByNoteId[note.note_id] ? "收起" : "评论"}
+                            </Button>
+                            {originalUrl && (
+                              <a href={originalUrl} target="_blank" rel="noreferrer" onClick={stopCardClick}>
+                                <Button size="sm" variant="outline">
+                                  <LinkIcon className="h-3 w-3 mr-1" />原文
+                                </Button>
+                              </a>
+                            )}
+                          </div>
+                          {commentPreviewErrors[note.note_id] && (
+                            <div className="mt-2 p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-400">{commentPreviewErrors[note.note_id]}</div>
+                          )}
+                          {commentPreviewByNoteId[note.note_id] && (
+                            <div className="mt-2 pt-2 border-t border-border" onClick={stopCardClick}>
+                              {commentPreviewByNoteId[note.note_id].length === 0 ? <span className="text-xs text-muted-foreground">暂无评论</span> : null}
+                              {commentPreviewByNoteId[note.note_id].filter((cm) => !cm.parent_comment_id).slice(0, 4).map((cm) => (
+                                <div key={cm.comment_id} className="mb-1.5 text-xs">
+                                  <span className="font-semibold text-xs">{cm.user_name}</span>{' '}
+                                  <span className="text-muted-foreground text-[11px]">{cm.created_at_remote} · {cm.like_count} likes</span>
+                                  <div style={{ color: c.textSecondary }}>{cm.content}</div>
+                                  {getChildComments(note.note_id, cm.comment_id).map((r) => (
+                                    <div key={r.comment_id} className="ml-4 mt-1">
+                                      <span className="font-semibold text-[11px]">{r.user_name}</span>{' '}
+                                      <span className="text-muted-foreground text-[11px]">{r.like_count} likes</span>
+                                      <div style={{ color: c.textSecondary, fontSize: 12 }}>{r.content}</div>
+                                    </div>
+                                  ))}
                                 </div>
                               ))}
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </Card>
-                  </Col>
-                );
-              })}
-            </Row>
-            <div style={{ textAlign: "center", marginTop: 24 }}>
-              <Button onClick={handleLoadMore} disabled={!hasMore || isLoadingMore} loading={isLoadingMore}>{hasMore ? "加载更多" : "没有更多了"}</Button>
-            </div>
-          </>
-        )}
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="text-center mt-6">
+                <Button onClick={handleLoadMore} disabled={!hasMore || isLoadingMore}>
+                  {isLoadingMore && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {hasMore ? "加载更多" : "没有更多了"}
+                </Button>
+              </div>
+            </>
+          )}
+        </CardContent>
       </Card>
 
-      <Drawer title={selectedNote?.title || "笔记详情"} open={!!selectedNote} onClose={closeDetail} width={640} styles={{ body: { background: c.cardBg2 } }}>
+      <Dialog open={!!selectedNote} onClose={closeDetail} width={640}>
         {selectedNote && (
-          <div>
-            {isFetchingDetail && <Spin style={{ display: "block", textAlign: "center", margin: "16px 0" }} />}
-            {detailError && <Alert message={detailError} type="warning" showIcon style={{ marginBottom: 12 }} />}
-            {selVideoUrl && getNoteKindLabel(selectedNote) === "视频" ? (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ position: "relative", background: c.cardBorder2, borderRadius: 8, overflow: "hidden" }}>
-                  {selImgUrls.length ? <img src={selImgUrls[0]} alt="视频封面" referrerPolicy="no-referrer" style={{ width: "100%", maxHeight: 400, objectFit: "contain", display: "block" }} /> : <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}><PlayCircleOutlined style={{ fontSize: 40, color: c.textMuted }} /></div>}
-                  <Tag color="purple" style={{ position: "absolute", top: 8, left: 8 }}><PlayCircleOutlined /> 视频封面</Tag>
+          <>
+            <DialogHeader onClose={closeDetail}>
+              <DialogTitle>{selectedNote?.title || "笔记详情"}</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <div>
+                {isFetchingDetail && <div className="text-center py-4"><Spinner className="mx-auto" /></div>}
+                {detailError && (
+                  <div className="mb-3 p-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400 text-sm">{detailError}</div>
+                )}
+                {selVideoUrl && getNoteKindLabel(selectedNote) === "视频" ? (
+                  <div className="mb-4">
+                    <div className="relative rounded-lg overflow-hidden" style={{ background: c.cardBorder2 }}>
+                      {selImgUrls.length ? <img src={selImgUrls[0]} alt="视频封面" referrerPolicy="no-referrer" className="w-full max-h-[400px] object-contain block" /> : <div className="h-[200px] flex items-center justify-center"><Play className="h-10 w-10" style={{ color: c.textMuted }} /></div>}
+                      <Badge variant="warning" className="absolute top-2 left-2"><Play className="h-3 w-3 mr-1" /> 视频封面</Badge>
+                    </div>
+                    <a href={selVideoUrl} target="_blank" rel="noreferrer" className="block mt-2">
+                      <Button className="w-full"><LinkIcon className="h-4 w-4 mr-2" />打开视频</Button>
+                    </a>
+                  </div>
+                ) : selImgUrls.length ? (
+                  <div className="mb-4">
+                    <div className="relative rounded-lg overflow-hidden text-center" style={{ background: c.cardBorder2 }}>
+                      <img src={selImgUrls[selMediaIdx]} alt="笔记图片" referrerPolicy="no-referrer" className="max-w-full max-h-[400px] object-contain" />
+                      {selImgUrls.length > 1 && (
+                        <>
+                          <button
+                            className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full border border-input bg-background/80 flex items-center justify-center hover:bg-accent"
+                            onClick={() => setDetailMediaIndex((c) => (c - 1 + selImgUrls.length) % selImgUrls.length)}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </button>
+                          <button
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full border border-input bg-background/80 flex items-center justify-center hover:bg-accent"
+                            onClick={() => setDetailMediaIndex((c) => (c + 1) % selImgUrls.length)}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </button>
+                          <Badge className="absolute bottom-2 right-2">{selMediaIdx + 1}/{selImgUrls.length}</Badge>
+                        </>
+                      )}
+                    </div>
+                    {selImgUrls.length > 1 && (
+                      <div className="flex gap-1 mt-2 overflow-x-auto">
+                        {selImgUrls.map((url, i) => (
+                          <div key={url} onClick={() => setDetailMediaIndex(i)}
+                            className="w-12 h-12 rounded overflow-hidden cursor-pointer shrink-0"
+                            style={{ border: i === selMediaIdx ? "2px solid #1668dc" : "2px solid transparent" }}>
+                            <img src={url} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                <div className="mb-4 space-y-2 text-sm">
+                  <div className="flex">
+                    <span className="text-muted-foreground w-16 shrink-0">作者</span>
+                    <span>
+                      {selectedNote.author_id ? (
+                        <a href={`https://www.xiaohongshu.com/user/profile/${selectedNote.author_id}`} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                          {selectedNote.author_name || "-"}
+                        </a>
+                      ) : (selectedNote.author_name || "-")}
+                    </span>
+                  </div>
+                  <div className="flex">
+                    <span className="text-muted-foreground w-16 shrink-0">互动</span>
+                    <span>赞 {formatMetric(selectedNote.likes)} · 藏 {formatMetric(selectedNote.collects)} · 评 {formatMetric(selectedNote.comments)}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="text-muted-foreground w-16 shrink-0">笔记 ID</span>
+                    <span>{selectedNote.note_id || "-"}</span>
+                  </div>
+                  {formatNoteTime(selectedNote) && (
+                    <div className="flex">
+                      <span className="text-muted-foreground w-16 shrink-0">发布时间</span>
+                      <span>{formatNoteTime(selectedNote)}</span>
+                    </div>
+                  )}
+                  <div className="flex">
+                    <span className="text-muted-foreground w-16 shrink-0">作品链接</span>
+                    <a href={getPreviewNoteUrl(selectedNote)} target="_blank" rel="noreferrer" className="text-xs break-all text-primary hover:underline">{getPreviewNoteUrl(selectedNote) || "-"}</a>
+                  </div>
                 </div>
-                <Button type="primary" icon={<LinkOutlined />} href={selVideoUrl} target="_blank" rel="noreferrer" style={{ marginTop: 8 }} block>打开视频</Button>
-              </div>
-            ) : selImgUrls.length ? (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ position: "relative", background: c.cardBorder2, borderRadius: 8, overflow: "hidden", textAlign: "center" }}>
-                  <img src={selImgUrls[selMediaIdx]} alt="笔记图片" referrerPolicy="no-referrer" style={{ maxWidth: "100%", maxHeight: 400, objectFit: "contain" }} />
-                  {selImgUrls.length > 1 && (
-                    <>
-                      <Button shape="circle" icon={<LeftOutlined />} size="small" style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)" }} onClick={() => setDetailMediaIndex((c) => (c - 1 + selImgUrls.length) % selImgUrls.length)} />
-                      <Button shape="circle" icon={<RightOutlined />} size="small" style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)" }} onClick={() => setDetailMediaIndex((c) => (c + 1) % selImgUrls.length)} />
-                      <Tag style={{ position: "absolute", bottom: 8, right: 8 }}>{selMediaIdx + 1}/{selImgUrls.length}</Tag>
-                    </>
+
+                {selectedNote.tags?.length ? (
+                  <div className="mb-3 flex flex-wrap gap-1">
+                    {selectedNote.tags.map((t) => <Badge key={t} variant="secondary">#{t}</Badge>)}
+                  </div>
+                ) : null}
+
+                <div className="mb-4">
+                  <p className="font-semibold text-sm">正文</p>
+                  <p className="mt-1 text-sm" style={{ color: c.textSecondary }}>{selectedNote.content || "暂无正文。"}</p>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Button
+                    variant={savedNoteIds.includes(selectedNote.note_id) ? "outline" : "default"}
+                    disabled={savedNoteIds.includes(selectedNote.note_id)}
+                    onClick={() => void handleSaveNote(selectedNote)}
+                  >
+                    {savingNoteIds.includes(selectedNote.note_id) ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : savedNoteIds.includes(selectedNote.note_id) ? <Check className="h-4 w-4 mr-2" /> : <Database className="h-4 w-4 mr-2" />}
+                    {savedNoteIds.includes(selectedNote.note_id) ? "已保存" : "保存到内容库"}
+                  </Button>
+                  <Button variant="outline" onClick={() => void handlePreviewComments(selectedNote)}>
+                    <MessageSquare className="h-4 w-4 mr-2" />{commentPreviewByNoteId[selectedNote.note_id] ? "收起评论" : "查看评论"}
+                  </Button>
+                  {getPreviewNoteUrl(selectedNote) && (
+                    <a href={getPreviewNoteUrl(selectedNote)} target="_blank" rel="noreferrer">
+                      <Button><LinkIcon className="h-4 w-4 mr-2" />打开原文</Button>
+                    </a>
                   )}
                 </div>
-                {selImgUrls.length > 1 && (
-                  <Space size={4} style={{ marginTop: 8, overflowX: "auto" }}>
-                    {selImgUrls.map((url, i) => (
-                      <div key={url} onClick={() => setDetailMediaIndex(i)} style={{ width: 48, height: 48, borderRadius: 4, overflow: "hidden", cursor: "pointer", border: i === selMediaIdx ? "2px solid #1668dc" : "2px solid transparent", flexShrink: 0 }}>
-                        <img src={url} alt="" referrerPolicy="no-referrer" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      </div>
-                    ))}
-                  </Space>
+
+                {commentPreviewErrors[selectedNote.note_id] && (
+                  <div className="mb-3 p-2 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm">{commentPreviewErrors[selectedNote.note_id]}</div>
+                )}
+                {commentPreviewByNoteId[selectedNote.note_id] && (
+                  <Card size="small" className="mb-3" style={{ background: c.cardBg }}>
+                    <CardHeader className="p-4 pb-2">
+                      <CardTitle className="text-sm">评论预览</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-2">
+                      {commentPreviewByNoteId[selectedNote.note_id].length === 0 ? <span className="text-sm text-muted-foreground">暂无评论</span> : null}
+                      {commentPreviewByNoteId[selectedNote.note_id].filter((cm) => !cm.parent_comment_id).map((cm) => (
+                        <div key={cm.comment_id} className="mb-3 pb-2 border-b border-border/50">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm">{cm.user_name}</span>
+                            <span className="text-muted-foreground text-[11px]">{cm.created_at_remote} · {cm.like_count} likes</span>
+                          </div>
+                          <div className="text-sm mt-0.5" style={{ color: c.textSecondary }}>{cm.content}</div>
+                          {getChildComments(selectedNote.note_id, cm.comment_id).map((r) => (
+                            <div key={r.comment_id} className="ml-5 mt-1.5 pl-2 border-l-2" style={{ borderColor: "#303030" }}>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-xs">{r.user_name}</span>
+                                <span className="text-muted-foreground text-[11px]">{r.like_count} likes</span>
+                              </div>
+                              <div className="text-xs mt-0.5" style={{ color: c.textSecondary }}>{r.content}</div>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
                 )}
               </div>
-            ) : null}
-
-            <Descriptions column={1} size="small" style={{ marginBottom: 16 }}>
-              <Descriptions.Item label="作者">{selectedNote.author_id ? <Typography.Link href={`https://www.xiaohongshu.com/user/profile/${selectedNote.author_id}`} target="_blank" rel="noreferrer">{selectedNote.author_name || "-"}</Typography.Link> : (selectedNote.author_name || "-")}</Descriptions.Item>
-              <Descriptions.Item label="互动">赞 {formatMetric(selectedNote.likes)} · 藏 {formatMetric(selectedNote.collects)} · 评 {formatMetric(selectedNote.comments)}</Descriptions.Item>
-              <Descriptions.Item label="笔记 ID">{selectedNote.note_id || "-"}</Descriptions.Item>
-              {formatNoteTime(selectedNote) && <Descriptions.Item label="发布时间">{formatNoteTime(selectedNote)}</Descriptions.Item>}
-              <Descriptions.Item label="作品链接"><Typography.Link href={getPreviewNoteUrl(selectedNote)} target="_blank" rel="noreferrer" style={{ fontSize: 12, wordBreak: "break-all" }}>{getPreviewNoteUrl(selectedNote) || "-"}</Typography.Link></Descriptions.Item>
-            </Descriptions>
-
-            {selectedNote.tags?.length ? <div style={{ marginBottom: 12 }}>{selectedNote.tags.map((t) => <Tag key={t} color="blue">#{t}</Tag>)}</div> : null}
-
-            <div style={{ marginBottom: 16 }}>
-              <Text strong>正文</Text>
-              <Paragraph style={{ marginTop: 4, color: c.textSecondary }}>{selectedNote.content || "暂无正文。"}</Paragraph>
-            </div>
-
-            <Space wrap style={{ marginBottom: 16 }}>
-              <Button
-                icon={savedNoteIds.includes(selectedNote.note_id) ? <CheckOutlined /> : <DatabaseOutlined />}
-                onClick={() => void handleSaveNote(selectedNote)}
-                loading={savingNoteIds.includes(selectedNote.note_id)}
-                disabled={savedNoteIds.includes(selectedNote.note_id)}
-              >{savedNoteIds.includes(selectedNote.note_id) ? "已保存" : "保存到内容库"}</Button>
-              <Button icon={<CommentOutlined />} onClick={() => void handlePreviewComments(selectedNote)}>{commentPreviewByNoteId[selectedNote.note_id] ? "收起评论" : "查看评论"}</Button>
-              {getPreviewNoteUrl(selectedNote) && <Button type="primary" icon={<LinkOutlined />} href={getPreviewNoteUrl(selectedNote)} target="_blank" rel="noreferrer">打开原文</Button>}
-            </Space>
-
-            {commentPreviewErrors[selectedNote.note_id] && <Alert message={commentPreviewErrors[selectedNote.note_id]} type="error" showIcon style={{ marginBottom: 12 }} />}
-            {commentPreviewByNoteId[selectedNote.note_id] && (
-              <Card size="small" title="评论预览" style={{ background: c.cardBg }}>
-                {commentPreviewByNoteId[selectedNote.note_id].length === 0 ? <Text type="secondary">暂无评论</Text> : null}
-                {commentPreviewByNoteId[selectedNote.note_id].filter((cm) => !cm.parent_comment_id).map((cm) => (
-                  <div key={cm.comment_id} style={{ marginBottom: 12, paddingBottom: 8, borderBottom: "1px solid #303030" }}>
-                    <Space><Text strong style={{ fontSize: 13 }}>{cm.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{cm.created_at_remote} · {cm.like_count} likes</Text></Space>
-                    <div style={{ color: c.textSecondary, fontSize: 13, marginTop: 2 }}>{cm.content}</div>
-                    {getChildComments(selectedNote.note_id, cm.comment_id).map((r) => (
-                      <div key={r.comment_id} style={{ marginLeft: 20, marginTop: 6, paddingLeft: 8, borderLeft: "2px solid #303030" }}>
-                        <Space><Text strong style={{ fontSize: 12 }}>{r.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{r.like_count} likes</Text></Space>
-                        <div style={{ color: c.textSecondary, fontSize: 12 }}>{r.content}</div>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </Card>
-            )}
-          </div>
+            </DialogBody>
+          </>
         )}
-      </Drawer>
+      </Dialog>
     </div>
   );
 }

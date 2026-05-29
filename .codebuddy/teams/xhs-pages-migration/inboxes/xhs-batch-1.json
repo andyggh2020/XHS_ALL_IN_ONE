@@ -1,0 +1,20 @@
+[
+  {
+    "id": "msg-1779942396095-cyirzq",
+    "from": "team-lead",
+    "to": "xhs-batch-1",
+    "type": "message",
+    "content": "What is your progress? Which files have you completed?",
+    "timestamp": "2026-05-28T04:26:36.095Z",
+    "read": true
+  },
+  {
+    "id": "msg-1779942405685-q35k2b",
+    "from": "team-lead",
+    "to": "xhs-batch-1",
+    "type": "message",
+    "content": "Please report your current status. Which files have you completed and written back?",
+    "timestamp": "2026-05-28T04:26:45.685Z",
+    "read": true
+  }
+]

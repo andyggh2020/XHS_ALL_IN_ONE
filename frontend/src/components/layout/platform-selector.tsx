@@ -1,101 +1,73 @@
-import { ArrowRightOutlined, ClockCircleOutlined } from "@ant-design/icons";
-import { Card, Col, Row, Tag, Typography } from "antd";
-import { useNavigate } from "react-router-dom";
-
+import { ArrowRight } from "lucide-react";
 import { useThemeColors } from "../../hooks/use-theme-colors";
-import type { PlatformMeta } from "../../types";
 
-const { Text, Title } = Typography;
+type PlatformItem = {
+  id: string;
+  name: string;
+  icon: string;
+  status: "active" | "coming";
+  color: string;
+};
 
-export function PlatformSelector({ platforms }: { platforms: PlatformMeta[] }) {
+const platforms: PlatformItem[] = [
+  { id: "xhs", name: "小红书", icon: "📕", status: "active", color: "#ff2442" },
+  { id: "douyin", name: "抖音", icon: "🎵", status: "coming", color: "#000000" },
+  { id: "bilibili", name: "Bilibili", icon: "📺", status: "coming", color: "#fb7299" },
+  { id: "weibo", name: "微博", icon: "📱", status: "coming", color: "#ff8200" },
+  { id: "zhihu", name: "知乎", icon: "💡", status: "coming", color: "#0084ff" },
+  { id: "ks", name: "快手", icon: "🎬", status: "coming", color: "#ff6f00" },
+];
+
+type Props = {
+  onSelect: (id: string) => void;
+};
+
+export function PlatformSelector({ onSelect }: Props) {
   const c = useThemeColors();
-  const navigate = useNavigate();
 
   return (
-    <Row gutter={[20, 20]}>
-      {platforms.map((platform) => {
-        const href = platform.enabled
-          ? `/platforms/${platform.id}/dashboard`
-          : `/platforms/${platform.id}`;
-
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {platforms.map((p) => {
+        const isActive = p.status === "active";
         return (
-          <Col key={platform.id} xs={24} sm={12} md={8} lg={8}>
-            <Card
-              hoverable
-              style={{
-                borderColor: c.cardBorder,
-                cursor: "pointer",
-              }}
-              styles={{
-                body: { padding: "20px 24px" },
-              }}
-              onClick={() => navigate(href)}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 16,
-                }}
-              >
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
-                    background: platform.accent_color,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 800,
-                    fontSize: 20,
-                    color: "#fff",
-                    flexShrink: 0,
-                  }}
-                >
-                  {platform.name_cn.slice(0, 1)}
-                </div>
-
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <Title level={5} style={{ margin: 0, fontSize: 16 }}>
-                    {platform.name_cn}
-                  </Title>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    {platform.name_en}
-                  </Text>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <Tag
-                    color={platform.enabled ? "blue" : "default"}
-                    style={{
-                      margin: 0,
-                      borderRadius: 4,
-                    }}
-                  >
-                    {platform.enabled ? "Active" : "Coming Soon"}
-                  </Tag>
-                  {platform.enabled ? (
-                    <ArrowRightOutlined
-                      style={{ color: c.textTertiary, fontSize: 14 }}
-                    />
-                  ) : (
-                    <ClockCircleOutlined
-                      style={{ color: c.textMuted, fontSize: 14 }}
-                    />
-                  )}
+          <div
+            key={p.id}
+            onClick={() => isActive && onSelect(p.id)}
+            className="group relative rounded-2xl border p-6 transition-all duration-300 cursor-pointer hover:shadow-lg hover:-translate-y-0.5"
+            style={{
+              background: c.cardBg,
+              borderColor: isActive ? c.cardBorder : "rgba(255,255,255,0.06)",
+              opacity: isActive ? 1 : 0.5,
+            }}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">{p.icon}</span>
+                <div>
+                  <h3 className="text-base font-semibold" style={{ color: c.textPrimary }}>{p.name}</h3>
+                  {!isActive && <span className="text-xs text-muted-foreground">即将开放</span>}
                 </div>
               </div>
-            </Card>
-          </Col>
+              {isActive && (
+                <div className="p-1.5 rounded-lg bg-primary/10 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ArrowRight size={16} />
+                </div>
+              )}
+            </div>
+            {isActive && (
+              <div className="mt-4">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
+                  style={{ background: `${p.color}15`, color: p.color }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: p.color }} />
+                  已接入
+                </span>
+              </div>
+            )}
+          </div>
         );
       })}
-    </Row>
+    </div>
   );
 }

@@ -1,8 +1,7 @@
-import { Alert, Button, Checkbox, Form, Input, Space } from "antd";
-import { ImportOutlined } from "@ant-design/icons";
+import { Download } from "lucide-react";
 import { useState } from "react";
-
-import { useThemeColors } from "../../hooks/use-theme-colors";
+import { Button } from "../ui/button";
+import { useToast } from "../ui/toast";
 import { importXhsCookieAccount } from "../../lib/api";
 import type { PlatformAccount } from "../../types";
 
@@ -12,7 +11,7 @@ type CookieImportPanelProps = {
 };
 
 export function CookieImportPanel({ accountType, onImported }: CookieImportPanelProps) {
-  const c = useThemeColors();
+  const toast = useToast();
   const [cookieString, setCookieString] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,40 +41,44 @@ export function CookieImportPanel({ accountType, onImported }: CookieImportPanel
   }
 
   return (
-    <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-      <Form layout="vertical">
-        <Form.Item label={<span style={{ color: c.textPrimary }}>Cookie 字符串</span>}>
-          <Input.TextArea
-            value={cookieString}
-            onChange={(e) => setCookieString(e.target.value)}
-            placeholder="a1=...; web_session=...;"
-            rows={6}
-            style={{ background: c.cardBg, borderColor: c.cardBorder, color: c.textPrimary }}
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium mb-1.5 text-foreground">Cookie 字符串</label>
+        <textarea
+          value={cookieString}
+          onChange={(e) => setCookieString(e.target.value)}
+          placeholder="a1=...; web_session=...;"
+          rows={6}
+          className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus-visible:outline-none focus-visible:border-primary/50 focus-visible:shadow-[0_0_0_3px_var(--primary-ring)] transition-all placeholder:text-muted-foreground/60 resize-none"
+        />
+        <p className="text-xs text-muted-foreground mt-1.5">从浏览器开发者工具中复制完整的 Cookie 字符串</p>
+      </div>
+
+      {accountType === "pc" && (
+        <label className="flex items-center gap-2.5 cursor-pointer px-1 py-1.5 rounded-lg hover:bg-surface-hover transition-colors">
+          <input
+            type="checkbox"
+            checked={syncCreator}
+            onChange={(e) => setSyncCreator(e.target.checked)}
+            className="w-4 h-4 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]/30 bg-[var(--surface)]"
           />
-        </Form.Item>
-      </Form>
+          <span className="text-sm text-muted-foreground">导入 PC Cookie 后同步 Creator 账号</span>
+        </label>
+      )}
 
-      {accountType === "pc" ? (
-        <Checkbox
-          checked={syncCreator}
-          onChange={(event) => setSyncCreator(event.target.checked)}
-          style={{ color: c.textPrimary }}
-        >
-          导入 PC Cookie 后同步 Creator 账号
-        </Checkbox>
-      ) : null}
+      {error && (
+        <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive text-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
 
-      {error ? <Alert type="error" message={error} showIcon /> : null}
-
-      <Button
-        type="primary"
-        block
-        icon={<ImportOutlined />}
-        onClick={handleImport}
-        loading={isSubmitting}
-      >
+      <Button onClick={handleImport} disabled={isSubmitting} className="w-full">
+        <Download size={16} className="mr-1.5" />
         {isSubmitting ? "校验中..." : "校验并导入"}
       </Button>
-    </Space>
+    </div>
   );
 }

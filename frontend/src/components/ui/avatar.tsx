@@ -5,13 +5,17 @@ const Avatar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElem
   ({ className, src, alt, fallback, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("relative flex h-9 w-9 shrink-0 overflow-hidden rounded-full", className)}
+      className={cn(
+        "relative flex h-9 w-9 shrink-0 overflow-hidden rounded-full",
+        "ring-2 ring-[var(--border)] hover:ring-[var(--primary)]/30 transition-all duration-300",
+        className,
+      )}
       {...props}
     >
       {src ? (
         <img src={src} alt={alt || ""} className="aspect-square h-full w-full object-cover" />
       ) : (
-        <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-[#1668dc] to-[#7c3aed] text-xs font-bold text-white select-none">
+        <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-[var(--primary)] via-[var(--purple)] to-[var(--pink)] text-xs font-bold text-white select-none">
           {fallback || "U"}
         </div>
       )}

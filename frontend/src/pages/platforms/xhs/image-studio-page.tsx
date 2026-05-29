@@ -1,59 +1,21 @@
-import {
-  DeleteOutlined,
-  FileImageOutlined,
-  InboxOutlined,
-  LinkOutlined,
-  PictureOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  RobotOutlined,
-  StarOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
-import {
-  Alert,
-  Button,
-  Card,
-  Checkbox,
-  Col,
-  Empty,
-  Image,
-  Input,
-  Modal,
-  Row,
-  Space,
-  Spin,
-  Tabs,
-  Tag,
-  Typography,
-  Upload,
-} from "antd";
+import { Image as ImageIcon, Inbox, Link, Plus, RefreshCw, Star, Trash2, Upload, Bot } from "lucide-react";
 import { useEffect, useState } from "react";
-
-import { PageHeader } from "../../../components/layout/app-shell";
+import { Badge } from "../../../components/ui/badge";
+import { Button } from "../../../components/ui/button";
+import { Card } from "../../../components/ui/card";
+import { Dialog, DialogBody, DialogHeader, DialogTitle } from "../../../components/ui/dialog";
+import { Spinner } from "../../../components/ui/skeletons";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
+import { HeaderControls } from "../../../components/layout/header-controls";
 import {
-  deleteGeneratedImageAsset,
-  deleteUserImage,
-  describeImageWithAi,
-  fetchGeneratedImageAssets,
-  fetchUserImages,
-  generateImageWithAi,
-  uploadAssetFile,
+  deleteGeneratedImageAsset, deleteUserImage, describeImageWithAi,
+  fetchGeneratedImageAssets, fetchUserImages, generateImageWithAi, uploadAssetFile,
 } from "../../../lib/api";
 import { formatShanghaiTime } from "../../../lib/time";
 import type { GeneratedImageAsset, UserImageFile } from "../../../types";
 
-const { Text, Paragraph } = Typography;
-const { TextArea } = Input;
-
 function isRenderableImage(value: string): boolean {
-  return (
-    value.startsWith("http://") ||
-    value.startsWith("https://") ||
-    value.startsWith("data:image/") ||
-    value.startsWith("/api/")
-  );
+  return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/") || value.startsWith("/api/");
 }
 
 export function XhsImageStudioPage() {
@@ -72,732 +34,213 @@ export function XhsImageStudioPage() {
   const [refPickerOpen, setRefPickerOpen] = useState(false);
   const [saveToAssets, setSaveToAssets] = useState(true);
   const [generatedPreview, setGeneratedPreview] = useState<string | null>(null);
-
-  // For the reference picker modal: which callback mode
-  const [pickerMode, setPickerMode] = useState<"reference" | "describe">(
-    "reference",
-  );
+  const [pickerMode, setPickerMode] = useState<"reference" | "describe">("reference");
   const [pickerUrlInput, setPickerUrlInput] = useState("");
+  const [activeTab, setActiveTab] = useState<string>("ai_assets");
 
   async function loadAssets() {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [aiResult, userResult] = await Promise.all([
-        fetchGeneratedImageAssets(),
-        fetchUserImages(),
-      ]);
-      setAssets(aiResult.items);
-      setUserImages(userResult.items);
-    } catch {
-      setError("图片资产加载失败。");
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(true); setError(null);
+    try { const [aiResult, userResult] = await Promise.all([fetchGeneratedImageAssets(), fetchUserImages()]); setAssets(aiResult.items); setUserImages(userResult.items); }
+    catch { setError("图片资产加载失败。"); } finally { setIsLoading(false); }
   }
 
   async function handleGenerate() {
-    if (!prompt.trim()) {
-      setError("请填写提示词。");
-      return;
-    }
-    setIsGenerating(true);
-    setError(null);
-    setMessage(null);
-    setGeneratedPreview(null);
+    if (!prompt.trim()) { setError("请填写提示词。"); return; }
+    setIsGenerating(true); setError(null); setMessage(null); setGeneratedPreview(null);
     try {
-      const result = await generateImageWithAi({
-        prompt: prompt.trim(),
-        reference_images:
-          referenceImages.length > 0 ? referenceImages : undefined,
-        save_to_assets: saveToAssets,
-      });
+      const result = await generateImageWithAi({ prompt: prompt.trim(), reference_images: referenceImages.length > 0 ? referenceImages : undefined, save_to_assets: saveToAssets });
       setGeneratedPreview(result.url);
-      if (result.asset) {
-        setAssets((prev) => [result.asset!, ...prev]);
-      }
+      if (result.asset) setAssets((prev) => [result.asset!, ...prev]);
       setMessage("图片生成成功。");
-    } catch {
-      setError("AI 图片生成失败，请确认已配置图片生成模型。");
-    } finally {
-      setIsGenerating(false);
-    }
+    } catch { setError("AI 图片生成失败，请确认已配置图片生成模型。"); } finally { setIsGenerating(false); }
   }
 
   async function handleDescribeImage() {
-    if (!imageUrl.trim()) {
-      setError("请先填写图片 URL。");
-      return;
-    }
-    setIsDescribing(true);
-    setError(null);
-    setMessage(null);
-    try {
-      const result = await describeImageWithAi({
-        image_url: imageUrl.trim(),
-        instruction: "提炼这张图片适合小红书发布的卖点、风格和标题方向。",
-      });
-      setDescription(result.text);
-      setMessage("图片描述已生成。");
-    } catch {
-      setError("图片描述失败，请确认已配置支持视觉理解的图片模型。");
-    } finally {
-      setIsDescribing(false);
-    }
+    if (!imageUrl.trim()) { setError("请先填写图片 URL。"); return; }
+    setIsDescribing(true); setError(null); setMessage(null);
+    try { const result = await describeImageWithAi({ image_url: imageUrl.trim(), instruction: "提炼这张图片适合小红书发布的卖点、风格和标题方向。" }); setDescription(result.text); setMessage("图片描述已生成。"); }
+    catch { setError("图片描述失败，请确认已配置支持视觉理解的图片模型。"); } finally { setIsDescribing(false); }
   }
 
-  function openRefPicker(mode: "reference" | "describe") {
-    setPickerMode(mode);
-    setPickerUrlInput("");
-    setRefPickerOpen(true);
-  }
-
-  function handlePickerSelect(url: string) {
-    if (pickerMode === "reference") {
-      setReferenceImages((prev) =>
-        prev.includes(url) ? prev : [...prev, url],
-      );
-    } else {
-      setImageUrl(url);
-    }
-    setRefPickerOpen(false);
-  }
-
-  function handlePickerUrlAdd() {
-    const trimmed = pickerUrlInput.trim();
-    if (!trimmed) return;
-    handlePickerSelect(trimmed);
-  }
+  function openRefPicker(mode: "reference" | "describe") { setPickerMode(mode); setPickerUrlInput(""); setRefPickerOpen(true); }
+  function handlePickerSelect(url: string) { if (pickerMode === "reference") { setReferenceImages((prev) => prev.includes(url) ? prev : [...prev, url]); } else { setImageUrl(url); } setRefPickerOpen(false); }
+  function handlePickerUrlAdd() { const trimmed = pickerUrlInput.trim(); if (trimmed) handlePickerSelect(trimmed); }
 
   async function handleUploadFile(file: File) {
-    try {
-      const uploaded = await uploadAssetFile(file);
-      const newItem: UserImageFile = {
-        file_name: uploaded.file_name,
-        url: uploaded.download_url,
-        size: uploaded.size,
-      };
-      setUserImages((prev) => [newItem, ...prev]);
-    } catch {
-      setError("文件上传失败。");
-    }
-    return false; // prevent antd auto-upload
+    try { const uploaded = await uploadAssetFile(file); const newItem: UserImageFile = { file_name: uploaded.file_name, url: uploaded.download_url, size: uploaded.size }; setUserImages((prev) => [newItem, ...prev]); }
+    catch { setError("文件上传失败。"); }
+    return false;
   }
 
-  useEffect(() => {
-    void loadAssets();
-  }, []);
+  useEffect(() => { void loadAssets(); }, []);
+
+  const renderPickerModal = (
+    <Dialog open={refPickerOpen} onClose={() => setRefPickerOpen(false)}>
+      <DialogHeader onClose={() => setRefPickerOpen(false)}><DialogTitle>选择图片</DialogTitle></DialogHeader>
+      <DialogBody>
+        <div className="flex gap-1 mb-4 rounded-xl border border-border p-0.5 bg-muted/50">
+          {["user_images", "ai_assets", "url"].map((tab) => (
+            <button key={tab} onClick={() => setActiveTab(tab)} className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{ background: activeTab === tab ? "var(--primary)" : "transparent", color: activeTab === tab ? "white" : "var(--muted-foreground)" }}>
+              {tab === "user_images" ? "普通图片" : tab === "ai_assets" ? "AI 资产" : "URL"}
+            </button>
+          ))}
+        </div>
+        {activeTab === "user_images" && (userImages.length === 0 ? <p className="text-center text-sm text-muted-foreground py-8">暂无普通图片资产。</p> : (
+          <div className="grid grid-cols-4 gap-2">{userImages.map((img) => (
+            <div key={img.file_name} onClick={() => handlePickerSelect(img.url)} className="cursor-pointer rounded overflow-hidden border border-border h-20 flex items-center justify-center bg-muted/30">
+              <img src={img.url} alt={img.file_name} className="max-h-full max-w-full object-contain" />
+            </div>
+          ))}</div>
+        ))}
+        {activeTab === "ai_assets" && (assets.length === 0 ? <p className="text-center text-sm text-muted-foreground py-8">暂无 AI 图片资产。</p> : (
+          <div className="grid grid-cols-4 gap-2">{assets.map((asset) => (
+            <div key={asset.id} onClick={() => handlePickerSelect(asset.file_path)} className="cursor-pointer rounded overflow-hidden border border-border h-20 flex items-center justify-center bg-muted/30">
+              {isRenderableImage(asset.file_path) ? <img src={asset.file_path} alt={asset.prompt} className="max-h-full max-w-full object-contain" /> : <ImageIcon size={24} className="text-muted-foreground" />}
+            </div>
+          ))}</div>
+        ))}
+        {activeTab === "url" && (
+          <div className="flex gap-2">
+            <input value={pickerUrlInput} onChange={(e) => setPickerUrlInput(e.target.value)} placeholder="输入图片 URL" onKeyDown={(e) => e.key === "Enter" && handlePickerUrlAdd()} className="flex-1 h-10 rounded-xl border border-input bg-background px-4 text-sm focus:outline-none" />
+            <Button onClick={handlePickerUrlAdd}>添加</Button>
+          </div>
+        )}
+      </DialogBody>
+    </Dialog>
+  );
 
   return (
     <div>
-      <PageHeader
-        eyebrow="XHS Image Studio"
-        title="图片工坊"
-        description="AI 图片生成、图片描述、沉淀图片资产，赋能小红书内容创作。"
-        action={
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={loadAssets}
-            loading={isLoading}
-          >
-            刷新资产
-          </Button>
-        }
-      />
+      {/* Gradient header area */}
+      <div className="bg-page-header-feigua -mx-8 -mt-8 px-8 pt-8 pb-2 mb-6 border-b border-border/50">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight mb-1.5">图片工坊</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">AI 图片生成、图片描述、沉淀图片资产，赋能小红书内容创作。</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={loadAssets} disabled={isLoading}><RefreshCw size={14} className="mr-1" />刷新资产</Button>
+            <HeaderControls />
+          </div>
+        </div>
+      </div>
 
-      {error && (
-        <Alert
-          type="error"
-          message={error}
-          showIcon
-          closable
-          onClose={() => setError(null)}
-          style={{ marginBottom: 16 }}
-        />
-      )}
-      {message && (
-        <Alert
-          type="success"
-          message={message}
-          showIcon
-          closable
-          onClose={() => setMessage(null)}
-          style={{ marginBottom: 16 }}
-        />
-      )}
+      {error && <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm">✕ {error}</div>}
+      {message && <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-500 text-sm">✓ {message}</div>}
 
-      {/* ---- Top Row: Two tool cards ---- */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        {/* Left Card: AI Image Generation */}
-        <Col xs={24} md={14}>
-          <Card
-            title={
-              <Space>
-                <StarOutlined /> AI 图片生成
-              </Space>
-            }
-            extra={
-              <Text type="secondary" style={{ fontSize: 11 }}>
-                需配置图片生成模型（如 gpt-image-2、豆包 Seedream）
-              </Text>
-            }
-          >
-            <TextArea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="充满活力的特写编辑肖像，模特眼神犀利，头戴雕塑感帽子，色彩拼接丰富，具有 Vogue 杂志封面的美学风格..."
-              rows={4}
-              disabled={isGenerating}
-              style={{ marginBottom: 12 }}
-            />
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        {/* AI Generation */}
+        <Card className="md:col-span-3 p-5">
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><Star size={16} /> AI 图片生成</h3>
+          <p className="text-xs text-muted-foreground mb-3">需配置图片生成模型（如 gpt-image-2、豆包 Seedream）</p>
 
-            {/* Reference images */}
-            <div style={{ marginBottom: 12 }}>
-              <Text
-                type="secondary"
-                style={{ fontSize: 12, marginBottom: 6, display: "block" }}
-              >
-                参考图
-              </Text>
-              <Space size={8} wrap>
-                {referenceImages.map((url, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      position: "relative",
-                      width: 60,
-                      height: 60,
-                      borderRadius: 4,
-                      overflow: "hidden",
-                      border: "1px solid #333",
-                    }}
-                  >
-                    {isRenderableImage(url) ? (
-                      <img
-                        src={url}
-                        alt={`ref-${idx}`}
-                        style={{
-                          width: 60,
-                          height: 60,
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: 60,
-                          height: 60,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          background: c.cardBg2,
-                        }}
-                      >
-                        <PictureOutlined style={{ fontSize: 20, color: "#666" }} />
-                      </div>
-                    )}
-                    <Button
-                      type="text"
-                      size="small"
-                      danger
-                      icon={<DeleteOutlined />}
-                      onClick={() =>
-                        setReferenceImages((prev) =>
-                          prev.filter((_, i) => i !== idx),
-                        )
-                      }
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        right: 0,
-                        width: 18,
-                        height: 18,
-                        padding: 0,
-                        minWidth: 18,
-                        borderRadius: "0 4px 0 4px",
-                        background: "rgba(0,0,0,0.6)",
-                      }}
-                    />
-                  </div>
-                ))}
-                {/* Add placeholder */}
-                <div
-                  onClick={() => openRefPicker("reference")}
-                  style={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: 4,
-                    border: "1px dashed #444",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    background: c.cardBg2,
-                  }}
-                >
-                  <PlusOutlined style={{ fontSize: 20, color: "#666" }} />
+          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="充满活力的特写编辑肖像，模特眼神犀利..." rows={4} disabled={isGenerating}
+            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 mb-3 resize-none" />
+
+          <div className="mb-3">
+            <p className="text-xs text-muted-foreground mb-1.5">参考图</p>
+            <div className="flex gap-2 flex-wrap">
+              {referenceImages.map((url, idx) => (
+                <div key={idx} className="relative w-14 h-14 rounded overflow-hidden border border-border">
+                  {isRenderableImage(url) ? <img src={url} alt={`ref-${idx}`} className="w-14 h-14 object-cover" /> : <div className="w-14 h-14 flex items-center justify-center bg-muted"><ImageIcon size={20} className="text-muted-foreground" /></div>}
+                  <button onClick={() => setReferenceImages((prev) => prev.filter((_, i) => i !== idx))} className="absolute top-0 right-0 w-4 h-4 bg-black/60 text-white text-[10px] rounded-bl flex items-center justify-center">✕</button>
                 </div>
-              </Space>
-            </div>
-
-            {/* Controls row */}
-            <Row
-              justify="space-between"
-              align="middle"
-              style={{ marginBottom: 12 }}
-            >
-              <Col>
-                <Checkbox
-                  checked={saveToAssets}
-                  onChange={(e) => setSaveToAssets(e.target.checked)}
-                >
-                  保存到 AI 图片资产
-                </Checkbox>
-              </Col>
-              <Col>
-                <Space>
-                  <Button
-                    onClick={() => { setPrompt(""); setReferenceImages([]); setGeneratedPreview(null); setSaveToAssets(true); }}
-                    disabled={isGenerating}
-                  >
-                    重置
-                  </Button>
-                  <Button
-                    type="primary"
-                    icon={<RobotOutlined />}
-                    onClick={handleGenerate}
-                    loading={isGenerating}
-                  >
-                    生成
-                  </Button>
-                </Space>
-              </Col>
-            </Row>
-
-            {/* Generated result */}
-            {generatedPreview && (
-              <div style={{ marginTop: 8 }}>
-                <Text
-                  type="secondary"
-                  style={{ fontSize: 12, marginBottom: 6, display: "block" }}
-                >
-                  生成结果
-                </Text>
-                <div
-                  style={{
-                    background: c.cardBg2,
-                    borderRadius: 6,
-                    padding: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  <Image
-                    src={generatedPreview}
-                    alt="generated"
-                    style={{ maxHeight: 240, objectFit: "contain" }}
-                  />
-                  {!saveToAssets && (
-                    <Button
-                      size="small"
-                      type="link"
-                      onClick={() => {
-                        // Re-generate with save flag
-                        setSaveToAssets(true);
-                        setMessage("下次生成将自动保存到 AI 资产。");
-                      }}
-                      style={{ marginTop: 8 }}
-                    >
-                      保存到 AI 资产
-                    </Button>
-                  )}
-                </div>
+              ))}
+              <div onClick={() => openRefPicker("reference")} className="w-14 h-14 rounded border border-dashed border-border flex items-center justify-center cursor-pointer bg-muted/30">
+                <Plus size={20} className="text-muted-foreground" />
               </div>
-            )}
-          </Card>
-        </Col>
+            </div>
+          </div>
 
-        {/* Right Card: Image Description */}
-        <Col xs={24} md={10}>
-          <Card
-            title={
-              <Space>
-                <FileImageOutlined /> 图片描述
-              </Space>
-            }
-            extra={
-              <Text type="secondary" style={{ fontSize: 11 }}>
-                需配置多模态模型（如 GPT-4o）
-              </Text>
-            }
-          >
-            <Space.Compact style={{ width: "100%", marginBottom: 12 }}>
-              <Input
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="图片 URL"
-                disabled={isGenerating}
-              />
-              <Button
-                icon={<PictureOutlined />}
-                onClick={() => openRefPicker("describe")}
-              >
-                从资产选择
-              </Button>
-            </Space.Compact>
-            <Button
-              onClick={handleDescribeImage}
-              loading={isDescribing}
-              block
-              style={{ marginBottom: 12 }}
-            >
-              生成描述
-            </Button>
-            {description && (
-              <Paragraph
-                style={{
-                  background: c.cardBorder2,
-                  padding: 12,
-                  borderRadius: 6,
-                  fontSize: 13,
-                  margin: 0,
-                }}
-              >
-                {description}
-              </Paragraph>
-            )}
-          </Card>
-        </Col>
-      </Row>
+          <div className="flex items-center justify-between mb-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={saveToAssets} onChange={(e) => setSaveToAssets(e.target.checked)} className="w-4 h-4 rounded border-border text-primary" />
+              <span className="text-sm text-muted-foreground">保存到 AI 图片资产</span>
+            </label>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => { setPrompt(""); setReferenceImages([]); setGeneratedPreview(null); setSaveToAssets(true); }} disabled={isGenerating}>重置</Button>
+              <Button size="sm" onClick={handleGenerate} disabled={isGenerating}><Bot size={14} className="mr-1" />{isGenerating ? "生成中..." : "生成"}</Button>
+            </div>
+          </div>
 
-      {/* ---- Bottom: Tabs ---- */}
-      <Tabs
-        defaultActiveKey="ai_assets"
-        items={[
-          {
-            key: "ai_assets",
-            label: (
-              <Space>
-                <StarOutlined /> AI 图片资产
-              </Space>
-            ),
-            children: (
-              <>
-                {isLoading ? (
-                  <div style={{ textAlign: "center", padding: 48 }}>
-                    <Spin tip="正在加载 AI 图片资产..." />
-                  </div>
-                ) : assets.length === 0 ? (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description="暂无 AI 图片资产。"
-                    style={{ padding: 32 }}
-                  />
-                ) : (
-                  <Row gutter={[12, 12]}>
-                    {assets.map((asset) => (
-                      <Col xs={12} sm={8} md={6} key={asset.id}>
-                        <Card
-                          size="small"
-                          hoverable
-                          styles={{ body: { padding: 8 } }}
-                        >
-                          <div
-                            style={{
-                              height: 120,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              marginBottom: 6,
-                              overflow: "hidden",
-                              borderRadius: 4,
-                              background: c.cardBg2,
-                            }}
-                          >
-                            {isRenderableImage(asset.file_path) ? (
-                              <Image
-                                alt={asset.prompt}
-                                src={asset.file_path}
-                                style={{
-                                  maxHeight: 120,
-                                  objectFit: "contain",
-                                }}
-                              />
-                            ) : (
-                              <PictureOutlined
-                                style={{ fontSize: 28, color: "#555" }}
-                              />
-                            )}
-                          </div>
-                          <Text
-                            strong
-                            ellipsis
-                            style={{ fontSize: 12, display: "block" }}
-                          >
-                            {asset.prompt}
-                          </Text>
-                          <div style={{ marginTop: 4 }}>
-                            <Tag
-                              style={{
-                                fontSize: 10,
-                                padding: "0 4px",
-                                margin: 0,
-                              }}
-                            >
-                              {asset.model_name || "image model"}
-                            </Tag>
-                            <Text
-                              type="secondary"
-                              style={{ fontSize: 10, marginLeft: 4 }}
-                            >
-                              {formatShanghaiTime(asset.created_at)}
-                            </Text>
-                          </div>
-                          <Button
-                            type="text" danger size="small" icon={<DeleteOutlined />}
-                            onClick={async () => {
-                              try {
-                                await deleteGeneratedImageAsset(asset.id);
-                                setAssets((prev) => prev.filter((a) => a.id !== asset.id));
-                              } catch { /* global interceptor shows error */ }
-                            }}
-                            style={{ width: "100%", marginTop: 4 }}
-                          >
-                            删除
-                          </Button>
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                )}
-              </>
-            ),
-          },
-          {
-            key: "user_images",
-            label: (
-              <Space>
-                <PictureOutlined /> 普通图片资产
-              </Space>
-            ),
-            children: (
-              <>
-                <div style={{ marginBottom: 16 }}>
-                  <Upload
-                    accept="image/*"
-                    showUploadList={false}
-                    beforeUpload={(file) => {
-                      void handleUploadFile(file);
-                      return false;
-                    }}
-                  >
-                    <Button icon={<UploadOutlined />}>上传图片</Button>
-                  </Upload>
+          {generatedPreview && (
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">生成结果</p>
+              <div className="rounded-lg bg-muted/30 p-2 text-center">
+                <img src={generatedPreview} alt="generated" className="max-h-[240px] object-contain mx-auto" />
+              </div>
+            </div>
+          )}
+        </Card>
+
+        {/* Image Description */}
+        <Card className="md:col-span-2 p-5">
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><ImageIcon size={16} /> 图片描述</h3>
+          <p className="text-xs text-muted-foreground mb-3">需配置多模态模型（如 GPT-4o）</p>
+          <div className="flex gap-2 mb-3">
+            <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="图片 URL" disabled={isGenerating} className="flex-1 h-10 rounded-xl border border-input bg-background px-4 text-sm focus:outline-none" />
+            <Button variant="outline" size="sm" onClick={() => openRefPicker("describe")}><ImageIcon size={14} className="mr-1" />选择</Button>
+          </div>
+          <Button onClick={handleDescribeImage} disabled={isDescribing} className="w-full mb-3">{isDescribing ? "描述中..." : "生成描述"}</Button>
+          {description && <p className="text-sm p-3 rounded-lg bg-muted/30">{description}</p>}
+        </Card>
+      </div>
+
+      {/* Bottom tabs */}
+      <div className="flex gap-1 mb-4 rounded-xl border border-border p-0.5 bg-muted/50">
+        {["ai_assets", "user_images"].map((tab) => (
+          <button key={tab} onClick={() => setActiveTab(tab)} className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{ background: activeTab === tab ? "var(--primary)" : "transparent", color: activeTab === tab ? "white" : "var(--muted-foreground)" }}>
+            {tab === "ai_assets" ? "AI 图片资产" : "普通图片资产"}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "ai_assets" ? (
+        isLoading ? <div className="flex justify-center py-12"><Spinner /></div>
+        : assets.length === 0 ? <p className="text-center text-sm text-muted-foreground py-8">暂无 AI 图片资产。</p>
+        : <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            {assets.map((asset) => (
+              <Card key={asset.id} className="p-2">
+                <div className="h-[120px] flex items-center justify-center mb-1 rounded overflow-hidden bg-muted/30">
+                  {isRenderableImage(asset.file_path) ? <img src={asset.file_path} alt={asset.prompt} className="max-h-[120px] object-contain" /> : <ImageIcon size={28} className="text-muted-foreground" />}
                 </div>
-                {userImages.length === 0 ? (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description="暂无普通图片资产。上传图片后将显示在这里。"
-                    style={{ padding: 32 }}
-                  />
-                ) : (
-                  <Row gutter={[12, 12]}>
-                    {userImages.map((img) => (
-                      <Col xs={12} sm={8} md={6} key={img.file_name}>
-                        <Card
-                          size="small"
-                          hoverable
-                          styles={{ body: { padding: 8 } }}
-                        >
-                          <div
-                            style={{
-                              height: 120,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              marginBottom: 6,
-                              overflow: "hidden",
-                              borderRadius: 4,
-                              background: c.cardBg2,
-                            }}
-                          >
-                            <Image
-                              alt={img.file_name}
-                              src={img.url}
-                              style={{
-                                maxHeight: 120,
-                                objectFit: "contain",
-                              }}
-                            />
-                          </div>
-                          <Text
-                            strong
-                            ellipsis
-                            style={{ fontSize: 12, display: "block" }}
-                          >
-                            {img.file_name}
-                          </Text>
-                          <Text type="secondary" style={{ fontSize: 10 }}>
-                            {(img.size / 1024).toFixed(1)} KB
-                          </Text>
-                          <Button
-                            type="text" danger size="small" icon={<DeleteOutlined />}
-                            onClick={async () => {
-                              try {
-                                await deleteUserImage(img.file_name);
-                                setUserImages((prev) => prev.filter((i) => i.file_name !== img.file_name));
-                              } catch { /* global interceptor shows error */ }
-                            }}
-                            style={{ width: "100%", marginTop: 4 }}
-                          >
-                            删除
-                          </Button>
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                )}
-              </>
-            ),
-          },
-        ]}
-      />
+                <p className="text-xs font-medium truncate">{asset.prompt}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <Badge variant="secondary" className="text-[10px]">{asset.model_name || "model"}</Badge>
+                  <span className="text-[10px] text-muted-foreground">{formatShanghaiTime(asset.created_at)}</span>
+                </div>
+                <Button size="sm" variant="ghost" className="w-full mt-1 text-destructive" onClick={async () => { try { await deleteGeneratedImageAsset(asset.id); setAssets((prev) => prev.filter((a) => a.id !== asset.id)); } catch { /* ok */ } }}>
+                  <Trash2 size={12} className="mr-0.5" />删除
+                </Button>
+              </Card>
+            ))}
+          </div>
+      ) : (
+        <div>
+          <div className="mb-4">
+            <input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) handleUploadFile(e.target.files[0]); }} className="text-sm" />
+          </div>
+          {userImages.length === 0 ? <p className="text-center text-sm text-muted-foreground py-8">暂无普通图片资产。</p>
+          : <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              {userImages.map((img) => (
+                <Card key={img.file_name} className="p-2">
+                  <div className="h-[120px] flex items-center justify-center mb-1 rounded overflow-hidden bg-muted/30">
+                    <img src={img.url} alt={img.file_name} className="max-h-[120px] object-contain" />
+                  </div>
+                  <p className="text-xs truncate">{img.file_name}</p>
+                  <p className="text-[10px] text-muted-foreground">{(img.size / 1024).toFixed(1)} KB</p>
+                  <Button size="sm" variant="ghost" className="w-full mt-1 text-destructive" onClick={async () => { try { await deleteUserImage(img.file_name); setUserImages((prev) => prev.filter((i) => i.file_name !== img.file_name)); } catch { /* ok */ } }}>
+                  <Trash2 size={12} className="mr-0.5" />删除
+                </Button>
+              </Card>
+            ))}
+            </div>}
+        </div>
+      )}
 
-      {/* ---- Reference Image Picker Modal ---- */}
-      <Modal
-        title="选择图片"
-        open={refPickerOpen}
-        onCancel={() => setRefPickerOpen(false)}
-        footer={null}
-        width={640}
-        destroyOnClose
-      >
-        <Tabs
-          defaultActiveKey="user_images"
-          items={[
-            {
-              key: "user_images",
-              label: (
-                <Space>
-                  <PictureOutlined /> 普通图片资产
-                </Space>
-              ),
-              children:
-                userImages.length === 0 ? (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description="暂无普通图片资产。"
-                    style={{ padding: 24 }}
-                  />
-                ) : (
-                  <Row gutter={[8, 8]}>
-                    {userImages.map((img) => (
-                      <Col span={6} key={img.file_name}>
-                        <div
-                          onClick={() => handlePickerSelect(img.url)}
-                          style={{
-                            cursor: "pointer",
-                            borderRadius: 4,
-                            overflow: "hidden",
-                            border: "1px solid #333",
-                            height: 80,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            background: c.cardBg2,
-                          }}
-                        >
-                          <img
-                            src={img.url}
-                            alt={img.file_name}
-                            style={{
-                              maxHeight: 80,
-                              maxWidth: "100%",
-                              objectFit: "contain",
-                            }}
-                          />
-                        </div>
-                      </Col>
-                    ))}
-                  </Row>
-                ),
-            },
-            {
-              key: "ai_assets",
-              label: (
-                <Space>
-                  <StarOutlined /> AI 图片资产
-                </Space>
-              ),
-              children:
-                assets.length === 0 ? (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description="暂无 AI 图片资产。"
-                    style={{ padding: 24 }}
-                  />
-                ) : (
-                  <Row gutter={[8, 8]}>
-                    {assets.map((asset) => (
-                      <Col span={6} key={asset.id}>
-                        <div
-                          onClick={() => handlePickerSelect(asset.file_path)}
-                          style={{
-                            cursor: "pointer",
-                            borderRadius: 4,
-                            overflow: "hidden",
-                            border: "1px solid #333",
-                            height: 80,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            background: c.cardBg2,
-                          }}
-                        >
-                          {isRenderableImage(asset.file_path) ? (
-                            <img
-                              src={asset.file_path}
-                              alt={asset.prompt}
-                              style={{
-                                maxHeight: 80,
-                                maxWidth: "100%",
-                                objectFit: "contain",
-                              }}
-                            />
-                          ) : (
-                            <PictureOutlined
-                              style={{ fontSize: 24, color: "#555" }}
-                            />
-                          )}
-                        </div>
-                      </Col>
-                    ))}
-                  </Row>
-                ),
-            },
-            {
-              key: "url",
-              label: (
-                <Space>
-                  <LinkOutlined /> URL
-                </Space>
-              ),
-              children: (
-                <Space.Compact style={{ width: "100%" }}>
-                  <Input
-                    value={pickerUrlInput}
-                    onChange={(e) => setPickerUrlInput(e.target.value)}
-                    placeholder="输入图片 URL"
-                    onPressEnter={handlePickerUrlAdd}
-                  />
-                  <Button type="primary" onClick={handlePickerUrlAdd}>
-                    添加
-                  </Button>
-                </Space.Compact>
-              ),
-            },
-          ]}
-        />
-      </Modal>
+      {renderPickerModal}
     </div>
   );
 }

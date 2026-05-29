@@ -1,36 +1,17 @@
 import {
-  RocketOutlined,
-  PlayCircleOutlined,
-  SafetyCertificateOutlined,
-  ClockCircleOutlined,
-  TrophyOutlined,
-  UserSwitchOutlined,
-  SearchOutlined,
-  DatabaseOutlined,
-  RobotOutlined,
-  PictureOutlined,
-  SendOutlined,
-  ThunderboltOutlined,
-  EditOutlined,
-  SettingOutlined,
-  CheckCircleOutlined,
-  StarFilled,
-  ArrowRightOutlined,
-  DashboardOutlined,
-  EyeOutlined,
-  CloudUploadOutlined,
-  LineChartOutlined,
-  ReloadOutlined,
-  LayoutOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Col, Row, Space, Statistic, Tag, Typography } from "antd";
+  Rocket, ChevronRight, Star, CheckCircle, ArrowRight,
+  Search, Database, Bot, Image, Send, Zap, Settings, Edit3,
+  BarChart3, ShieldCheck,
+} from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
 import { useAuth } from "../../hooks/use-auth";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { useThemeMode } from "../../app/providers";
-
-const { Title, Text, Paragraph } = Typography;
+import { cn } from "../../lib/utils";
 
 interface Feature {
   icon: React.ReactNode;
@@ -39,63 +20,36 @@ interface Feature {
   tagColor: string;
   intro: string;
   highlights: string[];
-  gradient: string;
 }
 
-function FeatureIcon({ color, children }: { color: string; children: React.ReactNode }) {
-  return (
-    <div style={{ width: 56, height: 56, borderRadius: 14, background: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, color }}>
-      {children}
-    </div>
-  );
-}
-
-const FEATURES: { icon: React.ReactNode; title: string; tag: string; tagColor: string; intro: string; highlights: string[] }[] = [
+const FEATURES: Feature[] = [
   {
-    icon: <SearchOutlined />,
-    title: "智能数据采集",
-    tag: "PC 端",
-    tagColor: "#1668dc",
+    icon: <Search size={24} />, title: "智能数据采集", tag: "PC 端", tagColor: "#1668dc",
     intro: "基于小红书 PC 端接口，关键词搜索、用户主页、笔记详情、评论区等多维度数据采集。",
     highlights: ["关键词搜索全站笔记", "批量采集无水印原图和高清视频", "笔记评论和互动数据"],
   },
   {
-    icon: <DatabaseOutlined />,
-    title: "内容库管理",
-    tag: "资产",
-    tagColor: "#10b981",
+    icon: <Database size={24} />, title: "内容库管理", tag: "资产", tagColor: "#10b981",
     intro: "采集笔记统一沉淀到内容库，卡片/列表双视图，标签分类检索。",
     highlights: ["自动保存完整信息", "自定义标签分类", "JSON / CSV 批量导出"],
   },
   {
-    icon: <RobotOutlined />,
-    title: "AI 智能改写",
-    tag: "大模型",
-    tagColor: "#7c3aed",
+    icon: <Bot size={24} />, title: "AI 智能改写", tag: "大模型", tagColor: "#7c3aed",
     intro: "接入主流大模型，编辑器内完成标题、正文、标签全量改写。",
     highlights: ["支持多模型，自定义 API Key", "一键改写正文", "AI 生成吸睛标题和热门标签"],
   },
   {
-    icon: <PictureOutlined />,
-    title: "AI 图片润色",
-    tag: "视觉",
-    tagColor: "#f59e0b",
+    icon: <Image size={24} />, title: "AI 图片润色", tag: "视觉", tagColor: "#f59e0b",
     intro: "AI 图片处理：风格迁移、背景替换、封面生成。",
     highlights: ["添加参考图和文字指令", "根据标题自动生成封面", "生成的图片直接关联草稿"],
   },
   {
-    icon: <SendOutlined />,
-    title: "一键发布",
-    tag: "发布",
-    tagColor: "#ef4444",
+    icon: <Send size={24} />, title: "一键发布", tag: "发布", tagColor: "#ef4444",
     intro: "对接创作者平台，支持图集和视频发布，多账号切换。",
     highlights: ["支持图集和视频作品发布", "立即发布和定时发布", "多账号一键切换"],
   },
   {
-    icon: <ThunderboltOutlined />,
-    title: "全自动运营",
-    tag: "自动",
-    tagColor: "#06b6d4",
+    icon: <Zap size={24} />, title: "全自动运营", tag: "自动", tagColor: "#06b6d4",
     intro: "配置关键词和发布频率，搜索→采集→改写→发布全自动。",
     highlights: ["创建自动化任务", "设定发布频率和时段", "运行日志完整记录"],
   },
@@ -122,25 +76,6 @@ export function MarketingPage() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
-  const c = {
-    bg: isDark ? "#09090b" : "#fafafa",
-    heroBg: isDark ? "linear-gradient(135deg, #09090b 0%, #0f1729 40%, #09090b 100%)" : "linear-gradient(135deg, #fafafa 0%, #f0f5ff 40%, #fafafa 100%)",
-    cardBg: isDark ? "#111113" : "#ffffff",
-    cardBorder: isDark ? "#222226" : "#e5e5e5",
-    navBg: isDark ? "rgba(9,9,11,0.85)" : "rgba(255,255,255,0.85)",
-    navBorder: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
-    t1: isDark ? "#ffffff" : "#18181b",
-    t2: isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.55)",
-    t3: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)",
-    statBg: isDark ? "#111113" : "#f9fafb",
-    statBorder: isDark ? "#222226" : "#e5e5e5",
-    faqBg: isDark ? "#111113" : "#f9fafb",
-    btnOutlineBg: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
-    btnOutlineBorder: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)",
-    btnOutlineColor: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)",
-    gradientText: "linear-gradient(135deg, #1668dc 0%, #7c3aed 50%, #f59e0b 100%)",
-  };
-
   const handleCTA = () => {
     navigate(auth.isAuthenticated ? "/platforms/xhs/dashboard" : "/login", { replace: true });
   };
@@ -150,283 +85,295 @@ export function MarketingPage() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
+  const navLinks = ["功能", "定价", "FAQ"];
+
   return (
-    <div style={{ background: c.bg, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif' }}>
+    <div className="bg-background min-h-screen">
       {/* Nav */}
-      <div style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        padding: isMobile ? "8px 12px" : "10px 28px",
-        background: c.navBg, borderBottom: `1px solid ${c.navBorder}`,
-        display: "flex", alignItems: "center",
-      }}>
-        <div style={{ flex: "0 0 auto", cursor: "pointer" }} onClick={() => navigate("/")}>
-          <Space size={6}>
-            <div style={{
-              width: isMobile ? 28 : 34, height: isMobile ? 28 : 34, borderRadius: 8,
-              background: "linear-gradient(135deg, #1668dc, #7c3aed)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontWeight: 800, fontSize: isMobile ? 14 : 18, color: "#fff",
-            }}>X</div>
-            {!isMobile && <Text strong style={{ color: c.t1, fontSize: 15 }}>小红书矩阵运营</Text>}
-          </Space>
-        </div>
-        {!isMobile && <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          {["功能", "定价", "FAQ"].map((n) => (
-            <Text key={n} onClick={() => scrollTo(`#${n}`)} style={{ color: c.t2, fontSize: 14, cursor: "pointer", margin: "0 18px" }}>{n}</Text>
-          ))}
-        </div>}
-        <div style={{ flex: "0 0 auto", marginLeft: "auto" }}>
-          <Space size={isMobile ? 6 : 12}>
-            <Button type="text" size={isMobile ? "small" : undefined} style={{ color: c.t2, fontSize: isMobile ? 13 : 14 }} onClick={() => navigate("/login")}>登录</Button>
-            <Button type="primary" size={isMobile ? "small" : "small"} onClick={handleCTA} style={{ borderRadius: 8, fontWeight: 600 }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+        <div className="flex items-center px-4 sm:px-8 h-14">
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/")}>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#ff2442] to-[#ff6b81] flex items-center justify-center shrink-0 shadow-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="4" />
+                <path d="M9 8h6" /><path d="M9 12h6" /><path d="M9 16h3" />
+              </svg>
+            </div>
+            {!isMobile && <span className="font-semibold text-base">小红书助手</span>}
+          </div>
+          {!isMobile && (
+            <div className="flex-1 flex justify-center gap-9">
+              {navLinks.map((n) => (
+                <button key={n} onClick={() => scrollTo(`#${n}`)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  {n}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <button onClick={() => navigate("/login")} className="text-sm text-muted-foreground hover:text-foreground px-3 py-1.5">登录</button>
+            <Button size="sm" onClick={handleCTA}>
               {auth.isAuthenticated ? "工作台" : "免费注册"}
             </Button>
-          </Space>
+          </div>
         </div>
-      </div>
+      </nav>
 
       {/* Hero */}
-      <div style={{
-        padding: isMobile ? "100px 16px 60px" : "160px 28px 80px",
-        textAlign: "center", background: c.heroBg,
-      }}>
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: 6,
-          background: isDark ? "rgba(22,104,220,0.1)" : "rgba(22,104,220,0.06)",
-          borderRadius: 20, padding: "5px 14px", marginBottom: isMobile ? 20 : 24,
-        }}>
-          <StarFilled style={{ color: "#f59e0b", fontSize: 12 }} />
-          <Text style={{ color: "#1668dc", fontSize: isMobile ? 12 : 13, fontWeight: 600 }}>全新 2.0 · 十项能力升级</Text>
+      <section className="pt-28 sm:pt-40 pb-12 sm:pb-16 text-center bg-background relative overflow-hidden">
+        {/* Background glow orbs */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-primary/5 via-purple-500/4 to-transparent blur-[120px]" />
+          <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-purple-500/8 to-pink-500/4 blur-[100px]" />
+          <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-blue-500/8 to-cyan-500/4 blur-[100px]" />
         </div>
 
-        <Title level={1} style={{
-          color: c.t1,
-          fontSize: isMobile ? 32 : 52,
-          fontWeight: 800, marginBottom: isMobile ? 16 : 24,
-          lineHeight: 1.2,
-        }}>
-          小红书的<br />
-          <span style={{ background: c.gradientText, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>自动化运营引擎</span>
-        </Title>
+        <div className="relative px-4 max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-1.5 bg-primary/10 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6 sm:mb-8">
+            <Star size={12} className="text-amber-500" />
+            <span className="text-xs sm:text-sm font-semibold text-primary">全新 2.0 · 十项能力升级</span>
+          </div>
 
-        <Paragraph style={{
-          color: c.t2, fontSize: isMobile ? 15 : 18,
-          maxWidth: 600, margin: "0 auto 32px", padding: isMobile ? "0 8px" : 0,
-        }}>
-          把采集、分析、改写、发布装进一个面板。
-        </Paragraph>
+          <h1 className={cn(
+            "font-extrabold leading-tight mb-5 sm:mb-7 tracking-tight",
+            isMobile ? "text-[2.5rem]" : "text-[3.5rem] sm:text-[4rem]",
+          )}>
+            小红书助手<br />
+            <span className="bg-gradient-to-r from-[#2563eb] via-[#7c3aed] to-[#ec4899] bg-clip-text text-transparent">
+              一个平台，管理所有
+            </span>
+          </h1>
 
-        <Space size={isMobile ? 8 : 16} wrap style={{ justifyContent: "center" }}>
-          <Button type="primary" size={isMobile ? "middle" : "large"} icon={<RocketOutlined />} onClick={handleCTA}
-            style={{
-              height: isMobile ? 44 : 54, paddingInline: isMobile ? 28 : 44,
-              fontSize: isMobile ? 14 : 17, fontWeight: 700, borderRadius: 14,
-              background: "linear-gradient(135deg, #1668dc, #7c3aed)", border: "none",
-              boxShadow: "0 8px 32px rgba(22,104,220,0.4)",
-            }}>
-            {auth.isAuthenticated ? "进入工作台" : "免费开始使用"}
-          </Button>
-          {!isMobile && (
-            <Button size="large" icon={<PlayCircleOutlined />} onClick={() => scrollTo("#功能")}
-              style={{
-                height: 54, paddingInline: 32, fontSize: 16, borderRadius: 14,
-                background: c.btnOutlineBg, border: `1px solid ${c.btnOutlineBorder}`, color: c.btnOutlineColor,
-              }}>
-              探索功能
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto mb-9 sm:mb-11 leading-relaxed">
+            集数据发现、内容库、AI 改写、自动发布于一体
+            <br className="hidden sm:block" />
+            把采集、分析、发布装进一个面板
+          </p>
+
+          <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
+            <Button size={isMobile ? "default" : "lg"} className="bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white shadow-xl shadow-primary/25 border-0 hover:shadow-primary/35 hover:-translate-y-0.5 active:translate-y-0 transition-all px-6 sm:px-8" onClick={handleCTA}>
+              <Rocket size={18} className="mr-1.5" />
+              {auth.isAuthenticated ? "进入工作台" : "免费开始使用"}
             </Button>
-          )}
-        </Space>
-      </div>
+            {!isMobile && (
+              <Button size="lg" variant="outline" className="px-6 sm:px-8" onClick={() => scrollTo("#功能")}>
+                <ChevronRight size={18} className="mr-1.5" />
+                探索功能
+              </Button>
+            )}
+          </div>
+
+          {/* Social proof */}
+          <div className="flex items-center justify-center gap-3 sm:gap-4 mt-10 sm:mt-12">
+            <div className="flex -space-x-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 border-2 border-background flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                  {String.fromCharCode(64 + i)}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">1,200+</span> 创作者已在使用
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Stats */}
-      <div style={{ maxWidth: 900, margin: "60px auto 0", padding: "0 28px" }}>
-        <Row gutter={[16, 16]}>
+      <section className="max-w-4xl mx-auto px-4 sm:px-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { v: "6", d: "大模块", color: "#1668dc" },
+            { v: "6", d: "大模块", color: "#2563eb" },
             { v: "12+", d: "签名逆向", color: "#7c3aed" },
-            { v: "∞", d: "不限制采集", color: "#10b981" },
+            { v: "∞", d: "不限采集", color: "#10b981" },
             { v: "24×7", d: "自动运行", color: "#f59e0b" },
-          ].map((s, i) => (
-            <Col xs={12} sm={6} key={i}>
-              <div style={{ background: c.statBg, border: `1px solid ${c.statBorder}`, borderRadius: 16, padding: "28px 16px", textAlign: "center" }}>
-                <Text strong style={{ color: s.color, fontSize: 36, fontWeight: 800, display: "block", marginBottom: 4 }}>{s.v}</Text>
-                <Text style={{ color: c.t3, fontSize: 13 }}>{s.d}</Text>
-              </div>
-            </Col>
+          ].map((s) => (
+            <div key={s.d} className="rounded-2xl border bg-card/40 backdrop-blur-sm p-6 sm:p-8 text-center hover:bg-card/60 transition-colors">
+              <p className="text-[2rem] sm:text-[2.5rem] font-extrabold tracking-tight" style={{ color: s.color }}>{s.v}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1.5">{s.d}</p>
+            </div>
           ))}
-        </Row>
-      </div>
+        </div>
+      </section>
 
       {/* Features */}
-      <div id="功能" style={{ maxWidth: 1100, margin: "80px auto 0", padding: "0 28px" }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <Tag color="blue" style={{ borderRadius: 8, marginBottom: 16 }}>核心能力</Tag>
-          <Title level={2} style={{ color: c.t1, fontWeight: 700 }}>一个面板，搞定全流程</Title>
+      <section id="功能" className="max-w-5xl mx-auto mt-20 sm:mt-24 px-4 sm:px-8">
+        <div className="text-center mb-12">
+          <Badge variant="default" className="mb-4">核心能力</Badge>
+          <h2 className="text-2xl sm:text-3xl font-bold">一个面板，搞定全流程</h2>
         </div>
 
-        <Row gutter={[20, 20]}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {FEATURES.map((f) => (
-            <Col xs={24} sm={12} lg={8} key={f.title}>
-              <Card style={{ background: c.cardBg, borderColor: c.cardBorder, borderRadius: 16, height: "100%" }} styles={{ body: { padding: "32px 28px" } }}>
-                <FeatureIcon color={f.tagColor}>{f.icon}</FeatureIcon>
-                <Tag color={f.tagColor} style={{ borderRadius: 6, marginBottom: 8 }}>{f.tag}</Tag>
-                <Title level={4} style={{ color: c.t1, marginBottom: 8, fontSize: 18 }}>{f.title}</Title>
-                <Paragraph style={{ color: c.t2, fontSize: 14, marginBottom: 16 }}>{f.intro}</Paragraph>
-                <Space orientation="vertical" size={8}>
-                  {f.highlights.map((h) => (
-                    <Space key={h} size={8}><CheckCircleOutlined style={{ color: f.tagColor, fontSize: 13 }} /><Text style={{ color: c.t2, fontSize: 13 }}>{h}</Text></Space>
-                  ))}
-                </Space>
-              </Card>
-            </Col>
+            <div key={f.title} className="rounded-2xl border bg-card/80 backdrop-blur-lg p-7 sm:p-8 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5" style={{ background: `${f.tagColor}15`, color: f.tagColor }}>
+                {f.icon}
+              </div>
+              <Badge variant="default" className="mb-2" style={{ background: `${f.tagColor}15`, color: f.tagColor, border: "none" }}>{f.tag}</Badge>
+              <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
+              <p className="text-sm text-muted-foreground mb-4">{f.intro}</p>
+              <div className="space-y-2">
+                {f.highlights.map((h) => (
+                  <div key={h} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <CheckCircle size={14} className="shrink-0 mt-0.5" style={{ color: f.tagColor }} />
+                    <span>{h}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           ))}
-        </Row>
-      </div>
+        </div>
+      </section>
 
       {/* Workflow */}
-      <div style={{ maxWidth: 1000, margin: "80px auto 0", padding: "0 28px" }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <Tag color="blue" style={{ borderRadius: 8, marginBottom: 16 }}>四步上手</Tag>
-          <Title level={2} style={{ color: c.t1, fontWeight: 700 }}>配置一次，长期自动运行</Title>
+      <section className="max-w-4xl mx-auto mt-20 sm:mt-24 px-4 sm:px-8">
+        <div className="text-center mb-12">
+          <Badge variant="default" className="mb-4">四步上手</Badge>
+          <h2 className="text-2xl sm:text-3xl font-bold">配置一次，长期自动运行</h2>
         </div>
-        <Card style={{ background: c.cardBg, borderColor: c.cardBorder, borderRadius: 20 }} styles={{ body: { padding: "48px 32px" } }}>
-          <Row gutter={[24, 32]}>
+
+        <div className="rounded-2xl border bg-card/80 backdrop-blur-lg p-8 sm:p-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             {[
-              { step: "01", icon: <SettingOutlined />, title: "绑定账号", desc: "Cookie 导入小红书 PC 端和创作者账号", color: "#1668dc" },
-              { step: "02", icon: <SearchOutlined />, title: "搜索采集", desc: "输入关键词自动搜索并批量采集目标笔记", color: "#7c3aed" },
-              { step: "03", icon: <EditOutlined />, title: "AI 改写", desc: "AI 自动改写标题正文，生成差异化原创内容", color: "#f59e0b" },
-              { step: "04", icon: <RocketOutlined />, title: "自动发布", desc: "按设定频率自动发布，24×7 持续运营", color: "#10b981" },
-            ].map((s, i) => (
-              <Col xs={24} sm={12} md={6} key={i} style={{ textAlign: "center" }}>
-                <Text style={{ color: s.color, fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>{s.step}</Text>
-                <div style={{ width: 56, height: 56, borderRadius: 16, background: `${s.color}15`, display: "flex", alignItems: "center", justifyContent: "center", margin: "16px auto" }}>
-                  <Text style={{ color: s.color, fontSize: 22 }}>{s.icon}</Text>
+              { step: "01", icon: <Settings size={22} />, title: "绑定账号", desc: "Cookie 导入小红书 PC 端和创作者账号", color: "#1668dc" },
+              { step: "02", icon: <Search size={22} />, title: "搜索采集", desc: "输入关键词自动搜索并批量采集目标笔记", color: "#7c3aed" },
+              { step: "03", icon: <Edit3 size={22} />, title: "AI 改写", desc: "AI 自动改写标题正文，生成差异化原创内容", color: "#f59e0b" },
+              { step: "04", icon: <Rocket size={22} />, title: "自动发布", desc: "按设定频率自动发布，24×7 持续运营", color: "#10b981" },
+            ].map((s) => (
+              <div key={s.step} className="text-center">
+                <p className="text-xs font-bold tracking-widest mb-3" style={{ color: s.color }}>{s.step}</p>
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: `${s.color}15`, color: s.color }}>
+                  {s.icon}
                 </div>
-                <Title level={5} style={{ color: c.t1, marginBottom: 8, fontSize: 15 }}>{s.title}</Title>
-                <Text style={{ color: c.t3, fontSize: 13 }}>{s.desc}</Text>
-              </Col>
+                <h4 className="font-semibold mb-2">{s.title}</h4>
+                <p className="text-xs text-muted-foreground">{s.desc}</p>
+              </div>
             ))}
-          </Row>
-        </Card>
-      </div>
+          </div>
+        </div>
+      </section>
 
       {/* Pricing */}
-      <div id="定价" style={{
-        maxWidth: 1000,
-        margin: isMobile ? "60px auto 0" : "80px auto 0",
-        padding: isMobile ? "0 12px" : "0 28px",
-      }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <Tag color="blue" style={{ borderRadius: 8, marginBottom: 16 }}>定价</Tag>
-          <Title level={2} style={{ color: c.t1, fontWeight: 700 }}>简单透明的方案选择</Title>
-          <Paragraph style={{ color: c.t3 }}>7 天免费试用，随时升级或降级</Paragraph>
+      <section id="定价" className="max-w-4xl mx-auto mt-20 sm:mt-24 px-4 sm:px-8">
+        <div className="text-center mb-12">
+          <Badge variant="default" className="mb-4">定价</Badge>
+          <h2 className="text-2xl sm:text-3xl font-bold">简单透明的方案选择</h2>
+          <p className="text-sm text-muted-foreground mt-2">7 天免费试用，随时升级或降级</p>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 48 }}>
-          <div style={{ background: c.statBg, borderRadius: 14, padding: 4, display: "inline-flex", border: `1px solid ${c.statBorder}` }}>
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex rounded-xl border border-border p-1 bg-muted/30">
             {(["monthly", "yearly"] as const).map((cycle) => (
-              <button key={cycle} onClick={() => setBillingCycle(cycle)}
-                style={{ padding: "10px 28px", borderRadius: 11, border: "none", background: billingCycle === cycle ? "#1668dc" : "transparent", color: billingCycle === cycle ? "#fff" : c.t3, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+              <button
+                key={cycle}
+                onClick={() => setBillingCycle(cycle)}
+                className={cn(
+                  "px-6 sm:px-8 py-2.5 rounded-lg text-sm font-semibold transition-all",
+                  billingCycle === cycle ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
                 {cycle === "monthly" ? "按月付费" : "按年付费"}
-                {cycle === "yearly" && <span style={{ fontSize: 11, marginLeft: 6, color: billingCycle === cycle ? "#ffd700" : "#f59e0b" }}>省 18%</span>}
+                {cycle === "yearly" && <span className="text-[11px] ml-1.5 text-amber-500">省 18%</span>}
               </button>
             ))}
           </div>
         </div>
 
-        <Row gutter={[20, 24]} justify="center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {PLANS.map((plan) => {
             const price = billingCycle === "monthly" ? plan.price : Math.round(plan.price * 0.82);
             return (
-              <Col xs={24} md={8} key={plan.name}>
-                <Card
-                  style={{ background: plan.popular ? c.cardBg : "transparent", borderColor: plan.popular ? plan.accent : c.cardBorder, borderRadius: 20, height: "100%", transform: plan.popular && !isMobile ? "scale(1.04)" : "scale(1)" }}
-                  styles={{ body: { padding: "36px 28px" } }}
-                >
-                  {plan.popular && (
-                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", background: `linear-gradient(135deg, ${plan.accent}, ${plan.accent}dd)`, color: "#fff", padding: "5px 22px", borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
-                      最受欢迎
-                    </div>
-                  )}
-                  <Text strong style={{ color: c.t1, fontSize: 20, display: "block", marginTop: plan.popular ? 8 : 0 }}>{plan.name}</Text>
-                  <Text style={{ color: c.t3, fontSize: 13 }}>{plan.subtitle}</Text>
-                  <div style={{ margin: "20px 0 16px", display: "flex", alignItems: "baseline" }}>
-                    <Text style={{ color: plan.accent, fontSize: 48, fontWeight: 800 }}>¥{price}</Text>
-                    <Text style={{ color: c.t3, fontSize: 14, marginLeft: 4 }}>/月</Text>
+              <div
+                key={plan.name}
+                className={cn(
+                  "rounded-2xl border bg-card/80 backdrop-blur-lg p-8 relative flex flex-col",
+                  plan.popular && "ring-2 ring-primary shadow-xl scale-[1.03] z-10",
+                )}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#1668dc] to-[#1668dc] text-white px-6 py-1 rounded-full text-xs font-bold shadow-lg">
+                    最受欢迎
                   </div>
-                  <Space orientation="vertical" size={12} style={{ marginBottom: 28 }}>
-                    {plan.features.map((feat) => (
-                      <Space key={feat} size={10}><CheckCircleOutlined style={{ color: plan.accent, fontSize: 15 }} /><Text style={{ color: c.t2, fontSize: 14 }}>{feat}</Text></Space>
-                    ))}
-                  </Space>
-                  <Button type={plan.popular ? "primary" : "default"} block size="large" onClick={handleCTA}
-                    style={{ height: 50, borderRadius: 14, fontWeight: 600, ...(plan.popular ? { background: `linear-gradient(135deg, ${plan.accent}, ${plan.accent}dd)`, border: "none" } : { background: c.btnOutlineBg, border: `1px solid ${c.btnOutlineBorder}`, color: c.btnOutlineColor }) }}>
-                    {plan.price === 0 ? "免费试用" : "开始使用"}
-                  </Button>
-                </Card>
-              </Col>
+                )}
+                <h3 className={cn("text-xl font-bold", plan.popular && "mt-4")}>{plan.name}</h3>
+                <p className="text-sm text-muted-foreground">{plan.subtitle}</p>
+                <div className="flex items-baseline gap-1 my-5">
+                  <span className="text-5xl font-extrabold" style={{ color: plan.accent }}>¥{price}</span>
+                  <span className="text-sm text-muted-foreground">/月</span>
+                </div>
+                <div className="space-y-3 flex-1 mb-7">
+                  {plan.features.map((feat) => (
+                    <div key={feat} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                      <CheckCircle size={16} className="shrink-0 mt-0.5" style={{ color: plan.accent }} />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  variant={plan.popular ? "default" : "outline"}
+                  className={cn("w-full", plan.popular && "bg-gradient-to-r from-[#1668dc] to-[#1668dc] border-0")}
+                  onClick={handleCTA}
+                >
+                  {plan.price === 0 ? "免费试用" : "开始使用"}
+                </Button>
+              </div>
             );
           })}
-        </Row>
-      </div>
+        </div>
+      </section>
 
       {/* FAQ */}
-      <div id="FAQ" style={{ maxWidth: 800, margin: "80px auto 0", padding: "0 28px 40px" }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <Tag color="blue" style={{ borderRadius: 8, marginBottom: 16 }}>FAQ</Tag>
-          <Title level={2} style={{ color: c.t1, fontWeight: 700 }}>还有疑问？</Title>
+      <section id="FAQ" className="max-w-2xl mx-auto mt-20 sm:mt-24 px-4 sm:px-8 pb-10">
+        <div className="text-center mb-12">
+          <Badge variant="default" className="mb-4">FAQ</Badge>
+          <h2 className="text-2xl sm:text-3xl font-bold">还有疑问？</h2>
         </div>
-        <Space orientation="vertical" size={12} style={{ width: "100%" }}>
-          {FAQ.map((item, i) => (
-            <Card key={i} style={{ background: c.faqBg, borderColor: c.cardBorder, borderRadius: 14 }} styles={{ body: { padding: "24px 28px" } }}>
-              <Text strong style={{ color: c.t1, fontSize: 15, display: "block", marginBottom: 8 }}>Q: {item.q}</Text>
-              <Text style={{ color: c.t2, fontSize: 14 }}>{item.a}</Text>
-            </Card>
+        <div className="space-y-3">
+          {FAQ.map((item) => (
+            <div key={item.q} className="rounded-2xl border bg-card/50 backdrop-blur-lg p-5 sm:p-6">
+              <p className="font-semibold mb-2">Q: {item.q}</p>
+              <p className="text-sm text-muted-foreground">{item.a}</p>
+            </div>
           ))}
-        </Space>
-      </div>
+        </div>
+      </section>
 
       {/* CTA */}
-      <div style={{
-        textAlign: "center",
-        padding: isMobile ? "60px 16px" : "80px 28px",
-        background: c.heroBg,
-      }}>
-        <Title level={isMobile ? 3 : 2} style={{ color: c.t1, marginBottom: isMobile ? 12 : 16 }}>
-          准备好让效率起飞了吗？
-        </Title>
-        <Paragraph style={{ color: c.t2, fontSize: isMobile ? 14 : 16, marginBottom: isMobile ? 24 : 32 }}>
-          一个浏览器标签页，5 个工具的事。7 天免费试用，零风险上手。
-        </Paragraph>
-        <Space size={isMobile ? 8 : 16} wrap style={{ justifyContent: "center" }}>
-          <Button type="primary" size={isMobile ? "middle" : "large"} icon={<RocketOutlined />} onClick={handleCTA}
-            style={{
-              height: isMobile ? 44 : 56, paddingInline: isMobile ? 24 : 48,
-              fontSize: isMobile ? 14 : 18, fontWeight: 700, borderRadius: 16,
-              background: "linear-gradient(135deg, #1668dc, #7c3aed)", border: "none",
-              boxShadow: "0 8px 36px rgba(22,104,220,0.45)",
-            }}>
-            {auth.isAuthenticated ? "进入工作台" : "立即免费使用"}
-          </Button>
-          {!isMobile && (
-            <Button size="large" icon={<ArrowRightOutlined />} onClick={() => navigate("/login")}
-              style={{
-                height: 56, paddingInline: 36, fontSize: 16, borderRadius: 16,
-                background: c.btnOutlineBg, border: `1px solid ${c.btnOutlineBorder}`, color: c.btnOutlineColor,
-              }}>
-              已有账号？登录
+      <section className="text-center py-16 sm:py-20 px-4 bg-background relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-primary/5 blur-[100px]" />
+        </div>
+        <div className="relative">
+          <h2 className={cn("font-bold mb-3", isMobile ? "text-2xl" : "text-3xl")}>准备好让效率起飞了吗？</h2>
+          <p className="text-muted-foreground mb-6 sm:mb-8 max-w-lg mx-auto">
+            一个浏览器标签页，5 个工具的事。7 天免费试用，零风险上手。
+          </p>
+          <div className="flex items-center justify-center gap-3 sm:gap-5 flex-wrap">
+            <Button size={isMobile ? "default" : "lg"} className="bg-gradient-to-r from-[#1668dc] to-[#7c3aed] text-white shadow-xl shadow-primary/30 border-0" onClick={handleCTA}>
+              <Rocket size={18} className="mr-1.5" />
+              {auth.isAuthenticated ? "进入工作台" : "立即免费使用"}
             </Button>
-          )}
-        </Space>
-      </div>
+            {!isMobile && (
+              <Button size="lg" variant="outline" onClick={() => navigate("/login")}>
+                <ArrowRight size={18} className="mr-1.5" />
+                已有账号？登录
+              </Button>
+            )}
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <div style={{ textAlign: "center", padding: "40px 28px", borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`, background: c.bg }}>
-        <Space size={8}>
-          <div style={{ width: 26, height: 26, borderRadius: 7, background: "linear-gradient(135deg, #1668dc, #7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13, color: "#fff" }}>X</div>
-          <Text style={{ color: c.t3, fontSize: 13 }}>小红书矩阵运营 · 仅供学习交流</Text>
-        </Space>
-      </div>
+      <footer className="text-center py-10 border-t border-border">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#ff2442] to-[#ff6b81] flex items-center justify-center shrink-0">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="4" /><path d="M9 8h6" /><path d="M9 12h6" /><path d="M9 16h3" />
+            </svg>
+          </div>
+          小红书助手 · 仅供学习交流
+        </div>
+      </footer>
     </div>
   );
 }

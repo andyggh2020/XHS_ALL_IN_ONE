@@ -1,13 +1,9 @@
-import { Alert, Button, Card, Checkbox, Space, Typography } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import { RefreshCw } from "lucide-react";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-
-import { useThemeColors } from "../../hooks/use-theme-colors";
+import { Button } from "../ui/button";
 import { createXhsCreatorQrLoginSession, createXhsPcQrLoginSession, pollXhsLoginSession } from "../../lib/api";
 import type { PlatformAccount, XhsQrLoginSession } from "../../types";
-
-const { Text, Link: AntLink } = Typography;
 
 type QrLoginPanelProps = {
   accountType: "pc" | "creator";
@@ -15,7 +11,6 @@ type QrLoginPanelProps = {
 };
 
 export function QrLoginPanel({ accountType, onConfirmed }: QrLoginPanelProps) {
-  const c = useThemeColors();
   const [session, setSession] = useState<XhsQrLoginSession | null>(null);
   const [statusText, setStatusText] = useState("准备生成二维码");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,9 +21,7 @@ export function QrLoginPanel({ accountType, onConfirmed }: QrLoginPanelProps) {
   function errorMessage(error: unknown): string {
     if (axios.isAxiosError(error)) {
       const detail = error.response?.data?.detail;
-      if (typeof detail === "string" && detail) {
-        return detail;
-      }
+      if (typeof detail === "string" && detail) return detail;
     }
     return "二维码生成失败，请稍后重试。";
   }
@@ -51,14 +44,10 @@ export function QrLoginPanel({ accountType, onConfirmed }: QrLoginPanelProps) {
     }
   }
 
-  useEffect(() => {
-    void startSession();
-  }, [accountType, syncCreator]);
+  useEffect(() => { void startSession(); }, [accountType, syncCreator]);
 
   useEffect(() => {
-    if (!session?.session_id || session.status === "confirmed" || session.status === "expired") {
-      return;
-    }
+    if (!session?.session_id || session.status === "confirmed" || session.status === "expired") return;
 
     const interval = window.setInterval(async () => {
       try {
@@ -76,86 +65,64 @@ export function QrLoginPanel({ accountType, onConfirmed }: QrLoginPanelProps) {
           setStatusText("账号绑定成功");
           onConfirmed(polled.account);
         }
-      } catch {
-        setError("轮询登录状态失败，正在等待下一次尝试。");
-      }
+      } catch { /* silent */ }
     }, 2000);
 
     return () => window.clearInterval(interval);
   }, [accountType, onConfirmed, session?.session_id, session?.status]);
 
   return (
-    <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-      <Card
-        styles={{
-          body: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-            minHeight: 220,
-            background: c.cardBg,
-          },
-        }}
-        style={{ borderColor: c.cardBorder }}
-      >
+    <div className="space-y-5">
+      {/* QR Code */}
+      <div className="flex items-center justify-center p-5 min-h-[200px] rounded-2xl border-2 border-dashed border-border/60 bg-[var(--surface-block)]">
         {session?.qr_image_data_url ? (
           <img
             src={session.qr_image_data_url}
             alt="小红书登录二维码"
-            style={{ width: 180, height: 180, borderRadius: 8, background: "#fff", padding: 8 }}
+            className="w-[168px] h-[168px] rounded-xl bg-white p-2.5 shadow-lg"
           />
         ) : (
-          <div
-            style={{
-              width: 180,
-              height: 180,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: c.cardBg4,
-              borderRadius: 8,
-              color: c.textMuted,
-              fontSize: 28,
-              fontWeight: 700,
-            }}
-          >
+          <div className="w-[168px] h-[168px] flex items-center justify-center rounded-xl bg-muted/50 text-muted-foreground/40 text-3xl font-bold tracking-widest border border-border/30">
             QR
           </div>
         )}
-      </Card>
-
-      <div style={{ textAlign: "center" }}>
-        <Text strong style={{ display: "block", marginBottom: 4, color: "rgba(255,255,255,0.88)" }}>
-          {statusText}
-        </Text>
-        {session?.qr_url ? (
-          <AntLink href={session.qr_url} target="_blank" rel="noreferrer">
-            打开二维码链接
-          </AntLink>
-        ) : null}
       </div>
 
-      {accountType === "pc" ? (
-        <Checkbox
-          checked={syncCreator}
-          onChange={(event) => setSyncCreator(event.target.checked)}
-          style={{ color: "rgba(255,255,255,0.88)" }}
-        >
-          登录 PC 后同步 Creator 账号
-        </Checkbox>
-      ) : null}
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium">{statusText}</p>
+        {session?.qr_url && (
+          <a href={session.qr_url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+            打开二维码链接
+          </a>
+        )}
+      </div>
 
-      {error ? <Alert type="error" message={error} showIcon /> : null}
+      {accountType === "pc" && (
+        <label className="flex items-center gap-2.5 cursor-pointer px-1 py-1.5 rounded-lg hover:bg-surface-hover transition-colors">
+          <input
+            type="checkbox"
+            checked={syncCreator}
+            onChange={(e) => setSyncCreator(e.target.checked)}
+            className="w-4 h-4 rounded border-border text-primary focus:ring-primary/30"
+          />
+          <span className="text-sm text-muted-foreground">登录 PC 后同步 Creator 账号</span>
+        </label>
+      )}
 
-      <Button
-        block
-        icon={<ReloadOutlined />}
-        onClick={startSession}
-        loading={isLoading}
-      >
+      {error && (
+        <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive text-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
+
+      <Button onClick={startSession} disabled={isLoading} variant="outline" className="w-full">
+        <RefreshCw size={16} className={`mr-1.5 ${isLoading ? "animate-spin" : ""}`} />
         {isLoading ? "生成中..." : "刷新二维码"}
       </Button>
-    </Space>
+    </div>
   );
 }

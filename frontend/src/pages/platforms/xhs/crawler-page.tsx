@@ -1,24 +1,16 @@
-import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  CloudDownloadOutlined,
-  CommentOutlined,
-  FileExcelOutlined,
-  LinkOutlined,
-  LoadingOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import { Alert, Button, Card, Checkbox, Col, Empty, Form, Input, InputNumber, Row, Select, Space, Spin, Table, Tag, Typography } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import { Check, CheckCircle, ChevronDown, ChevronRight, Clock, Download, ExternalLink, FileText, Heart, Image, KeyRound, Link as LinkIcon, Loader2, MessageSquare, Play, Plus, RefreshCw, Search, Send, Settings, Shield, Star, Target, Trash2, User, X, Zap, BarChart3, Bot, Database } from "lucide-react";
+import { Button } from "../../../components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Input } from "../../../components/ui/input";
+import { Badge } from "../../../components/ui/badge";
+import { Spinner } from "../../../components/ui/skeletons";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
+import { HeaderControls } from "../../../components/layout/header-controls";
 import { Link } from "react-router-dom";
 
 import { crawlXhsDataStream, fetchAccounts } from "../../../lib/api";
 import type { PlatformAccount, XhsDataCrawlItem, XhsDataCrawlMode } from "../../../types";
-
-const { Title, Text } = Typography;
 
 const sortOptions = [
   { value: 0, label: "综合排序" },
@@ -228,100 +220,251 @@ export function XhsCrawlerPage() {
 
   const noPcAccount = !isLoadingAccounts && pcAccounts.length === 0;
 
-  const columns: ColumnsType<XhsDataCrawlItem> = [
-    {
-      title: "状态", dataIndex: "status", width: 80,
-      render: (status: string) => status === "failed"
-        ? <Tag icon={<CloseCircleOutlined />} color="error">失败</Tag>
-        : <Tag icon={<CheckCircleOutlined />} color="success">成功</Tag>,
-    },
-    { title: "来源", dataIndex: "source", width: 200, ellipsis: true },
-    { title: "标题", key: "title", width: 200, ellipsis: true, render: (_, item) => item.note?.title || "-" },
-    { title: "作者", key: "author", width: 100, render: (_, item) => item.note?.author_name || "-" },
-    { title: "互动", key: "engagement", width: 180, render: (_, item) => item.note ? <Text type="secondary" style={{ fontSize: 12 }}>赞{item.note.likes} 藏{item.note.collects} 评{item.note.comments}</Text> : "-" },
-    { title: "评论", key: "comments", width: 80, render: (_, item) => <Space size={4}><CommentOutlined />{item.comment_count}</Space> },
-    { title: "错误", dataIndex: "error", ellipsis: true, render: (err: string) => err ? <Text type="danger" style={{ fontSize: 12 }}>{err}</Text> : "-" },
-  ];
-
   return (
     <div>
-      <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-        <Col>
-          <Title level={4} style={{ margin: 0 }}>数据抓取</Title>
-          <Text type="secondary">搜索结果、笔记详情和评论抓取，失败项单独标注并可导出 Excel</Text>
-        </Col>
-        <Col>
-          <Button icon={<ReloadOutlined />} onClick={loadAccounts} loading={isLoadingAccounts}>刷新账号</Button>
-        </Col>
-      </Row>
+      <div className="bg-page-header-feigua -mx-8 -mt-8 px-8 pt-8 pb-2 mb-6 border-b border-border/50">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight mb-1.5">数据抓取</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">搜索结果、笔记详情和评论抓取，失败项单独标注并可导出 Excel</p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <Button onClick={loadAccounts} disabled={isLoadingAccounts}>
+                {isLoadingAccounts ? <Spinner size="sm" className="mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                刷新账号
+              </Button>
+              <HeaderControls />
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Card style={{ marginBottom: 24 }}>
-        <Form layout="vertical" onFinish={() => void handleRun()}>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item label="PC 账号">
-                <Select value={selectedAccountId} onChange={setSelectedAccountId} placeholder="选择 PC 账号" options={pcAccounts.map((a) => ({ value: a.id, label: `${a.nickname || `PC 账号 ${a.id}`} · ${a.status}` }))} />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="抓取方式">
-                <Select value={mode} onChange={(v) => setMode(v)} options={[{ value: "note_urls", label: "直接爬取笔记链接" }, { value: "search", label: "通过搜索爬取详情" }, { value: "comments", label: "只爬取评论" }]} />
-              </Form.Item>
-            </Col>
-            <Col span={4}>
-              <Form.Item label="Time Sleep">
-                <InputNumber min={0} max={60} step={0.5} value={timeSleep} onChange={(v) => setTimeSleep(v ?? 1)} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col span={4} style={{ display: "flex", alignItems: "center", paddingTop: 8 }}>
-              <Checkbox checked={fetchCommentsChecked} onChange={(e) => setFetchCommentsChecked(e.target.checked)} disabled={mode === "comments"}>同时抓取评论</Checkbox>
-            </Col>
-          </Row>
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <form onSubmit={(e) => void handleRun(e)}>
+            <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-8">
+                <label className="text-sm font-medium mb-1.5 block">PC 账号</label>
+                <select
+                  value={selectedAccountId ?? ""}
+                  onChange={(e) => setSelectedAccountId(e.target.value ? Number(e.target.value) : null)}
+                  className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                >
+                  <option value="">选择 PC 账号</option>
+                  {pcAccounts.map((a) => (
+                    <option key={a.id} value={a.id}>{a.nickname || `PC 账号 ${a.id}`} · {a.status}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-4">
+                <label className="text-sm font-medium mb-1.5 block">抓取方式</label>
+                <select
+                  value={mode}
+                  onChange={(e) => setMode(e.target.value as XhsDataCrawlMode)}
+                  className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                >
+                  <option value="note_urls">直接爬取笔记链接</option>
+                  <option value="search">通过搜索爬取详情</option>
+                  <option value="comments">只爬取评论</option>
+                </select>
+              </div>
+            </div>
 
-          {mode === "search" ? (
-            <Row gutter={16}>
-              <Col span={8}><Form.Item label="搜索关键词"><Input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="低卡早餐、通勤穿搭" /></Form.Item></Col>
-              <Col span={4}><Form.Item label="爬取数量"><InputNumber min={1} max={200} value={maxNotes} onChange={(v) => { const n = v ?? 20; setMaxNotes(n); setPages(Math.max(1, Math.ceil(n / 20))); }} style={{ width: "100%" }} /></Form.Item></Col>
-              <Col span={4}><Form.Item label="排序"><Select value={filters.sort_type_choice} onChange={(v) => setFilters((c) => ({ ...c, sort_type_choice: v }))} options={sortOptions} /></Form.Item></Col>
-              <Col span={4}><Form.Item label="类型"><Select value={filters.note_type} onChange={(v) => setFilters((c) => ({ ...c, note_type: v }))} options={noteTypeOptions} /></Form.Item></Col>
-              <Col span={4}><Form.Item label="时间范围"><Select value={filters.note_time} onChange={(v) => setFilters((c) => ({ ...c, note_time: v }))} options={noteTimeOptions} /></Form.Item></Col>
-              <Col span={4}><Form.Item label="距离"><Select value={filters.pos_distance} onChange={(v) => setFilters((c) => ({ ...c, pos_distance: v }))} options={distanceOptions} /></Form.Item></Col>
-              <Col span={4}><Form.Item label="Geo"><Input value={filters.geo} onChange={(e) => setFilters((c) => ({ ...c, geo: e.target.value }))} placeholder="经纬度" /></Form.Item></Col>
-            </Row>
-          ) : (
-            <Form.Item label="笔记链接"><Input.TextArea value={urls} onChange={(e) => setUrls(e.target.value)} placeholder="每行一个链接，也可以用英文逗号分隔" rows={4} /></Form.Item>
+            <div className="grid grid-cols-12 gap-4 mt-4">
+              <div className="col-span-2">
+                <label className="text-sm font-medium mb-1.5 block">Time Sleep</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={60}
+                  step={0.5}
+                  value={timeSleep}
+                  onChange={(e) => setTimeSleep(Number(e.target.value) || 1)}
+                  className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                />
+              </div>
+              <div className="col-span-3 flex items-end pb-2">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={fetchCommentsChecked}
+                    onChange={(e) => setFetchCommentsChecked(e.target.checked)}
+                    disabled={mode === "comments"}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  同时抓取评论
+                </label>
+              </div>
+            </div>
+
+            {mode === "search" ? (
+              <div className="grid grid-cols-12 gap-4 mt-4">
+                <div className="col-span-3">
+                  <label className="text-sm font-medium mb-1.5 block">搜索关键词</label>
+                  <input
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="低卡早餐、通勤穿搭"
+                    className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium mb-1.5 block">爬取数量</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={200}
+                    value={maxNotes}
+                    onChange={(e) => { const n = Number(e.target.value) || 20; setMaxNotes(n); setPages(Math.max(1, Math.ceil(n / 20))); }}
+                    className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium mb-1.5 block">排序</label>
+                  <select
+                    value={filters.sort_type_choice}
+                    onChange={(e) => setFilters((c) => ({ ...c, sort_type_choice: Number(e.target.value) }))}
+                    className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                  >
+                    {sortOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium mb-1.5 block">类型</label>
+                  <select
+                    value={filters.note_type}
+                    onChange={(e) => setFilters((c) => ({ ...c, note_type: Number(e.target.value) }))}
+                    className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                  >
+                    {noteTypeOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium mb-1.5 block">时间范围</label>
+                  <select
+                    value={filters.note_time}
+                    onChange={(e) => setFilters((c) => ({ ...c, note_time: Number(e.target.value) }))}
+                    className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                  >
+                    {noteTimeOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div className="col-span-1">
+                  <label className="text-sm font-medium mb-1.5 block">距离</label>
+                  <select
+                    value={filters.pos_distance}
+                    onChange={(e) => setFilters((c) => ({ ...c, pos_distance: Number(e.target.value) }))}
+                    className="flex h-10 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm"
+                  >
+                    {distanceOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <label className="text-sm font-medium mb-1.5 block">笔记链接</label>
+                <textarea
+                  value={urls}
+                  onChange={(e) => setUrls(e.target.value)}
+                  placeholder="每行一个链接，也可以用英文逗号分隔"
+                  rows={4}
+                  className="flex min-h-[80px] w-full rounded-xl border border-input bg-background px-4 py-3 text-sm"
+                />
+              </div>
+            )}
+
+            <div className="flex gap-3 mt-4">
+              <Button type="submit" disabled={noPcAccount}>
+                {isRunning ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : mode === "search" ? <Search className="h-4 w-4 mr-2" /> : <Download className="h-4 w-4 mr-2" />}
+                {isRunning ? "抓取中..." : "开始抓取"}
+              </Button>
+              <Button variant="outline" onClick={() => items.length && exportRowsToExcel(items)} disabled={!items.length}>
+                <FileText className="h-4 w-4 mr-2" />导出 Excel
+              </Button>
+            </div>
+          </form>
+
+          {error && (
+            <div className="mt-4 p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm flex items-center gap-2">
+              <X className="h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </div>
           )}
-
-          <Space>
-            <Button type="primary" htmlType="submit" loading={isRunning} disabled={noPcAccount} icon={mode === "search" ? <SearchOutlined /> : <CloudDownloadOutlined />}>
-              {isRunning ? "抓取中..." : "开始抓取"}
-            </Button>
-            <Button icon={<FileExcelOutlined />} onClick={() => items.length && exportRowsToExcel(items)} disabled={!items.length}>导出 Excel</Button>
-          </Space>
-        </Form>
-
-        {error && <Alert message={error} type="error" showIcon style={{ marginTop: 16 }} />}
-        {noPcAccount && (
-          <Empty description="还没有可用的 PC 账号" style={{ marginTop: 24 }}>
-            <Link to="/platforms/xhs/accounts"><Button type="primary" icon={<LinkOutlined />}>去绑定账号</Button></Link>
-          </Empty>
-        )}
+          {noPcAccount && (
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center mt-6">
+              <h3 className="text-lg font-semibold mb-2">还没有可用的 PC 账号</h3>
+              <Link to="/platforms/xhs/accounts">
+                <Button><LinkIcon className="h-4 w-4 mr-2" />去绑定账号</Button>
+              </Link>
+            </div>
+          )}
+        </CardContent>
       </Card>
 
-      <Card title={<Space><Title level={5} style={{ margin: 0 }}>抓取结果</Title><Text type="secondary">成功 {successCount} · 失败 {failedCount}{isRunning && progressMsg ? ` · ${progressMsg}` : ""}{isRunning ? " · 抓取中..." : ""}</Text></Space>}>
-        {items.length === 0 && !isRunning ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="执行抓取后，结果会显示在这里" />
-        ) : (
-          <Table<XhsDataCrawlItem>
-            columns={columns}
-            dataSource={items}
-            rowKey={(_, index) => `${index}`}
-            size="small"
-            pagination={{ pageSize: 50 }}
-            scroll={{ x: 900 }}
-            rowClassName={(item) => item.status === "failed" ? "ant-table-row-error" : ""}
-          />
-        )}
+      <Card className="mb-6">
+        <CardHeader className="p-6 pb-0">
+          <div className="flex items-center gap-3">
+            <h5 className="text-base font-semibold m-0">抓取结果</h5>
+            <span className="text-sm text-muted-foreground">
+              成功 {successCount} · 失败 {failedCount}{isRunning && progressMsg ? ` · ${progressMsg}` : ""}{isRunning ? " · 抓取中..." : ""}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          {items.length === 0 && !isRunning ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-sm text-muted-foreground">执行抓取后，结果会显示在这里</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2 px-3 font-medium text-muted-foreground w-20">状态</th>
+                    <th className="text-left py-2 px-3 font-medium text-muted-foreground w-50">来源</th>
+                    <th className="text-left py-2 px-3 font-medium text-muted-foreground w-50">标题</th>
+                    <th className="text-left py-2 px-3 font-medium text-muted-foreground w-24">作者</th>
+                    <th className="text-left py-2 px-3 font-medium text-muted-foreground w-44">互动</th>
+                    <th className="text-left py-2 px-3 font-medium text-muted-foreground w-20">评论</th>
+                    <th className="text-left py-2 px-3 font-medium text-muted-foreground">错误</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item, index) => (
+                    <tr key={index} className={`border-b border-border/50 ${item.status === "failed" ? "bg-red-500/5" : ""}`}>
+                      <td className="py-2 px-3">
+                        {item.status === "failed" ? (
+                          <Badge variant="destructive"><X className="h-3 w-3 mr-1" />失败</Badge>
+                        ) : (
+                          <Badge variant="success"><Check className="h-3 w-3 mr-1" />成功</Badge>
+                        )}
+                      </td>
+                      <td className="py-2 px-3 max-w-[200px] truncate">{item.source}</td>
+                      <td className="py-2 px-3 max-w-[200px] truncate">{item.note?.title || "-"}</td>
+                      <td className="py-2 px-3">{item.note?.author_name || "-"}</td>
+                      <td className="py-2 px-3">
+                        {item.note ? (
+                          <span className="text-xs text-muted-foreground">
+                            赞{item.note.likes} 藏{item.note.collects} 评{item.note.comments}
+                          </span>
+                        ) : "-"}
+                      </td>
+                      <td className="py-2 px-3">
+                        <span className="flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />{item.comment_count}
+                        </span>
+                      </td>
+                      <td className="py-2 px-3">
+                        {item.error ? <span className="text-xs text-red-400">{item.error}</span> : "-"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
       </Card>
     </div>
   );

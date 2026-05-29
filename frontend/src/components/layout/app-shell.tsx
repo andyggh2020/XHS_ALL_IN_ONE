@@ -1,73 +1,306 @@
-import { Bell, LogOut, Menu, Moon, Search, Sun } from "lucide-react";
-import { Avatar, Badge, Button, Drawer, Layout, List, Menu as AntMenu, Space, Typography } from "antd";
-import type { MenuProps } from "antd";
 import {
-  AimOutlined, BarChartOutlined, CloudDownloadOutlined,
-  DashboardOutlined, DatabaseOutlined, FileTextOutlined, KeyOutlined,
-  RobotOutlined, SafetyCertificateOutlined, ScheduleOutlined,
-  SearchOutlined as SearchIcon, SendOutlined, SettingOutlined,
-  StarOutlined, TeamOutlined, ThunderboltOutlined, UserOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
-import { useCallback, useEffect, useState } from "react";
+  BarChart3, BookOpen, ChevronDown, Database, Download, FileEdit, Film, Goal,
+  KeyRound, LayoutDashboard, LogOut, Menu, MonitorPlay, Search,
+  Send, Settings, Shield, Sparkles, Timer, Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import KeepAliveRouteOutlet from "keepalive-for-react-router";
 
-import { SearchModal } from "../../components/ui/search-modal";
+import { Dialog, DialogBody } from "../../components/ui/dialog";
+import { Avatar } from "../../components/ui/avatar";
+import { Input } from "../../components/ui/input";
 import { useAuth } from "../../hooks/use-auth";
 import { useMediaQuery } from "../../hooks/use-media-query";
-import { useThemeMode } from "../../app/providers";
-import { fetchNotifications, markAllNotificationsRead, markNotificationRead } from "../../lib/api";
-import type { AppNotification } from "../../types";
+import { SearchContext } from "./search-context";
+import { globalSearch } from "../../lib/api";
+import type { SearchResult } from "../../types";
+import { cn } from "../../lib/utils";
 
-const { Sider, Header, Content } = Layout;
-const { Text } = Typography;
+// KeepAlive route patterns (defined outside component to avoid JSX/regex parsing conflicts)
+const keepAlivePatterns = [/\/platforms\/xhs\/discovery/, /\/platforms\/xhs\/crawler/];
 
-const mainNavItems: MenuProps["items"] = [
-  { key: "/platforms/xhs/dashboard", icon: <DashboardOutlined />, label: "总览" },
-  { key: "/platforms/xhs/accounts", icon: <SafetyCertificateOutlined />, label: "账号矩阵" },
-  { key: "/platforms/xhs/discovery", icon: <SearchIcon />, label: "笔记发现" },
-  { key: "/platforms/xhs/crawler", icon: <CloudDownloadOutlined />, label: "数据抓取" },
-  { key: "/platforms/xhs/keywords", icon: <KeyOutlined />, label: "关键词组" },
-  { key: "/platforms/xhs/analytics", icon: <BarChartOutlined />, label: "数据洞察" },
-  { key: "/platforms/xhs/benchmarks", icon: <AimOutlined />, label: "竞品监控" },
-  { key: "/platforms/xhs/image-studio", icon: <StarOutlined />, label: "图片工坊" },
-  { key: "/platforms/xhs/video-studio", icon: <VideoCameraOutlined />, label: "视频工坊" },
-  { key: "/platforms/xhs/library", icon: <DatabaseOutlined />, label: "内容库" },
-  { key: "/platforms/xhs/drafts", icon: <FileTextOutlined />, label: "草稿工坊" },
-  { key: "/platforms/xhs/publish", icon: <SendOutlined />, label: "发布中心" },
-  { key: "/platforms/xhs/auto-ops", icon: <ThunderboltOutlined />, label: "自动运营" },
+// ===== Nav data =====
+
+type NavItem = {
+  key: string;
+  icon: ReactNode;
+  label: string;
+  accent: string; // CSS variable for icon color
+  iconBg: string; // background tint class
+};
+
+type NavGroup = {
+  label: string;
+  icon: ReactNode;
+  items: NavItem[];
+  accent: string;
+  iconBg: string;
+};
+
+const navGroups: NavGroup[] = [
+  {
+    label: "运营分析", icon: <BarChart3 size={18} />, accent: "var(--nav-analytics)", iconBg: "bg-[var(--nav-analytics)]/10",
+    items: [
+      { key: "/platforms/xhs/analytics", icon: <BarChart3 size={16} />, label: "数据洞察", accent: "var(--nav-analytics)", iconBg: "bg-[var(--nav-analytics)]/10" },
+      { key: "/platforms/xhs/benchmarks", icon: <Goal size={16} />, label: "竞品监控", accent: "var(--nav-benchmarks)", iconBg: "bg-[var(--nav-benchmarks)]/10" },
+      { key: "/platforms/xhs/keywords", icon: <KeyRound size={16} />, label: "关键词组", accent: "var(--nav-keywords)", iconBg: "bg-[var(--nav-keywords)]/10" },
+    ],
+  },
+  {
+    label: "内容创作", icon: <Sparkles size={18} />, accent: "var(--nav-image-studio)", iconBg: "bg-[var(--nav-image-studio)]/10",
+    items: [
+      { key: "/platforms/xhs/image-studio", icon: <Sparkles size={16} />, label: "图片工坊", accent: "var(--nav-image-studio)", iconBg: "bg-[var(--nav-image-studio)]/10" },
+      { key: "/platforms/xhs/video-studio", icon: <Film size={16} />, label: "视频工坊", accent: "var(--nav-video-studio)", iconBg: "bg-[var(--nav-video-studio)]/10" },
+      { key: "/platforms/xhs/library", icon: <Database size={16} />, label: "内容库", accent: "var(--nav-library)", iconBg: "bg-[var(--nav-library)]/10" },
+      { key: "/platforms/xhs/drafts", icon: <FileEdit size={16} />, label: "草稿工坊", accent: "var(--nav-drafts)", iconBg: "bg-[var(--nav-drafts)]/10" },
+      { key: "/platforms/xhs/publish", icon: <Send size={16} />, label: "发布中心", accent: "var(--nav-publish)", iconBg: "bg-[var(--nav-publish)]/10" },
+    ],
+  },
+  {
+    label: "自动化", icon: <MonitorPlay size={18} />, accent: "var(--nav-auto-ops)", iconBg: "bg-[var(--nav-auto-ops)]/10",
+    items: [
+      { key: "/platforms/xhs/crawler", icon: <Download size={16} />, label: "数据抓取", accent: "var(--nav-crawler)", iconBg: "bg-[var(--nav-crawler)]/10" },
+      { key: "/platforms/xhs/discovery", icon: <Search size={16} />, label: "笔记发现", accent: "var(--nav-discovery)", iconBg: "bg-[var(--nav-discovery)]/10" },
+      { key: "/platforms/xhs/auto-ops", icon: <MonitorPlay size={16} />, label: "自动运营", accent: "var(--nav-auto-ops)", iconBg: "bg-[var(--nav-auto-ops)]/10" },
+    ],
+  },
 ];
 
-const footerNavItems: MenuProps["items"] = [
-  { key: "/tasks", icon: <ScheduleOutlined />, label: "任务中心" },
-  { key: "/models", icon: <RobotOutlined />, label: "模型配置" },
-  { key: "/settings", icon: <SettingOutlined />, label: "设置" },
+const mainNavItems: NavItem[] = [
+  { key: "/platforms/xhs/dashboard", icon: <LayoutDashboard size={18} />, label: "总览", accent: "var(--nav-dashboard)", iconBg: "bg-[var(--nav-dashboard)]/10" },
 ];
 
-const adminNavItem: MenuProps["items"] = [
-  { key: "/admin/users", icon: <TeamOutlined />, label: "用户管理" },
+const footerNavItems: NavItem[] = [
+  { key: "/settings", icon: <Settings size={18} />, label: "设置", accent: "var(--nav-settings)", iconBg: "bg-[var(--nav-settings)]/10" },
 ];
+
+const adminNavItem: NavItem[] = [
+  { key: "/admin/users", icon: <Users size={18} />, label: "用户管理", accent: "var(--nav-users)", iconBg: "bg-[var(--nav-users)]/10" },
+];
+
+// ===== Helpers =====
 
 function levelColor(level: string): string {
-  if (level === "error") return "#ef4444";
-  if (level === "warning") return "#eab308";
-  return "#666";
+  if (level === "error") return "var(--destructive)";
+  if (level === "warning") return "var(--warning)";
+  return "var(--muted-foreground)";
 }
+
+// ===== Search Modal =====
+
+function SearchModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    if (open) {
+      setQuery("");
+      setResults(null);
+      setSelectedIndex(0);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!query.trim()) { setResults(null); return; }
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await globalSearch(query.trim());
+        setResults(res);
+      } catch { setResults(null); }
+      finally { setLoading(false); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const flatItems = (() => {
+    if (!results) return [];
+    const items: { label: string; url: string; group: string }[] = [];
+    results.notes.forEach((n) => items.push({ label: `📝 ${n.title}`, url: n.url, group: "笔记" }));
+    results.accounts.forEach((a) => items.push({ label: `🔗 ${a.nickname} (${a.sub_type})`, url: a.url, group: "账号" }));
+    results.publish_jobs.forEach((j) => items.push({ label: `🚀 ${j.title} [${j.status}]`, url: j.url, group: "发布" }));
+    results.tasks.forEach((t) => items.push({ label: `⚡ ${t.task_type} [${t.status}]`, url: t.url, group: "任务" }));
+    return items;
+  })();
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); setSelectedIndex((i) => Math.min(i + 1, flatItems.length - 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setSelectedIndex((i) => Math.max(i - 1, 0)); }
+    else if (e.key === "Enter" && flatItems[selectedIndex]) { onClose(); navigate(flatItems[selectedIndex].url); }
+  };
+
+  const hasAnyResult = results && (results.notes.length > 0 || results.accounts.length > 0 || results.publish_jobs.length > 0 || results.tasks.length > 0);
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <div className="p-4 pb-0">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
+            onKeyDown={handleKeyDown}
+            placeholder="搜索笔记、账号、发布任务..."
+            className="w-full h-11 pl-10 pr-16 rounded-xl border border-input bg-background/50 text-sm focus-visible:outline-none focus-visible:border-primary/50 focus-visible:shadow-[0_0_0_3px_rgba(37,99,235,0.08)] transition-all"
+            autoFocus
+          />
+          <kbd className="absolute right-3.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded text-[10px] bg-muted text-muted-foreground font-mono">ESC</kbd>
+        </div>
+      </div>
+
+      <div className="max-h-[400px] overflow-y-auto p-2">
+        {loading && <div className="text-center py-8 text-sm text-muted-foreground">搜索中...</div>}
+        {!loading && query && !hasAnyResult && (
+          <div className="text-center py-8 text-sm text-muted-foreground">没有找到 "{query}" 的相关结果</div>
+        )}
+        {!loading && results && (() => {
+          const groups = [
+            { key: "笔记", items: results.notes, icon: "📝", labelKey: "title" as const, dot: "var(--nav-discovery)" },
+            { key: "账号", items: results.accounts, icon: "🔗", labelKey: "nickname" as const, dot: "var(--nav-accounts)" },
+            { key: "发布", items: results.publish_jobs, icon: "🚀", labelKey: "title" as const, dot: "var(--nav-publish)" },
+            { key: "任务", items: results.tasks, icon: "⚡", labelKey: "task_type" as const, dot: "var(--nav-tasks)" },
+          ].filter((g) => g.items.length > 0);
+
+          return groups.length > 0 ? (
+            <div>
+              {groups.map((group) => (
+                <div key={group.key}>
+                  <div className="flex items-center gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-widest">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: group.dot }} />
+                    <span className="text-muted-foreground">{group.key}</span>
+                  </div>
+                  {group.items.map((item: any) => {
+                    const label = item[group.labelKey] || "";
+                    const flatIdx = flatItems.findIndex((f) => f.label.includes(label));
+                    const isSelected = flatIdx === selectedIndex;
+                    return (
+                      <div
+                        key={`${group.key}-${item.id}`}
+                        onClick={() => { onClose(); navigate(item.url || ""); }}
+                        onMouseEnter={() => setSelectedIndex(flatIdx)}
+                        className={cn(
+                          "flex items-center gap-2 px-6 py-2.5 cursor-pointer rounded-lg transition-all",
+                          isSelected ? "bg-primary/10 text-primary" : "hover:bg-accent",
+                        )}
+                      >
+                        <span className="flex-1 text-sm truncate">{label}</span>
+                        {item.status && <span className="text-xs text-muted-foreground shrink-0">{item.status}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          ) : null;
+        })()}
+      </div>
+
+      {results && (
+        <div className="flex items-center justify-center gap-4 px-4 py-3 border-t border-border text-[11px] text-muted-foreground">
+          <span>↑↓ 导航</span>
+          <span>↵ 跳转</span>
+          <span>Esc 关闭</span>
+        </div>
+      )}
+    </Dialog>
+  );
+}
+
+// ===== Color Dot =====
+
+function ColorDot({ color }: { color: string }) {
+  return (
+    <span
+      className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+      style={{ background: color }}
+    />
+  );
+}
+
+// ===== Nav Group (Feigua Style) =====
+
+function NavGroupItem({ group, collapsed, isMobile, navigate, isSelected, onMobileClose }: {
+  group: NavGroup;
+  collapsed: boolean;
+  isMobile: boolean;
+  navigate: (path: string) => void;
+  isSelected: (key: string) => boolean;
+  onMobileClose: () => void;
+}) {
+  const [expanded, setExpanded] = useState(() => group.items.some((item) => isSelected(item.key)));
+  const needsPadding = !collapsed;
+  // Find if any child is selected to highlight the group header
+  const hasActiveChild = group.items.some((item) => isSelected(item.key));
+
+  return (
+    <div className="mt-3">
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="flex items-center w-full gap-2.5 px-4 py-2.5 text-sm font-semibold tracking-wide text-muted-foreground hover:text-foreground transition-colors rounded-lg"
+        style={{ color: hasActiveChild ? group.accent : undefined }}
+      >
+        <span className="shrink-0 opacity-70" style={{ color: group.accent }}>{group.icon}</span>
+        {needsPadding && (
+          <>
+            <span className="flex-1 text-left">{group.label}</span>
+            <ChevronDown size={14} className={`transition-transform duration-200 ${expanded ? 'rotate-0' : '-rotate-90'}`} />
+          </>
+        )}
+      </button>
+      {expanded && (
+        <div className="mt-1 ml-2 space-y-0.5">
+          {group.items.map((item) => {
+            const selected = isSelected(item.key);
+            return (
+              <button
+                key={item.key}
+                onClick={() => { navigate(item.key); if (isMobile) onMobileClose(); }}
+                className={cn(
+                  "flex items-center w-full text-sm transition-all duration-200",
+                  collapsed ? "justify-center" : "gap-3 pl-[44px]",
+                )}
+                style={{
+                  background: selected ? `color-mix(in srgb, ${item.accent} 12%, transparent)` : undefined,
+                  color: selected ? item.accent : 'var(--muted-foreground)',
+                  fontWeight: selected ? 600 : 400,
+                  fontSize: '13.5px',
+                  borderRadius: '10px',
+                  paddingTop: '8px',
+                  paddingBottom: '8px',
+                  paddingRight: collapsed ? 0 : '12px',
+                  paddingLeft: collapsed ? 0 : '12px',
+                }}
+                onMouseEnter={(e) => { if (!selected) { e.currentTarget.style.background = 'var(--sidebar-bg-hover)'; e.currentTarget.style.color = 'var(--foreground)'; } }}
+                onMouseLeave={(e) => { if (!selected) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted-foreground)'; } }}
+              >
+                <span className="shrink-0" style={{ opacity: selected ? 1 : 0.5 }}>
+                  {item.icon}
+                </span>
+                {(!collapsed || isMobile) && <span className="truncate">{item.label}</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== App Shell =====
 
 export function AppShell() {
   const auth = useAuth();
-  const { mode: themeMode, toggle: toggleTheme } = useThemeMode();
-  const isDark = themeMode === "dark";
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -78,66 +311,140 @@ export function AppShell() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const loadNotifications = useCallback(async () => {
-    try {
-      const res = await fetchNotifications({ page_size: 20 });
-      setNotifications(res.items);
-      setUnreadCount(res.items.filter((n) => !n.read).length);
-    } catch { /* silent */ }
-  }, []);
+  const isSelected = (key: string) => location.pathname === key || location.pathname.startsWith(key + "/");
 
-  useEffect(() => { void loadNotifications(); const timer = setInterval(() => void loadNotifications(), 30_000); return () => clearInterval(timer); }, [loadNotifications]);
-
-  const handleMarkRead = async (id: number) => { await markNotificationRead(id); void loadNotifications(); };
-  const handleMarkAllRead = async () => { await markAllNotificationsRead(); void loadNotifications(); };
-  const handleMenuClick: MenuProps["onClick"] = ({ key }) => { navigate(key); if (isMobile) setMobileMenuOpen(false); };
-  const selectedKeys = [location.pathname];
-
-  const colors = {
-    border: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
-    iconMuted: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+  // Nav item render
+  const NavItem = ({ item, isFooter }: { item: NavItem; isFooter?: boolean }) => {
+    const selected = isSelected(item.key) || (item.key === "/platforms/xhs/drafts" && location.pathname.startsWith("/platforms/xhs/drafts"));
+    const accentColor = item.accent;
+    return (
+      <button
+        onClick={() => { navigate(item.key); if (isMobile) setMobileMenuOpen(false); }}
+        className={cn(
+          "flex items-center w-full transition-all duration-200 group",
+          collapsed && !isMobile ? "justify-center" : "gap-3",
+        )}
+        title={collapsed && !isMobile ? item.label : undefined}
+        style={selected ? {
+          background: selected ? `color-mix(in srgb, ${accentColor} 12%, transparent)` : undefined,
+          color: accentColor,
+          fontWeight: 600,
+          fontSize: '14px',
+          borderRadius: '9999px',
+          marginLeft: collapsed ? 0 : '10px',
+          marginRight: collapsed ? 0 : '10px',
+          paddingTop: collapsed ? '12px' : '10px',
+          paddingBottom: collapsed ? '12px' : '10px',
+          paddingLeft: collapsed ? 0 : '14px',
+          paddingRight: collapsed ? 0 : '14px',
+        } : {
+          borderRadius: '9999px',
+          fontSize: '14px',
+          marginLeft: collapsed ? 0 : '10px',
+          marginRight: collapsed ? 0 : '10px',
+          paddingTop: collapsed ? '12px' : '10px',
+          paddingBottom: collapsed ? '12px' : '10px',
+          paddingLeft: collapsed ? 0 : '14px',
+          paddingRight: collapsed ? 0 : '14px',
+        }}
+        onMouseEnter={(e) => {
+          if (!selected) {
+            e.currentTarget.style.background = 'var(--sidebar-bg-hover)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!selected) {
+            e.currentTarget.style.background = 'transparent';
+          }
+        }}
+      >
+        <span
+          className={cn(
+            "shrink-0 transition-all duration-200 flex items-center justify-center",
+            collapsed && !isMobile ? "w-10 h-10" : "w-8 h-8",
+          )}
+          style={{
+            color: selected ? accentColor : 'var(--muted-foreground)',
+          }}
+        >
+          <span className={collapsed ? 'scale-100' : 'scale-110'}>{item.icon}</span>
+        </span>
+        {(!collapsed || isMobile) && <span className="truncate">{item.label}</span>}
+      </button>
+    );
   };
 
-  const siderWidth = collapsed ? 64 : 240;
-
+  // Sidebar content
   const sidebarContent = (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="flex items-center justify-between px-4 py-4 border-b shrink-0 cursor-pointer"
-        style={{ borderColor: colors.border }}
-        onClick={() => { navigate("/"); if (isMobile) setMobileMenuOpen(false); }}
-      >
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1668dc] to-[#7c3aed] flex items-center justify-center font-extrabold text-xs text-white shadow-lg shadow-[#1668dc]/30">
-            X
+      <div className="flex items-center px-5 py-5 border-b shrink-0 cursor-pointer group" onClick={() => { navigate("/"); if (isMobile) setMobileMenuOpen(false); }} style={{ borderColor: `var(--sidebar-border)` }}>
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff2442] to-[#ff6b81] flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="4" />
+              <path d="M9 8h6" />
+              <path d="M9 12h6" />
+              <path d="M9 16h3" />
+            </svg>
           </div>
           {(!collapsed || isMobile) && (
-            <span className="font-semibold text-sm dark:text-white/85 text-black/85">小红书矩阵运营</span>
+            <div>
+              <div className="font-bold text-base leading-tight" style={{ color: 'var(--sidebar-text-active)' }}>
+                小红书助手
+              </div>
+              <div className="text-[12px] mt-1.5 opacity-60" style={{ color: 'var(--sidebar-text)' }}>创作管理平台</div>
+            </div>
           )}
         </div>
+        {!isMobile && (
+          <button onClick={(e) => { e.stopPropagation(); setCollapsed(!collapsed); }} className="ml-auto p-1 rounded-lg text-muted-foreground transition-all opacity-0 group-hover:opacity-100" style={{ background: 'transparent' }} onMouseEnter={(e) => e.currentTarget.style.background = 'var(--sidebar-bg-hover)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+            <Menu size={13} />
+          </button>
+        )}
       </div>
 
-      {/* Nav */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-2 space-y-0.5">
-        <AntMenu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={mainNavItems} style={{ borderRight: 0, background: "transparent" }} />
+      {/* Rainbow gradient divider */}
+      <div className="gradient-divider mx-2.5 my-0" style={{ opacity: 0.5 }} />
+
+      {/* Main Nav - Top items */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 scrollbar-thin">
+        <div className="py-1.5 space-y-0.5">
+          {mainNavItems.map((item) => (
+            <NavItem key={item.key} item={item} />
+          ))}
+        </div>
+
+        {/* Grouped Nav - Feigua Style */}
+        {!collapsed && navGroups.map((group) => (
+          <NavGroupItem key={group.label} group={group} collapsed={collapsed} isMobile={isMobile} navigate={navigate} isSelected={isSelected} onMobileClose={() => setMobileMenuOpen(false)} />
+        ))}
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 border-t" style={{ borderColor: colors.border }}>
+      <div className="shrink-0 border-t" style={{ borderColor: `var(--sidebar-border)` }}>
         {auth.user?.is_admin && (
-          <AntMenu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={adminNavItem} style={{ borderRight: 0, background: "transparent" }} />
+          <div className="px-3 pt-3 space-y-0.5">
+            {adminNavItem.map((item) => (
+              <NavItem key={item.key} item={item} isFooter />
+            ))}
+          </div>
         )}
-        <AntMenu theme={isDark ? "dark" : "light"} mode="inline" selectedKeys={selectedKeys} onClick={handleMenuClick} items={footerNavItems} style={{ borderRight: 0, background: "transparent" }} />
-        <div className="flex items-center gap-2.5 px-4 py-3 border-t" style={{ borderColor: colors.border }}>
+        <div className="px-3 py-2.5 space-y-0.5">
+          {footerNavItems.map((item) => (
+            <NavItem key={item.key} item={item} isFooter />
+          ))}
+        </div>
+        <div className="flex items-center gap-3 px-5 py-4 border-t" style={{ borderColor: 'var(--sidebar-border)' }}>
           <div className="relative">
-            <Avatar size={26} icon={<UserOutlined />} style={{ background: "linear-gradient(135deg, #1668dc, #7c3aed)", border: "2px solid rgba(22,104,220,0.2)" }} />
-            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2" style={{ borderColor: isDark ? "#08080f" : "#fff" }} />
+            <Avatar className="w-8 h-8 text-sm ring-2 ring-[var(--primary)]/20" fallback={auth.user?.username?.charAt(0)?.toUpperCase() || "U"} />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[var(--success)] border-2 border-[var(--background)]" />
           </div>
           {(!collapsed || isMobile) && (
             <>
-              <span className="text-xs flex-1 truncate dark:text-white/65 text-black/65">{auth.user?.username ?? "用户"}</span>
-              <button onClick={() => void auth.logout()} className="text-[#666] hover:text-red-400 transition-colors p-1" title="退出">
-                <LogOut size={14} />
+              <span className="text-sm font-medium flex-1 truncate" style={{ color: 'var(--sidebar-text-active)' }}>{auth.user?.username ?? "用户"}</span>
+              <button onClick={() => void auth.logout()} className="text-muted-foreground hover:text-[var(--destructive)] transition-all p-2 rounded-lg hover:bg-[var(--destructive)]/10" title="退出">
+                <LogOut size={16} />
               </button>
             </>
           )}
@@ -146,106 +453,72 @@ export function AppShell() {
     </div>
   );
 
-  const notificationDropdownContent = (
-    <div className="w-[360px] max-w-[calc(100vw-32px)] rounded-xl border shadow-xl overflow-hidden" style={{ background: isDark ? "#111118" : "#fff", borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }}>
-      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: colors.border }}>
-        <span className="text-sm font-semibold dark:text-white/85 text-black/85">通知</span>
-        {unreadCount > 0 && <button onClick={() => void handleMarkAllRead()} className="text-xs text-[#1668dc] hover:underline">全部已读</button>}
-      </div>
-      <div className="max-h-[400px] overflow-y-auto">
-        {notifications.length === 0 ? (
-          <div className="py-8 text-center text-xs dark:text-white/35 text-black/35">暂无通知</div>
-        ) : (
-          <List
-            dataSource={notifications}
-            renderItem={(n) => (
-              <List.Item key={n.id} style={{ padding: "10px 16px", cursor: n.read ? "default" : "pointer", background: n.read ? "transparent" : isDark ? "rgba(22,104,220,0.04)" : "rgba(22,104,220,0.03)", borderBottom: `1px solid ${colors.border}` }} onClick={() => !n.read && void handleMarkRead(n.id)}>
-                <List.Item.Meta
-                  avatar={<span className="inline-block w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ background: levelColor(n.level) }} />}
-                  title={<span className="text-xs">{n.title}</span>}
-                  description={<div>{n.body && <span className="text-xs text-muted-foreground block">{n.body}</span>}<span className="text-[11px] text-muted-foreground">{new Date(n.created_at).toLocaleString("zh-CN")}</span></div>}
-                />
-              </List.Item>
-            )}
-          />
-        )}
-      </div>
-    </div>
-  );
-
   return (
-    <Layout style={{ minHeight: "100vh", background: "transparent" }}>
-      {isMobile ? (
-        <>
-          <Drawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} placement="left" width={260} styles={{ body: { padding: 0, background: isDark ? "#08080f" : "#fff" } }} closeIcon={null}>
+    <div className="min-h-screen bg-background flex">
+
+      {/* Mobile Drawer */}
+      {isMobile && mobileMenuOpen && (
+        <div className="fixed inset-0 z-40">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" style={{ animation: "fadeIn 0.15s ease-out" }} onClick={() => setMobileMenuOpen(false)} />
+          <div className="fixed left-0 top-0 bottom-0 w-[260px] bg-[color-mix(in_srgb,var(--card)_95%,transparent)] backdrop-blur-2xl border-r border-border z-50 shadow-2xl"
+            style={{ animation: "slideUp 0.2s ease-out" }}>
             {sidebarContent}
-          </Drawer>
-          <Layout style={{ background: "transparent" }}>
-            <Header className="flex items-center justify-between px-4 h-12 border-b sticky top-0 z-10" style={{ background: isDark ? "rgba(8,8,15,0.8)" : "rgba(255,255,255,0.8)", borderColor: colors.border, backdropFilter: "blur(12px)" }}>
-              <div className="flex items-center gap-2">
-                <button onClick={() => setMobileMenuOpen(true)} className="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                  <Menu size={18} className="dark:text-white/65 text-black/65" />
-                </button>
-                <span className="text-sm font-semibold dark:text-white/85 text-black/85">小红书矩阵运营</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <button onClick={() => setSearchOpen(true)} className="p-1.5 rounded-lg hover:bg-white/5" title="搜索"><Search size={16} className="dark:text-white/45 text-black/45" /></button>
-                <button onClick={toggleTheme} className="p-1.5 rounded-lg hover:bg-white/5">
-                  {themeMode === "dark" ? <Sun size={16} className="text-white/45" /> : <Moon size={16} className="text-black/45" />}
-                </button>
-                <Badge count={unreadCount} size="small">
-                  <Bell size={16} className="dark:text-white/45 text-black/45" style={{ margin: 6 }} />
-                </Badge>
-              </div>
-            </Header>
-            <Content className="p-4" style={{ background: "transparent" }}>
-              <KeepAliveRouteOutlet include={[/\/platforms\/xhs\/discovery/, /\/platforms\/xhs\/crawler/]} />
-            </Content>
-          </Layout>
-        </>
-      ) : (
-        <>
-          <Sider collapsed={collapsed} width={240} collapsedWidth={64} theme={isDark ? "dark" : "light"} trigger={null}
-            style={{ height: "100vh", position: "fixed", left: 0, top: 0, bottom: 0, borderRight: `1px solid ${colors.border}`, overflow: "hidden", background: isDark ? "rgba(8,8,15,0.6)" : "rgba(255,255,255,0.6)", backdropFilter: "blur(20px)" }}
-          >
-            {sidebarContent}
-          </Sider>
-          <Layout style={{ marginLeft: siderWidth, transition: "margin-left 0.2s", background: "transparent" }}>
-            <Header className="flex items-center justify-end px-6 h-12 border-b sticky top-0 z-10 gap-3" style={{ background: isDark ? "rgba(8,8,15,0.6)" : "rgba(255,255,255,0.6)", borderColor: colors.border, backdropFilter: "blur(16px)" }}>
-              <button onClick={() => setSearchOpen(true)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs dark:text-white/35 text-black/35 border dark:border-white/5 border-black/5 hover:border-[#1668dc]/30 transition-colors">
-                <Search size={14} />
-                <span>搜索</span>
-                <kbd className="px-1.5 py-0.5 rounded text-[10px] dark:bg-white/5 bg-black/5 dark:text-white/35 text-black/35 font-mono">⌘K</kbd>
-              </button>
-              <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-white/5 transition-colors" title={themeMode === "dark" ? "浅色模式" : "暗色模式"}>
-                {themeMode === "dark" ? <Sun size={16} className="text-white/45" /> : <Moon size={16} className="text-black/45" />}
-              </button>
-              <div className="relative">
-                <Badge count={unreadCount} size="small">
-                  <Bell size={18} className="dark:text-white/45 text-black/45 cursor-pointer" />
-                </Badge>
-              </div>
-            </Header>
-            <Content className="p-8" style={{ background: "transparent", minHeight: "calc(100vh - 48px)" }}>
-              <KeepAliveRouteOutlet include={[/\/platforms\/xhs\/discovery/, /\/platforms\/xhs\/crawler/]} />
-            </Content>
-          </Layout>
-        </>
+          </div>
+        </div>
       )}
+
+      {/* Desktop Sidebar */}
+      {!isMobile && (
+        <aside
+          className={cn(
+            "fixed left-0 top-0 bottom-0 z-30 border-r border-border overflow-hidden transition-all duration-300 ease-out",
+            collapsed ? "w-[64px]" : "w-[260px]",
+          )}
+        >
+          <div className="h-full" style={{ background: 'var(--sidebar-bg)' }}>
+            {sidebarContent}
+          </div>
+        </aside>
+      )}
+
+      {/* Main area */}
+      <div className={cn("flex-1 flex flex-col transition-all duration-300 ease-out", !isMobile && (collapsed ? "ml-[64px]" : "ml-[260px]"))}>
+        {/* Mobile header only */}
+        {isMobile && (
+          <header className="flex items-center justify-between px-4 h-13 border-b border-border glass">
+            <div className="flex items-center gap-2">
+              <button onClick={() => setMobileMenuOpen(true)} className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+                <Menu size={18} />
+              </button>
+              <span className="text-sm font-semibold bg-gradient-to-r from-[var(--primary)] to-[var(--purple)] bg-clip-text text-transparent">
+                小红书助手
+              </span>
+            </div>
+          </header>
+        )}
+
+        {/* Content */}
+        <main className={cn("flex-1", isMobile ? "p-4" : "p-8")}>
+          <SearchContext.Provider value={{ openSearch: () => setSearchOpen(true) }}>
+            <KeepAliveRouteOutlet include={keepAlivePatterns} />
+          </SearchContext.Provider>
+        </main>
+      </div>
+
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-    </Layout>
+    </div>
   );
 }
 
-export function PageHeader({ eyebrow, title, description, action }: { eyebrow: string; title: string; description: string; action?: ReactNode }) {
+export function PageHeader(props: { eyebrow: string; title: string; description: string; action?: ReactNode }) {
+  const { eyebrow, title, description, action } = props;
   return (
     <div className="flex items-start justify-between mb-8">
-      <div>
-        <p className="text-[11px] font-medium tracking-widest uppercase dark:text-white/35 text-black/35 mb-1">{eyebrow}</p>
-        <h2 className="text-2xl font-bold dark:text-white/92 text-black/88 mb-1">{title}</h2>
-        <p className="text-sm dark:text-white/45 text-black/45">{description}</p>
+      <div style={{ animation: "slideUp 0.3s ease-out" }}>
+        <h2 className="text-2xl font-bold tracking-tight mb-1.5">{title}</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
       </div>
-      {action && <div>{action}</div>}
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }

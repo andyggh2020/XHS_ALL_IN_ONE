@@ -1,11 +1,12 @@
-import { Drawer, Segmented, message } from "antd";
-import { useState } from "react";
-
-import type { PlatformAccount } from "../../types";
-import { useThemeColors } from "../../hooks/use-theme-colors";
+import { MessageSquare, Smartphone, UserPlus } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Dialog, DialogBody, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Button } from "../ui/button";
 import { CookieImportPanel } from "./cookie-import-panel";
 import { PhoneLoginPanel } from "./phone-login-panel";
 import { QrLoginPanel } from "./qr-login-panel";
+import type { PlatformAccount } from "../../types";
+import { useToast } from "../ui/toast";
 
 type AddAccountDrawerProps = {
   open: boolean;
@@ -16,73 +17,84 @@ type AddAccountDrawerProps = {
 type AccountType = "pc" | "creator";
 type LoginMethod = "qr" | "phone" | "cookie";
 
-const accountTypeOptions = [
-  { label: "PC", value: "pc" as const },
-  { label: "Creator", value: "creator" as const },
-];
-
-const loginMethodOptions = [
-  { label: "二维码", value: "qr" as const },
-  { label: "手机验证码", value: "phone" as const },
-  { label: "Cookie", value: "cookie" as const },
+const loginMethods: { key: LoginMethod; label: string; icon: React.ReactNode }[] = [
+  { key: "qr", label: "二维码", icon: <Smartphone size={16} /> },
+  { key: "phone", label: "手机验证码", icon: <MessageSquare size={16} /> },
+  { key: "cookie", label: "Cookie", icon: <UserPlus size={16} /> },
 ];
 
 export function AddAccountDrawer({ open, onClose, onBound }: AddAccountDrawerProps) {
-  const c = useThemeColors();
+  const toast = useToast();
   const [accountType, setAccountType] = useState<AccountType>("pc");
   const [method, setMethod] = useState<LoginMethod>("qr");
 
-  function handleConfirmed(account: PlatformAccount) {
+  const handleConfirmed = useCallback((account: PlatformAccount) => {
     const actionText = account.action === "updated" ? "已更新到账号矩阵" : "已加入账号矩阵";
-    message.success(`${account.nickname || "账号"} ${actionText}`);
+    toast.success(`${account.nickname || "账号"} ${actionText}`);
     onBound();
-  }
+  }, [onBound, toast]);
 
   return (
-    <Drawer
-      title={
+    <Dialog open={open} onClose={onClose} width={440}>
+      <DialogHeader onClose={onClose}>
         <div>
-          <div style={{ fontSize: 12, color: c.textTertiary, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>
-            XHS Account
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 600, color: c.textPrimary }}>添加小红书账号</div>
+          <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-0.5">XHS Account</p>
+          <DialogTitle>添加小红书账号</DialogTitle>
         </div>
-      }
-      placement="right"
-      width={420}
-      open={open}
-      onClose={onClose}
-      destroyOnClose
-      styles={{
-        header: { background: c.cardBg2, borderBottom: `1px solid ${c.cardBorder}` },
-        body: { background: c.cardBg3, padding: 24 },
-      }}
-    >
-      <div style={{ marginBottom: 20 }}>
-        <Segmented
-          block
-          value={accountType}
-          options={accountTypeOptions}
-          onChange={(val) => setAccountType(val as AccountType)}
-        />
-      </div>
+      </DialogHeader>
 
-      <div style={{ marginBottom: 24 }}>
-        <Segmented
-          block
-          value={method}
-          options={loginMethodOptions}
-          onChange={(val) => setMethod(val as LoginMethod)}
-        />
-      </div>
+      <DialogBody className="space-y-5">
+        {/* Account type toggle */}
+        <div className="inline-flex rounded-xl border border-border p-0.5 bg-muted/50 w-full">
+          {(["pc", "creator"] as const).map((type) => {
+            const active = accountType === type;
+            return (
+              <button
+                key={type}
+                onClick={() => setAccountType(type)}
+                className="flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                style={{
+                  background: active ? "var(--primary)" : "transparent",
+                  color: active ? "var(--primary-foreground)" : "var(--muted-foreground)",
+                  boxShadow: active ? "0 1px 3px rgba(0,0,0,0.15)" : "none",
+                }}
+              >
+                {type === "pc" ? "PC 端账号" : "Creator 账号"}
+              </button>
+            );
+          })}
+        </div>
 
-      {method === "qr" ? (
-        <QrLoginPanel accountType={accountType} onConfirmed={handleConfirmed} />
-      ) : method === "cookie" ? (
-        <CookieImportPanel accountType={accountType} onImported={handleConfirmed} />
-      ) : (
-        <PhoneLoginPanel accountType={accountType} onConfirmed={handleConfirmed} />
-      )}
-    </Drawer>
+        {/* Login method */}
+        <div className="inline-flex rounded-xl border border-border p-0.5 bg-muted/50 w-full">
+          {loginMethods.map((m) => {
+            const active = method === m.key;
+            return (
+              <button
+                key={m.key}
+                onClick={() => setMethod(m.key)}
+                className="flex items-center justify-center gap-1.5 flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                style={{
+                  background: active ? "var(--primary)" : "transparent",
+                  color: active ? "var(--primary-foreground)" : "var(--muted-foreground)",
+                  boxShadow: active ? "0 1px 3px rgba(0,0,0,0.15)" : "none",
+                }}
+              >
+                {m.icon} {m.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Panel */}
+        {method === "qr" ? (
+          <QrLoginPanel accountType={accountType} onConfirmed={handleConfirmed} />
+        ) : method === "cookie" ? (
+          <CookieImportPanel accountType={accountType} onImported={handleConfirmed} />
+        ) : (
+          <PhoneLoginPanel accountType={accountType} onConfirmed={handleConfirmed} />
+        )}
+      </DialogBody>
+    </Dialog>
   );
 }

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "msg-1779942397222-k3ysux",
+    "from": "team-lead",
+    "to": "xhs-batch-3",
+    "type": "message",
+    "content": "What is your progress? Which files have you completed?",
+    "timestamp": "2026-05-28T04:26:37.222Z",
+    "read": true
+  },
+  {
+    "id": "msg-1779942406622-omzsa6",
+    "from": "team-lead",
+    "to": "xhs-batch-3",
+    "type": "message",
+    "content": "Please report your current status. Which files have you completed and written back?",
+    "timestamp": "2026-05-28T04:26:46.622Z",
+    "read": true
+  },
+  {
+    "id": "msg-1779942417943-zobqtz",
+    "from": "team-lead",
+    "to": "xhs-batch-3",
+    "type": "message",
+    "content": "Please report status now. library-page.tsx still has antd imports. Have you started?",
+    "timestamp": "2026-05-28T04:26:57.943Z",
+    "read": true
+  }
+]

@@ -1,9 +1,8 @@
-import { Spin } from "antd";
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../../hooks/use-auth";
-import { useThemeMode } from "../../app/providers";
+import { Spinner } from "./skeletons";
 
 type RouteGuardProps = {
   children: ReactNode;
@@ -12,21 +11,14 @@ type RouteGuardProps = {
 export function ProtectedRoute({ children }: RouteGuardProps) {
   const location = useLocation();
   const auth = useAuth();
-  const { mode: themeMode } = useThemeMode();
-  const isDark = themeMode === "dark";
 
   if (auth.isChecking) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          background: isDark ? "#0a0a0a" : "#f5f5f5",
-        }}
-      >
-        <Spin size="large" tip="正在验证登录状态..." />
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <Spinner size="lg" />
+          <p className="text-sm text-muted-foreground">正在验证登录状态...</p>
+        </div>
       </div>
     );
   }
@@ -40,21 +32,14 @@ export function ProtectedRoute({ children }: RouteGuardProps) {
 
 export function PublicOnlyRoute({ children }: RouteGuardProps) {
   const auth = useAuth();
-  const { mode: themeMode } = useThemeMode();
-  const isDark = themeMode === "dark";
 
   if (auth.isChecking) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          background: isDark ? "#0a0a0a" : "#f5f5f5",
-        }}
-      >
-        <Spin size="large" tip="正在验证登录状态..." />
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <Spinner size="lg" />
+          <p className="text-sm text-muted-foreground">正在验证登录状态...</p>
+        </div>
       </div>
     );
   }

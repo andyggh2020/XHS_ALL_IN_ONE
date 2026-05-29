@@ -1,0 +1,33 @@
+{
+  "name": "xhs-pages-migration",
+  "leadAgentId": "8bbc0db7678a4aa5a33a3b6f6e2578fc",
+  "workspacePath": "e:/AI编程/XHS_ALL_IN_ONE",
+  "createdAt": "2026-05-28T04:26:01.833Z",
+  "options": {
+    "workspacePath": "e:/AI编程/XHS_ALL_IN_ONE",
+    "isAutoTeam": false
+  },
+  "members": [
+    {
+      "memberId": "team-lead@xhs-pages-migration",
+      "name": "team-lead",
+      "role": "Team Lead - coordinates the team and interacts with the user"
+    },
+    {
+      "memberId": "xhs-batch-1@xhs-pages-migration",
+      "name": "xhs-batch-1",
+      "role": "Rewrite XHS pages batch 1"
+    },
+    {
+      "memberId": "xhs-batch-2@xhs-pages-migration",
+      "name": "xhs-batch-2",
+      "role": "Rewrite XHS pages batch 2"
+    },
+    {
+      "memberId": "xhs-batch-3@xhs-pages-migration",
+      "name": "xhs-batch-3",
+      "role": "Rewrite XHS pages batch 3"
+    }
+  ],
+  "isAutoTeam": false
+}

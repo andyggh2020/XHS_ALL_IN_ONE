@@ -1,61 +1,23 @@
-import { ArrowLeftOutlined } from "@ant-design/icons";
-import { Button, Result, Typography } from "antd";
-import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
 
-import { getPlatform } from "../../lib/platforms";
+type Props = {
+  title?: string;
+  description?: string;
+};
 
-const { Paragraph } = Typography;
-
-export function ComingSoonPage() {
-  const { platformId } = useParams();
-  const platform = getPlatform(platformId);
+export function ComingSoonPage({ title = "功能开发中", description = "该功能正在紧锣密鼓地开发中，敬请期待！" }: Props) {
   const navigate = useNavigate();
-
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        background: "#0a0a0a",
-      }}
-    >
-      <Result
-        icon={
-          <div
-            style={{
-              width: 72,
-              height: 72,
-              borderRadius: 18,
-              background: platform.accent_color,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 800,
-              fontSize: 36,
-              color: "#fff",
-              margin: "0 auto 8px",
-            }}
-          >
-            {platform.name_cn.slice(0, 1)}
-          </div>
-        }
-        title={`${platform.name_cn} 工作区即将开放`}
-        subTitle={`${platform.name_en} 已进入平台注册表。`}
-        extra={
-          <Button
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate("/platform-select")}
-          >
-            返回平台选择
-          </Button>
-        }
-      >
-        <Paragraph type="secondary" style={{ textAlign: "center", maxWidth: 480, margin: "0 auto" }}>
-          第一版先完整实现小红书链路，后续平台会沿用同一账号、任务、内容库和发布架构扩展。
-        </Paragraph>
-      </Result>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+      <div className="text-6xl mb-6">🚧</div>
+      <h2 className="text-2xl font-bold mb-2">{title}</h2>
+      <p className="text-sm text-muted-foreground mb-8 max-w-md">{description}</p>
+      <Button variant="outline" onClick={() => navigate(-1)}>
+        <ArrowLeft size={16} className="mr-1.5" />
+        返回
+      </Button>
     </div>
   );
 }

@@ -1,49 +1,6 @@
-import {
-  BookOutlined,
-  CheckSquareOutlined,
-  CopyOutlined,
-  DatabaseOutlined,
-  DeleteOutlined,
-  DownloadOutlined,
-  EditOutlined,
-  FileAddOutlined,
-  FileTextOutlined,
-  HeartOutlined,
-  LinkOutlined,
-  MessageOutlined,
-  PictureOutlined,
-  PlayCircleOutlined,
-  ReloadOutlined,
-  ShareAltOutlined,
-  StarOutlined,
-  TagsOutlined,
-} from "@ant-design/icons";
-import {
-  Alert,
-  Button,
-  Card,
-  Checkbox,
-  Col,
-  Descriptions,
-  Drawer,
-  Empty,
-  Image,
-  Input,
-  Modal,
-  Popconfirm,
-  Row,
-  Segmented,
-  Select,
-  Space,
-  Spin,
-  Statistic,
-  Table,
-  Tag,
-  Typography,
-} from "antd";
-import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
+import { HeaderControls } from "../../../components/layout/header-controls";
 import { Link, useNavigate } from "react-router-dom";
 
 import {
@@ -62,8 +19,13 @@ import {
 } from "../../../lib/api";
 import { formatShanghaiTime } from "../../../lib/time";
 import type { NoteAsset, NoteComment, NotesExportResponse, SavedNote, Tag as TagType } from "../../../types";
-
-const { Title, Text, Paragraph } = Typography;
+import { Button } from "../../../components/ui/button";
+import { Card } from "../../../components/ui/card";
+import { Input } from "../../../components/ui/input";
+import { Select } from "../../../components/ui/select";
+import { Spinner } from "../../../components/ui/skeletons";
+import { Dialog, DialogBody, DialogHeader, DialogTitle } from "../../../components/ui/dialog";
+import { Badge } from "../../../components/ui/badge";
 
 function formatSavedTime(v: string): string { return formatShanghaiTime(v); }
 function getRawNoteType(note: SavedNote): string { const t = note.raw_json?.model_type ?? note.raw_json?.type; return typeof t === "string" ? t : "note"; }
@@ -142,13 +104,11 @@ function getNoteTags(note: SavedNote): string[] {
 }
 function getNoteEngagement(note: SavedNote): { likes: number; collects: number; comments: number; shares: number } {
   const raw = note.raw_json ?? {};
-  // Direct fields (from search results)
   const likes = Number(raw.liked_count ?? raw.likes ?? 0);
   const collects = Number(raw.collected_count ?? raw.collects ?? 0);
   const comments = Number(raw.comment_count ?? raw.comments ?? 0);
   const shares = Number(raw.share_count ?? raw.shares ?? 0);
   if (likes || collects || comments || shares) return { likes, collects, comments, shares };
-  // Nested in data.items[0].note_card.interact_info
   const data = (raw.data && typeof raw.data === "object") ? raw.data as Record<string, unknown> : {};
   const items = Array.isArray(data.items) ? data.items : [];
   const item = (items[0] && typeof items[0] === "object") ? items[0] as Record<string, unknown> : {};
@@ -255,19 +215,15 @@ export function XhsLibraryPage() {
   }
 
   async function handleDeleteNote(note: SavedNote) {
-    Modal.confirm({
-      title: "确定删除？", content: "相关素材、评论和标签关系也会一起删除。",
-      onOk: async () => {
-        try {
-          await deleteSavedNote(note.id);
-          setNotes((c) => c.filter((n) => n.id !== note.id));
-          setSelectedNoteIds((c) => c.filter((id) => id !== note.id));
-          setTotal((c) => Math.max(0, c - 1));
-          if (selectedNote?.id === note.id) closeDetail();
-          setBatchActionMessage("已删除笔记。");
-        } catch { setBatchActionMessage("删除失败。"); }
-      },
-    });
+    if (!window.confirm("确定删除？相关素材、评论和标签关系也会一起删除。")) return;
+    try {
+      await deleteSavedNote(note.id);
+      setNotes((c) => c.filter((n) => n.id !== note.id));
+      setSelectedNoteIds((c) => c.filter((id) => id !== note.id));
+      setTotal((c) => Math.max(0, c - 1));
+      if (selectedNote?.id === note.id) closeDetail();
+      setBatchActionMessage("已删除笔记。");
+    } catch { setBatchActionMessage("删除失败。"); }
   }
 
   function selectedNoteHasTag(tagId: number): boolean { return Boolean(selectedNote?.tags?.some((t) => t.id === tagId)); }
@@ -298,6 +254,7 @@ export function XhsLibraryPage() {
 
   async function batchDeleteNotes() {
     if (!selectedNoteIds.length) return;
+    if (!window.confirm(`确定删除选中的 ${selectedNoteIds.length} 条笔记？`)) return;
     setIsBatchWorking(true); setBatchActionMessage(null);
     try {
       for (const id of selectedNoteIds) {
@@ -341,194 +298,351 @@ export function XhsLibraryPage() {
   const topLevelComments = comments.filter((c) => !c.parent_comment_id);
   function childComments(pid: string) { return comments.filter((c) => c.parent_comment_id === pid); }
 
-  const tableColumns: ColumnsType<SavedNote> = [
-    { title: "标题", dataIndex: "title", ellipsis: true, render: (t: string, n) => <a onClick={() => void openDetail(n)}>{t || "未命名"}</a> },
-    { title: "作者", dataIndex: "author_name", width: 120 },
-    { title: "笔记 ID", dataIndex: "note_id", width: 140, ellipsis: true },
-    { title: "保存时间", dataIndex: "created_at", width: 160, render: (v: string) => formatSavedTime(v) },
-    { title: "标签", key: "tags", width: 180, render: (_, n) => n.tags?.length ? <Space size={4} wrap>{n.tags.map((t) => <Tag key={t.id} color="blue">{t.name}</Tag>)}</Space> : <Text type="secondary">-</Text> },
-    { title: "操作", key: "actions", width: 80, render: (_, n) => <Button type="text" danger icon={<DeleteOutlined />} size="small" onClick={(e) => { e.stopPropagation(); void handleDeleteNote(n); }} /> },
-  ];
-
   return (
     <div>
-      <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-        <Col><Title level={4} style={{ margin: 0 }}>内容库</Title><Text type="secondary">保存的笔记素材，支持标签、筛选、批量操作和导出</Text></Col>
-        <Col><Button icon={<ReloadOutlined />} onClick={() => void loadNotes()} loading={isLoading}>刷新</Button></Col>
-      </Row>
+      <div className="bg-page-header-feigua -mx-8 -mt-8 px-8 pt-8 pb-2 mb-6 border-b border-border/50">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight mb-1.5">内容库</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">保存的笔记素材，支持标签、筛选、批量操作和导出</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => void loadNotes()} loading={isLoading}>
+              刷新
+            </Button>
+            <HeaderControls />
+          </div>
+        </div>
+      </div>
 
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={6}><Card size="small"><Statistic title="已保存笔记" value={total} /></Card></Col>
-        <Col span={6}><Card size="small"><Statistic title="当前视图" value={viewMode === "card" ? "卡片" : "表格"} /></Card></Col>
-        <Col span={6}><Card size="small"><Statistic title="已选择" value={selectedNoteIds.length} suffix="条" /></Card></Col>
-        <Col span={6}><Card size="small"><Statistic title="平台" value="XHS" /></Card></Col>
-      </Row>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div className="stat-card-clean p-4">
+          <p className="text-xs text-muted-foreground mb-1">已保存笔记</p>
+          <p className="text-2xl font-bold">{total}</p>
+        </div>
+        <div className="stat-card-clean p-4">
+          <p className="text-xs text-muted-foreground mb-1">当前视图</p>
+          <p className="text-2xl font-bold">{viewMode === "card" ? "卡片" : "表格"}</p>
+        </div>
+        <div className="stat-card-clean p-4">
+          <p className="text-xs text-muted-foreground mb-1">已选择</p>
+          <p className="text-2xl font-bold">{selectedNoteIds.length}<span className="text-sm font-normal text-muted-foreground ml-1">条</span></p>
+        </div>
+        <div className="stat-card-clean p-4">
+          <p className="text-xs text-muted-foreground mb-1">平台</p>
+          <p className="text-2xl font-bold">小红书</p>
+        </div>
+      </div>
 
-      <Card size="small" style={{ marginBottom: 16 }}>
-        <Row gutter={12} align="middle">
-          <Col span={5}><Input placeholder="标题、正文、作者" value={keywordFilter} onChange={(e) => setKeywordFilter(e.target.value)} allowClear /></Col>
-          <Col span={4}><Select value={selectedTagFilter || undefined} onChange={(v) => setSelectedTagFilter(v ?? "")} placeholder="全部标签" allowClear style={{ width: "100%" }} options={availableTags.map((t) => ({ value: String(t.id), label: t.name }))} /></Col>
-          <Col><Checkbox checked={hasAssetsFilter} onChange={(e) => setHasAssetsFilter(e.target.checked)}>有素材</Checkbox></Col>
-          <Col><Checkbox checked={hasCommentsFilter} onChange={(e) => setHasCommentsFilter(e.target.checked)}>有评论</Checkbox></Col>
-          <Col><Segmented value={viewMode} onChange={(v) => setViewMode(v as string)} options={[{ label: "卡片", value: "card" }, { label: "表格", value: "table" }]} /></Col>
-          <Col><Button onClick={clearFilters}>重置</Button></Col>
-          <Col><Button type="primary" onClick={() => void loadNotes()} loading={isLoading}>筛选</Button></Col>
-        </Row>
+      <Card className="p-4 mb-4">
+        <div className="flex items-end gap-3 flex-wrap">
+          <div className="w-[200px]">
+            <Input placeholder="标题、正文、作者" value={keywordFilter} onChange={(e) => setKeywordFilter(e.target.value)} />
+          </div>
+          <div className="w-[160px]">
+            <Select value={selectedTagFilter || undefined} onChange={(v) => setSelectedTagFilter(v ?? "")} placeholder="全部标签" options={availableTags.map((t) => ({ value: String(t.id), label: t.name }))} />
+          </div>
+          <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+            <input type="checkbox" checked={hasAssetsFilter} onChange={(e) => setHasAssetsFilter(e.target.checked)} className="rounded" />
+            有素材
+          </label>
+          <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+            <input type="checkbox" checked={hasCommentsFilter} onChange={(e) => setHasCommentsFilter(e.target.checked)} className="rounded" />
+            有评论
+          </label>
+          <div className="flex rounded-lg border border-input overflow-hidden">
+            <button className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === "card" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-accent"}`} onClick={() => setViewMode("card")}>卡片</button>
+            <button className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === "table" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-accent"}`} onClick={() => setViewMode("table")}>表格</button>
+          </div>
+          <Button variant="outline" onClick={clearFilters}>重置</Button>
+          <Button onClick={() => void loadNotes()} loading={isLoading}>筛选</Button>
+        </div>
       </Card>
 
       {notes.length > 0 && (
-        <Card size="small" style={{ marginBottom: 16 }}>
-          <Space wrap>
-            <Checkbox checked={notes.length > 0 && notes.every((n) => selectedNoteIdSet.has(n.id))} onChange={toggleVisibleSelection}>选择当前页</Checkbox>
-            <Text strong>{selectedNoteIds.length} 条已选</Text>
-            <Button icon={<CheckSquareOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} onClick={createBatchRewriteDrafts} size="small">批量加入草稿工坊</Button>
-            <Button type="primary" icon={<DownloadOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} onClick={() => exportSelectedNotes("json")} size="small">JSON</Button>
-            <Button icon={<DownloadOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} onClick={() => exportSelectedNotes("csv")} size="small">CSV</Button>
-            <Button icon={<DownloadOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} onClick={() => exportSelectedNotes("xlsx")} size="small">Excel</Button>
-            {latestExport && <Button icon={<DownloadOutlined />} disabled={isBatchWorking} onClick={downloadLatestExport} size="small">下载</Button>}
-            <Popconfirm title={`确定删除选中的 ${selectedNoteIds.length} 条笔记？`} onConfirm={batchDeleteNotes}>
-              <Button danger icon={<DeleteOutlined />} disabled={isBatchWorking || !selectedNoteIds.length} size="small">批量删除</Button>
-            </Popconfirm>
-            <Button disabled={!selectedNoteIds.length} onClick={clearSelection} size="small">清空选择</Button>
-          </Space>
-          {batchActionMessage && <Alert message={batchActionMessage} type="info" showIcon style={{ marginTop: 8 }} closable onClose={() => setBatchActionMessage(null)} />}
+        <Card className="p-4 mb-4">
+          <div className="flex gap-2 flex-wrap items-center">
+            <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+              <input type="checkbox" checked={notes.length > 0 && notes.every((n) => selectedNoteIdSet.has(n.id))} onChange={toggleVisibleSelection} className="rounded" />
+              选择当前页
+            </label>
+            <span className="text-sm font-semibold">{selectedNoteIds.length} 条已选</span>
+            <Button variant="outline" disabled={isBatchWorking || !selectedNoteIds.length} onClick={createBatchRewriteDrafts} size="sm">批量加入草稿工坊</Button>
+            <Button disabled={isBatchWorking || !selectedNoteIds.length} onClick={() => exportSelectedNotes("json")} size="sm">JSON</Button>
+            <Button variant="outline" disabled={isBatchWorking || !selectedNoteIds.length} onClick={() => exportSelectedNotes("csv")} size="sm">CSV</Button>
+            <Button variant="outline" disabled={isBatchWorking || !selectedNoteIds.length} onClick={() => exportSelectedNotes("xlsx")} size="sm">Excel</Button>
+            {latestExport && <Button variant="outline" disabled={isBatchWorking} onClick={downloadLatestExport} size="sm">下载</Button>}
+            <Button variant="destructive" disabled={isBatchWorking || !selectedNoteIds.length} onClick={batchDeleteNotes} size="sm">批量删除</Button>
+            <Button variant="ghost" disabled={!selectedNoteIds.length} onClick={clearSelection} size="sm">清空选择</Button>
+          </div>
+          {batchActionMessage && (
+            <div className="mt-2 p-3 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-400 flex items-center gap-2">
+              <span className="font-bold shrink-0">ℹ</span>
+              <span className="text-sm flex-1">{batchActionMessage}</span>
+              <button className="text-xs opacity-50 hover:opacity-100" onClick={() => setBatchActionMessage(null)}>✕</button>
+            </div>
+          )}
         </Card>
       )}
 
-      {error && <Alert message={error} type="error" showIcon style={{ marginBottom: 16 }} />}
+      {error && (
+        <div className="mb-4 p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 flex items-center gap-2">
+          <span className="font-bold shrink-0">✕</span>
+          <span className="text-sm flex-1">{error}</span>
+        </div>
+      )}
 
-      {isLoading ? <Spin size="large" style={{ display: "block", textAlign: "center", margin: "48px 0" }} /> : notes.length === 0 ? (
-        <Empty description="内容库还是空的"><Link to="/platforms/xhs/discovery"><Button type="primary" icon={<BookOutlined />}>去发现笔记</Button></Link></Empty>
+      {isLoading ? (
+        <Spinner className="mx-auto my-12" size="lg" />
+      ) : notes.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="text-5xl mb-4 opacity-40">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+          </div>
+          <p className="text-muted-foreground mb-4">内容库还是空的</p>
+          <Link to="/platforms/xhs/discovery"><Button>去发现笔记</Button></Link>
+        </div>
       ) : viewMode === "table" ? (
-        <Card size="small">
-          <Table<SavedNote> columns={tableColumns} dataSource={notes} rowKey="id" size="small" pagination={{ pageSize: 20 }}
-            rowSelection={{ selectedRowKeys: selectedNoteIds, onChange: (keys) => setSelectedNoteIds(keys as number[]) }}
-            onRow={(n) => ({ onClick: () => void openDetail(n), style: { cursor: "pointer" } })} />
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left p-3 font-medium text-muted-foreground">标题</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground w-[120px]">作者</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground w-[140px]">笔记 ID</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground w-[160px]">保存时间</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground w-[180px]">标签</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground w-[80px]">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {notes.map((n) => (
+                  <tr key={n.id} className="border-b border-border cursor-pointer hover:bg-accent/50" onClick={() => void openDetail(n)}>
+                    <td className="p-3">
+                      <input type="checkbox" checked={selectedNoteIdSet.has(n.id)} onClick={(e) => e.stopPropagation()} onChange={() => toggleNoteSelection(n.id)} className="mr-2" />
+                      <span className="cursor-pointer text-primary hover:underline">{n.title || "未命名"}</span>
+                    </td>
+                    <td className="p-3">{n.author_name}</td>
+                    <td className="p-3 truncate max-w-[140px]">{n.note_id}</td>
+                    <td className="p-3">{formatSavedTime(n.created_at)}</td>
+                    <td className="p-3">
+                      <div className="flex gap-1 flex-wrap">
+                        {n.tags?.length ? n.tags.map((t) => (
+                          <Badge key={t.id} variant="default">{t.name}</Badge>
+                        )) : <span className="text-muted-foreground">-</span>}
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); void handleDeleteNote(n); }}>删除</Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Card>
       ) : (
-        <Row gutter={[16, 16]}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {notes.map((note) => {
             const cover = getSavedNoteCoverUrl(note);
             const kind = getRawNoteType(note);
             return (
-              <Col xs={12} sm={8} md={6} lg={4} xl={4} key={note.id}>
-                <Card hoverable size="small" style={{ overflow: "hidden" }} onClick={() => void openDetail(note)}
-                  cover={
-                    <div style={{ position: "relative", background: c.cardBorder2 }}>
-                      <Checkbox checked={selectedNoteIdSet.has(note.id)} onClick={(e) => { e.stopPropagation(); toggleNoteSelection(note.id); }} style={{ position: "absolute", top: 8, left: 8, zIndex: 2 }} />
-                      {cover ? <img src={cover} alt={note.title} referrerPolicy="no-referrer" style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block" }} /> : <div style={{ width: "100%", aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center", color: c.textMuted2, fontSize: 28 }}><PictureOutlined /></div>}
-                      <Tag color={kind.includes("video") ? "purple" : "blue"} style={{ position: "absolute", top: 8, right: 8 }} icon={kind.includes("video") ? <PlayCircleOutlined /> : <PictureOutlined />}>{kind.includes("video") ? "视频" : "图文"}</Tag>
+              <Card key={note.id} className="overflow-hidden cursor-pointer" onClick={() => void openDetail(note)}>
+                <div style={{ position: "relative", background: c.cardBorder2 }}>
+                  <input type="checkbox" checked={selectedNoteIdSet.has(note.id)} onClick={(e) => { e.stopPropagation(); toggleNoteSelection(note.id); }} style={{ position: "absolute", top: 8, left: 8, zIndex: 2 }} className="rounded" />
+                  {cover ? (
+                    <img src={cover} alt={note.title} referrerPolicy="no-referrer" className="w-full aspect-square object-cover block" />
+                  ) : (
+                    <div className="w-full aspect-square flex items-center justify-center" style={{ color: c.textMuted2, fontSize: 28 }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     </div>
-                  }>
-                  <Card.Meta title={<Text ellipsis style={{ fontSize: 13 }}>{note.title || "未命名"}</Text>} description={
-                    <>
-                      <div>
-                        <Text type="secondary" style={{ fontSize: 12 }}>{note.author_name}</Text>
-                        {getNotePublishTime(note) ? <Text type="secondary" style={{ fontSize: 11, marginLeft: 6 }}>{getNotePublishTime(note)}</Text> : <Text type="secondary" style={{ fontSize: 11, marginLeft: 6 }}>{formatSavedTime(note.created_at)}</Text>}
+                  )}
+                  <span className={`absolute top-2 right-2 inline-flex items-center rounded-lg border px-2 py-0.5 text-xs font-semibold ${kind.includes("video") ? "border-transparent bg-purple-500/10 text-purple-500" : "border-transparent bg-blue-500/10 text-blue-500"}`}>
+                    {kind.includes("video") ? "视频" : "图文"}
+                  </span>
+                </div>
+                <div className="p-3">
+                  <p className="text-sm truncate font-medium">{note.title || "未命名"}</p>
+                  <div className="mt-1">
+                    <span className="text-xs text-muted-foreground">{note.author_name}</span>
+                    {getNotePublishTime(note) ? <span className="text-xs text-muted-foreground ml-1">{getNotePublishTime(note)}</span> : <span className="text-xs text-muted-foreground ml-1">{formatSavedTime(note.created_at)}</span>}
+                  </div>
+                  {(() => {
+                    const eng = getNoteEngagement(note);
+                    if (!eng.likes && !eng.collects && !eng.comments && !eng.shares) return null;
+                    return (
+                      <div className="flex gap-2 mt-1 text-xs" style={{ color: c.textTertiary }}>
+                        {eng.likes > 0 && <span>❤ {eng.likes}</span>}
+                        {eng.collects > 0 && <span>⭐ {eng.collects}</span>}
+                        {eng.comments > 0 && <span>💬 {eng.comments}</span>}
+                        {eng.shares > 0 && <span>↗ {eng.shares}</span>}
                       </div>
-                      {(() => {
-                        const eng = getNoteEngagement(note);
-                        if (!eng.likes && !eng.collects && !eng.comments && !eng.shares) return null;
-                        return (
-                          <div style={{ marginTop: 4, display: "flex", gap: 8, fontSize: 11, color: c.textTertiary }}>
-                            {eng.likes > 0 && <span><HeartOutlined /> {eng.likes}</span>}
-                            {eng.collects > 0 && <span><StarOutlined /> {eng.collects}</span>}
-                            {eng.comments > 0 && <span><MessageOutlined /> {eng.comments}</span>}
-                            {eng.shares > 0 && <span><ShareAltOutlined /> {eng.shares}</span>}
-                          </div>
-                        );
-                      })()}
-                    </>
-                  } />
-                  {note.tags?.length ? <div style={{ marginTop: 6 }}>{note.tags.map((t) => <Tag key={t.id} color="blue" style={{ fontSize: 11 }}>{t.name}</Tag>)}</div> : null}
-                </Card>
-              </Col>
+                    );
+                  })()}
+                  {note.tags?.length ? (
+                    <div className="flex gap-1 flex-wrap mt-1">
+                      {note.tags.map((t) => (
+                        <Badge key={t.id} variant="default" className="text-xs">{t.name}</Badge>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </Card>
             );
           })}
-        </Row>
+        </div>
       )}
 
-      <Drawer title={selectedNote?.title || "笔记详情"} open={isDetailOpen} onClose={closeDetail} width={640} styles={{ body: { background: c.cardBg2 } }}>
-        {selectedNote && (
-          <Spin spinning={isDetailLoading}>
-            {detailError && <Alert message={detailError} type="warning" showIcon style={{ marginBottom: 12 }} />}
-            {detailActionMessage && <Alert message={detailActionMessage} type="success" showIcon style={{ marginBottom: 12 }} closable onClose={() => setDetailActionMessage(null)} />}
+      <Dialog open={isDetailOpen} onClose={closeDetail} width={640}>
+        <DialogHeader onClose={closeDetail}>
+          <DialogTitle>{selectedNote?.title || "笔记详情"}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          {selectedNote && (
+            <div>
+              {isDetailLoading ? (
+                <div className="text-center py-8"><Spinner /></div>
+              ) : (
+                <>
+                  {detailError && (
+                    <div className="mb-3 p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400 flex items-center gap-2">
+                      <span className="font-bold shrink-0">⚠</span>
+                      <span className="text-sm">{detailError}</span>
+                    </div>
+                  )}
+                  {detailActionMessage && (
+                    <div className="mb-3 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-2">
+                      <span className="font-bold shrink-0">✓</span>
+                      <span className="text-sm flex-1">{detailActionMessage}</span>
+                      <button className="text-xs opacity-50 hover:opacity-100" onClick={() => setDetailActionMessage(null)}>✕</button>
+                    </div>
+                  )}
 
-            <Descriptions column={1} size="small" style={{ marginBottom: 16 }}>
-              <Descriptions.Item label="作者">{getAuthorProfileUrl(selectedNote) ? <Typography.Link href={getAuthorProfileUrl(selectedNote)} target="_blank" rel="noreferrer">{selectedNote.author_name || "未知"}</Typography.Link> : (selectedNote.author_name || "未知")}</Descriptions.Item>
-              <Descriptions.Item label="互动">赞 {getNoteEngagement(selectedNote).likes} · 藏 {getNoteEngagement(selectedNote).collects} · 评 {getNoteEngagement(selectedNote).comments}</Descriptions.Item>
-              <Descriptions.Item label="笔记 ID">{selectedNote.note_id}</Descriptions.Item>
-              <Descriptions.Item label="保存时间">{formatSavedTime(selectedNote.created_at)}</Descriptions.Item>
-              {getNotePublishTime(selectedNote) && <Descriptions.Item label="发布时间">{getNotePublishTime(selectedNote)}</Descriptions.Item>}
-              <Descriptions.Item label="作品链接"><Typography.Link href={getNoteUrl(selectedNote)} target="_blank" rel="noreferrer" style={{ fontSize: 12, wordBreak: "break-all" }}>{getNoteUrl(selectedNote)}</Typography.Link></Descriptions.Item>
-            </Descriptions>
-
-            {getNoteTags(selectedNote).length > 0 && (
-              <div style={{ marginBottom: 12 }}>{getNoteTags(selectedNote).map((t) => <Tag key={t} color="blue">#{t}</Tag>)}</div>
-            )}
-
-            <Button type="link" icon={<LinkOutlined />} href={getNoteUrl(selectedNote)} target="_blank" rel="noreferrer" style={{ padding: 0, marginBottom: 16 }}>查看原文</Button>
-
-            <Space wrap style={{ marginBottom: 16 }}>
-              <Button icon={<CopyOutlined />} onClick={copySelectedNote} size="small">复制内容</Button>
-              <Button icon={<FileAddOutlined />} onClick={addToDrafts} loading={isCreatingDraft} size="small">加入草稿工坊</Button>
-              <Button icon={<EditOutlined />} onClick={() => createDraft("rewrite")} loading={isCreatingDraft} size="small">AI 改写</Button>
-              <Popconfirm title="确定删除？" onConfirm={() => void handleDeleteNote(selectedNote)}><Button danger icon={<DeleteOutlined />} size="small">删除</Button></Popconfirm>
-            </Space>
-
-            {selectedAssets.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <Text strong style={{ display: "block", marginBottom: 6 }}>素材 ({selectedAssets.length})</Text>
-                <Image.PreviewGroup>
-                  <Space size={8} wrap>
-                    {selectedAssets.map((a) => (
-                      a.asset_type === "video" ? (
-                        <div key={a.id} style={{ width: 80, height: 80, background: c.cardBorder2, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <Button type="link" icon={<PlayCircleOutlined />} href={a.url} target="_blank" rel="noreferrer">视频</Button>
-                        </div>
-                      ) : <Image key={a.id} src={a.url} width={80} height={80} style={{ objectFit: "cover", borderRadius: 6 }} referrerPolicy="no-referrer" />
-                    ))}
-                  </Space>
-                </Image.PreviewGroup>
-              </div>
-            )}
-
-            <div style={{ marginBottom: 16 }}>
-              <Text strong>正文</Text>
-              <Paragraph style={{ marginTop: 4, color: c.textSecondary, whiteSpace: "pre-wrap" }}>{selectedNote.content || "暂无正文。"}</Paragraph>
-            </div>
-
-            <Button onClick={toggleComments} style={{ marginBottom: 8 }}>{isCommentsOpen ? "收起评论" : `查看评论 (${commentsTotal})`}</Button>
-            {isCommentsOpen && (
-              <Card size="small" style={{ background: c.cardBg }}>
-                {commentsError && <Alert message={commentsError} type="error" showIcon style={{ marginBottom: 8 }} />}
-                {isCommentsLoading && <Spin size="small" />}
-                {topLevelComments.length === 0 && !isCommentsLoading ? <Text type="secondary">暂无评论</Text> : null}
-                {topLevelComments.map((cm) => (
-                  <div key={cm.comment_id} style={{ marginBottom: 10, paddingBottom: 8, borderBottom: "1px solid #303030" }}>
-                    <Space><Text strong style={{ fontSize: 13 }}>{cm.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{cm.created_at_remote} · {cm.like_count} likes</Text></Space>
-                    <div style={{ color: c.textSecondary, fontSize: 13, marginTop: 2 }}>{cm.content}</div>
-                    {childComments(cm.comment_id).map((r) => (
-                      <div key={r.comment_id} style={{ marginLeft: 20, marginTop: 4, paddingLeft: 8, borderLeft: "2px solid #303030" }}>
-                        <Space><Text strong style={{ fontSize: 12 }}>{r.user_name}</Text><Text type="secondary" style={{ fontSize: 11 }}>{r.like_count} likes</Text></Space>
-                        <div style={{ color: c.textSecondary, fontSize: 12 }}>{r.content}</div>
+                  <div className="grid grid-cols-1 gap-2 mb-4 text-sm">
+                    <div className="flex gap-2">
+                      <span className="text-muted-foreground w-20 shrink-0">作者</span>
+                      <span>
+                        {getAuthorProfileUrl(selectedNote) ? (
+                          <a href={getAuthorProfileUrl(selectedNote)} target="_blank" rel="noreferrer" className="text-primary underline-offset-4 hover:underline">{selectedNote.author_name || "未知"}</a>
+                        ) : (selectedNote.author_name || "未知")}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-muted-foreground w-20 shrink-0">互动</span>
+                      <span>赞 {getNoteEngagement(selectedNote).likes} · 藏 {getNoteEngagement(selectedNote).collects} · 评 {getNoteEngagement(selectedNote).comments}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-muted-foreground w-20 shrink-0">笔记 ID</span>
+                      <span>{selectedNote.note_id}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-muted-foreground w-20 shrink-0">保存时间</span>
+                      <span>{formatSavedTime(selectedNote.created_at)}</span>
+                    </div>
+                    {getNotePublishTime(selectedNote) && (
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground w-20 shrink-0">发布时间</span>
+                        <span>{getNotePublishTime(selectedNote)}</span>
                       </div>
-                    ))}
+                    )}
+                    <div className="flex gap-2">
+                      <span className="text-muted-foreground w-20 shrink-0">作品链接</span>
+                      <a href={getNoteUrl(selectedNote)} target="_blank" rel="noreferrer" className="text-xs break-all text-primary underline-offset-4 hover:underline">{getNoteUrl(selectedNote)}</a>
+                    </div>
                   </div>
-                ))}
-                {comments.length < commentsTotal && <Button size="small" onClick={() => void loadComments(commentsPage + 1)} loading={isCommentsLoading}>加载更多</Button>}
-              </Card>
-            )}
 
-            {selectedNote.raw_json && (
-              <details style={{ marginTop: 16 }}>
-                <summary style={{ cursor: "pointer", color: c.textTertiary, fontSize: 12 }}>原始 JSON</summary>
-                <pre style={{ fontSize: 11, color: c.textTertiary, background: c.cardBg, padding: 8, borderRadius: 6, overflow: "auto", maxHeight: 300 }}>{JSON.stringify(selectedNote.raw_json, null, 2)}</pre>
-              </details>
-            )}
-          </Spin>
-        )}
-      </Drawer>
+                  {getNoteTags(selectedNote).length > 0 && (
+                    <div className="flex gap-1 flex-wrap mb-3">
+                      {getNoteTags(selectedNote).map((t) => (
+                        <Badge key={t} variant="default">#{t}</Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  <a href={getNoteUrl(selectedNote)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline mb-4">
+                    查看原文
+                  </a>
+
+                  <div className="flex gap-2 flex-wrap mb-4">
+                    <Button variant="outline" onClick={copySelectedNote}>复制内容</Button>
+                    <Button variant="outline" onClick={addToDrafts} loading={isCreatingDraft}>加入草稿工坊</Button>
+                    <Button onClick={() => createDraft("rewrite")} loading={isCreatingDraft}>AI 改写</Button>
+                    <Button variant="destructive" onClick={() => void handleDeleteNote(selectedNote)}>删除</Button>
+                  </div>
+
+                  {selectedAssets.length > 0 && (
+                    <div className="mb-4">
+                      <p className="font-semibold text-sm mb-1.5">素材 ({selectedAssets.length})</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {selectedAssets.map((a) => (
+                          a.asset_type === "video" ? (
+                            <div key={a.id} className="flex items-center justify-center" style={{ width: 80, height: 80, background: c.cardBorder2, borderRadius: 6 }}>
+                              <a href={a.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary underline-offset-4 hover:underline">视频</a>
+                            </div>
+                          ) : (
+                            <img key={a.id} src={a.url} width={80} height={80} className="object-cover rounded-lg" referrerPolicy="no-referrer" />
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mb-4">
+                    <p className="font-semibold text-sm">正文</p>
+                    <p className="text-sm mt-1 whitespace-pre-wrap" style={{ color: c.textSecondary }}>{selectedNote.content || "暂无正文。"}</p>
+                  </div>
+
+                  <Button variant="outline" onClick={toggleComments} className="mb-2">{isCommentsOpen ? "收起评论" : `查看评论 (${commentsTotal})`}</Button>
+                  {isCommentsOpen && (
+                    <Card className="p-4 mb-4" style={{ background: c.cardBg }}>
+                      {commentsError && (
+                        <div className="mb-2 p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 flex items-center gap-2">
+                          <span className="font-bold shrink-0">✕</span>
+                          <span className="text-sm">{commentsError}</span>
+                        </div>
+                      )}
+                      {isCommentsLoading && <Spinner size="sm" />}
+                      {topLevelComments.length === 0 && !isCommentsLoading ? <p className="text-sm text-muted-foreground">暂无评论</p> : null}
+                      {topLevelComments.map((cm) => (
+                        <div key={cm.comment_id} className="mb-2.5 pb-2 border-b" style={{ borderColor: "#303030" }}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm">{cm.user_name}</span>
+                            <span className="text-xs text-muted-foreground">{cm.created_at_remote} · {cm.like_count} likes</span>
+                          </div>
+                          <div className="text-sm mt-0.5" style={{ color: c.textSecondary }}>{cm.content}</div>
+                          {childComments(cm.comment_id).map((r) => (
+                            <div key={r.comment_id} className="ml-5 mt-1 pl-2 border-l-2" style={{ borderColor: "#303030" }}>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-xs">{r.user_name}</span>
+                                <span className="text-xs text-muted-foreground">{r.like_count} likes</span>
+                              </div>
+                              <div className="text-xs mt-0.5" style={{ color: c.textSecondary }}>{r.content}</div>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                      {comments.length < commentsTotal && (
+                        <Button variant="outline" size="sm" onClick={() => void loadComments(commentsPage + 1)} loading={isCommentsLoading}>加载更多</Button>
+                      )}
+                    </Card>
+                  )}
+
+                  {selectedNote.raw_json && (
+                    <details className="mt-4">
+                      <summary className="cursor-pointer text-xs" style={{ color: c.textTertiary }}>原始 JSON</summary>
+                      <pre className="text-xs p-2 rounded-lg overflow-auto max-h-[300px] mt-1" style={{ color: c.textTertiary, background: c.cardBg }}>{JSON.stringify(selectedNote.raw_json, null, 2)}</pre>
+                    </details>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </DialogBody>
+      </Dialog>
     </div>
   );
 }

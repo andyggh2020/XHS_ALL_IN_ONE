@@ -1,16 +1,12 @@
-import { Input, List, Modal, Tag, Typography } from "antd";
+import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { Dialog } from "./dialog";
 import { globalSearch, type SearchResult } from "../../lib/api";
-import { useThemeColors } from "../../hooks/use-theme-colors";
+import { cn } from "../../lib/utils";
 
-const { Text } = Typography;
-
-type SearchModalProps = {
-  open: boolean;
-  onClose: () => void;
-};
+type SearchModalProps = { open: boolean; onClose: () => void };
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "blue", uploading: "processing", publishing: "processing",
@@ -18,39 +14,24 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function SearchModal({ open, onClose }: SearchModalProps) {
-  const c = useThemeColors();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const flatResultsRef = useRef<{ label: string; url: string }[]>([]);
 
   useEffect(() => {
-    if (open) {
-      setQuery("");
-      setResults(null);
-      setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
+    if (open) { setQuery(""); setResults(null); setSelectedIndex(0); setTimeout(() => inputRef.current?.focus(), 100); }
   }, [open]);
 
   useEffect(() => {
-    if (!query.trim()) {
-      setResults(null);
-      return;
-    }
+    if (!query.trim()) { setResults(null); return; }
     const timer = setTimeout(async () => {
       setLoading(true);
-      try {
-        const res = await globalSearch(query.trim());
-        setResults(res);
-      } catch {
-        setResults(null);
-      } finally {
-        setLoading(false);
-      }
+      try { const res = await globalSearch(query.trim()); setResults(res); }
+      catch { setResults(null); }
+      finally { setLoading(false); }
     }, 250);
     return () => clearTimeout(timer);
   }, [query]);
@@ -64,128 +45,71 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     results.tasks.forEach((t) => items.push({ label: `⚡ ${t.task_type} [${t.status}]`, url: t.url, group: "任务" }));
     return items;
   })();
-  flatResultsRef.current = flatItems;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedIndex((i) => Math.min(i + 1, flatItems.length - 1));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedIndex((i) => Math.max(i - 1, 0));
-    } else if (e.key === "Enter" && flatItems[selectedIndex]) {
-      onClose();
-      navigate(flatItems[selectedIndex].url);
-    }
+    if (e.key === "ArrowDown") { e.preventDefault(); setSelectedIndex((i) => Math.min(i + 1, flatItems.length - 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setSelectedIndex((i) => Math.max(i - 1, 0)); }
+    else if (e.key === "Enter" && flatItems[selectedIndex]) { onClose(); navigate(flatItems[selectedIndex].url); }
   };
 
-  const hasAnyResult = results && (
-    results.notes.length > 0 || results.accounts.length > 0 ||
-    results.publish_jobs.length > 0 || results.tasks.length > 0
-  );
+  const hasAnyResult = results && (results.notes.length > 0 || results.accounts.length > 0 || results.publish_jobs.length > 0 || results.tasks.length > 0);
 
   return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      footer={null}
-      width={520}
-      closable={false}
-      destroyOnClose
-      style={{ top: 80 }}
-      styles={{
-        body: { padding: "16px 0", background: c.cardBg, borderRadius: 12 },
-      }}
-    >
-      <div style={{ padding: "0 16px 12px", borderBottom: `1px solid ${c.cardBorder}` }}>
-        <Input
-          ref={inputRef as any}
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
-          onKeyDown={handleKeyDown}
-          placeholder="搜索笔记、账号、发布任务..."
-          variant="borderless"
-          size="large"
-          style={{ fontSize: 16 }}
-          prefix={
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c.textTertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8 }}>
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          }
-          suffix={
-            <Tag style={{ marginRight: 0, fontSize: 11, lineHeight: "18px", borderRadius: 4 }}>
-              ESC
-            </Tag>
-          }
-        />
+    <Dialog open={open} onClose={onClose}>
+      <div className="p-4 pb-0">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
+            onKeyDown={handleKeyDown}
+            placeholder="搜索笔记、账号、发布任务..."
+            className="w-full h-11 pl-10 pr-16 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <kbd className="absolute right-3.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded text-[10px] bg-muted text-muted-foreground font-mono">ESC</kbd>
+        </div>
       </div>
 
-      <div style={{ maxHeight: 400, overflow: "auto", padding: "8px 0" }}>
-        {loading && (
-          <div style={{ textAlign: "center", padding: 24, color: c.textTertiary, fontSize: 13 }}>
-            搜索中...
-          </div>
-        )}
-        {!loading && query && !hasAnyResult && (
-          <div style={{ textAlign: "center", padding: 32, color: c.textTertiary, fontSize: 13 }}>
-            没有找到 "{query}" 的相关结果
-          </div>
-        )}
+      <div className="max-h-[400px] overflow-y-auto p-2">
+        {loading && <div className="text-center py-8 text-sm text-muted-foreground">搜索中...</div>}
+        {!loading && query && !hasAnyResult && <div className="text-center py-8 text-sm text-muted-foreground">没有找到相关结果</div>}
         {!loading && results && (() => {
           const groups = [
-            { key: "笔记", items: results.notes, icon: "📝" },
-            { key: "账号", items: results.accounts, icon: "🔗" },
-            { key: "发布", items: results.publish_jobs, icon: "🚀" },
-            { key: "任务", items: results.tasks, icon: "⚡" },
+            { key: "笔记", items: results.notes, icon: "📝", labelKey: "title" as const },
+            { key: "账号", items: results.accounts, icon: "🔗", labelKey: "nickname" as const },
+            { key: "发布", items: results.publish_jobs, icon: "🚀", labelKey: "title" as const },
+            { key: "任务", items: results.tasks, icon: "⚡", labelKey: "task_type" as const },
           ].filter((g) => g.items.length > 0);
-
           return groups.length > 0 ? (
-            <List size="small" dataSource={groups} renderItem={(group) => (
-              <>
-                <div style={{ padding: "6px 16px", fontSize: 11, color: c.textTertiary, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>
-                  {group.icon} {group.key}
+            <div>
+              {groups.map((group) => (
+                <div key={group.key}>
+                  <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{group.icon} {group.key}</div>
+                  {group.items.map((item: any) => {
+                    const label = item[group.labelKey] || "";
+                    const flatIdx = flatItems.findIndex((f) => f.label.includes(label));
+                    const isSelected = flatIdx === selectedIndex;
+                    return (
+                      <div key={`${group.key}-${item.id}`} onClick={() => { onClose(); navigate(item.url || ""); }} onMouseEnter={() => setSelectedIndex(flatIdx)}
+                        className={cn("flex items-center gap-2 px-6 py-2.5 cursor-pointer rounded-lg transition-colors", isSelected ? "bg-primary/10" : "hover:bg-accent")}>
+                        <span className="flex-1 text-sm truncate">{label}</span>
+                        {item.status && <span className="text-xs text-muted-foreground shrink-0">{STATUS_COLORS[item.status] || item.status}</span>}
+                      </div>
+                    );
+                  })}
                 </div>
-                {group.items.map((item: any, idx: number) => {
-                  const flatIdx = flatItems.findIndex((f) => f.label.includes(item.title || item.nickname || item.task_type));
-                  const isSelected = flatIdx === selectedIndex;
-                  return (
-                    <div
-                      key={`${group.key}-${item.id}`}
-                      onClick={() => { onClose(); navigate(item.url || ""); }}
-                      onMouseEnter={() => setSelectedIndex(flatIdx)}
-                      style={{
-                        padding: "8px 16px 8px 24px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        background: isSelected ? (c.isDark ? "rgba(22,104,220,0.12)" : "rgba(22,104,220,0.06)") : "transparent",
-                        transition: "background 0.1s",
-                      }}
-                    >
-                      <Text ellipsis style={{ flex: 1, fontSize: 13, color: c.textPrimary }}>
-                        {"title" in item ? item.title : "nickname" in item ? item.nickname : item.task_type}
-                      </Text>
-                      <Text style={{ fontSize: 11, color: c.textTertiary, flexShrink: 0 }}>
-                        {"status" in item ? STATUS_COLORS[item.status] || item.status : ""}
-                      </Text>
-                    </div>
-                  );
-                })}
-              </>
-            )} />
+              ))}
+            </div>
           ) : null;
         })()}
       </div>
 
       {results && (
-        <div style={{ padding: "8px 16px 0", borderTop: `1px solid ${c.cardBorder}`, display: "flex", gap: 16, justifyContent: "center", color: c.textMuted, fontSize: 11 }}>
-          <span>↑↓ 导航</span>
-          <span>↵ 跳转</span>
-          <span>Esc 关闭</span>
+        <div className="flex items-center justify-center gap-4 px-4 py-3 border-t border-border text-[11px] text-muted-foreground">
+          <span>↑↓ 导航</span><span>↵ 跳转</span><span>Esc 关闭</span>
         </div>
       )}
-    </Modal>
+    </Dialog>
   );
 }

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { message } from "antd";
+import { message } from "../components/ui/toast";
 
 import { fallbackPlatforms } from "./platforms";
 import type {
