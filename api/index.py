@@ -1,9 +1,12 @@
-"""Vercel Serverless Function entry point.
-Cache-busting marker: rebuild-20260529-1945
-"""
+"""Vercel Serverless Function entry point."""
 import os
 import sys
 from pathlib import Path
+
+# OVERRIDE Vercel's Prisma Postgres DATABASE_URL env var BEFORE any database imports
+# This must happen before backend.app.core.database reads settings
+os.environ.pop("DATABASE_URL", None)
+os.environ["DATABASE_TYPE"] = "sqlite"
 
 _api_root = Path(__file__).resolve().parent
 _project_root = _api_root.parent
