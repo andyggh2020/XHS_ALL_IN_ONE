@@ -4,24 +4,20 @@
     {
       "src": "main.py",
       "use": "@vercel/python"
-    },
-    {
-      "src": "frontend/dist/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "main.py" },
-    { "src": "/assets/(.*)", "dest": "/frontend/dist/assets/$1" },
-    { "src": "/favicon\\.svg", "dest": "/frontend/dist/favicon.svg" },
-    { "src": "/(.*)", "dest": "/frontend/dist/index.html" }
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
+    }
   ],
   "env": {
-    "VERCEL": "1",
     "DATABASE_SQLITE_PATH": "/tmp/spider_xhs.db",
     "DATABASE_TYPE": "sqlite",
     "SECRET_KEY": "vercel-deploy-change-me-in-production",
     "BACKEND_CORS_ORIGINS": "*",
-    "FRONTEND_SERVE_STATIC": "false"
+    "FRONTEND_SERVE_STATIC": "true",
+    "FRONTEND_BUILD_DIR": "./frontend/dist"
   }
 }
