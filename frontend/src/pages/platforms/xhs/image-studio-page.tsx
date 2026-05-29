@@ -7,6 +7,7 @@ import { Dialog, DialogBody, DialogHeader, DialogTitle } from "../../../componen
 import { Spinner } from "../../../components/ui/skeletons";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { HeaderControls } from "../../../components/layout/header-controls";
+import { ErrorBanner, MessageBanner } from "../../../components/ui/status-banners";
 import {
   deleteGeneratedImageAsset, deleteUserImage, describeImageWithAi,
   fetchGeneratedImageAssets, fetchUserImages, generateImageWithAi, uploadAssetFile,
@@ -126,8 +127,8 @@ export function XhsImageStudioPage() {
         </div>
       </div>
 
-      {error && <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm">✕ {error}</div>}
-      {message && <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-500 text-sm">✓ {message}</div>}
+      {error && <ErrorBanner message={error} />}
+      {message && <MessageBanner message={message} />}
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         {/* AI Generation */}

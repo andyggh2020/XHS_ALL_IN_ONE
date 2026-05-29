@@ -19,6 +19,7 @@ import { Spinner } from "../../../components/ui/skeletons";
 import { useToast } from "../../../components/ui/toast";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { HeaderControls } from "../../../components/layout/header-controls";
+import { ErrorBanner } from "../../../components/ui/status-banners";
 import {
   deleteDraft, deleteDraftAsset, fetchDraftAssets, fetchDrafts,
   reorderDraftAssets, updateDraft,
@@ -142,7 +143,7 @@ export function XhsDraftsPage() {
         </div>
       </div>
 
-      {error && <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm">✕ {error}</div>}
+      {error && <ErrorBanner message={error} />}
 
       <div className="flex gap-1 mb-6 rounded-xl border border-border p-0.5 bg-muted/50">
         {["drafts", "publish"].map((tab) => (

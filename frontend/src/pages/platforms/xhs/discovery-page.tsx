@@ -7,6 +7,7 @@ import { Dialog, DialogBody, DialogHeader, DialogTitle, DialogFooter } from "../
 import { FormEvent, MouseEvent, useEffect, useMemo, useState } from "react";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { HeaderControls } from "../../../components/layout/header-controls";
+import { ErrorBanner, MessageBanner } from "../../../components/ui/status-banners";
 import { Link } from "react-router-dom";
 
 import { fetchAccounts, fetchSavedNoteIds, fetchXhsNoteComments, fetchXhsNoteDetail, saveXhsNotesToLibrary, searchXhsNotes } from "../../../lib/api";
@@ -282,14 +283,7 @@ export function XhsDiscoveryPage() {
               </div>
             </div>
           </form>
-          {error && (
-            <div className="mt-3 p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm flex items-center gap-2">
-              <span className="flex-1">{error}</span>
-              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 shrink-0">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          )}
+                    {error && <ErrorBanner message={error} onClose={() => setError(null)} />}
           {noPcAccount && (
             <div className="flex flex-col items-center justify-center py-16 px-6 text-center mt-6">
               <h3 className="text-lg font-semibold mb-2">还没有可用的 PC 账号</h3>
@@ -515,9 +509,7 @@ export function XhsDiscoveryPage() {
                   )}
                 </div>
 
-                {commentPreviewErrors[selectedNote.note_id] && (
-                  <div className="mb-3 p-2 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm">{commentPreviewErrors[selectedNote.note_id]}</div>
-                )}
+                {commentPreviewErrors[selectedNote.note_id] && <ErrorBanner message={commentPreviewErrors[selectedNote.note_id]} />}
                 {commentPreviewByNoteId[selectedNote.note_id] && (
                   <Card size="small" className="mb-3" style={{ background: c.cardBg }}>
                     <CardHeader className="p-4 pb-2">

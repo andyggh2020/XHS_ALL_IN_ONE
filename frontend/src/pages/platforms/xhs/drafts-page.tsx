@@ -19,6 +19,8 @@ import { Spinner } from "../../../components/ui/skeletons";
 import { useToast } from "../../../components/ui/toast";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { HeaderControls } from "../../../components/layout/header-controls";
+import { ErrorBanner } from "../../../components/ui/status-banners";
+import { DraftsEmpty, PublishEmpty } from "../../../components/ui/empty-states";
 import {
   deleteDraft, deleteDraftAsset, fetchDraftAssets, fetchDrafts,
   reorderDraftAssets, updateDraft,
@@ -145,7 +147,7 @@ export function XhsDraftsPage() {
         </div>
       </div>
 
-      {error && <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm">✕ {error}</div>}
+      {error && <ErrorBanner message={error} />}
 
       <div className="flex gap-1 mb-6 rounded-xl border border-border p-0.5 bg-muted/50">
         {["drafts", "publish"].map((tab) => (
@@ -159,7 +161,7 @@ export function XhsDraftsPage() {
 
       {activeTab === "drafts" ? (
         isLoadingDrafts ? <div className="flex justify-center py-12"><Spinner /></div>
-        : drafts.length === 0 ? <div className="text-center py-12 text-muted-foreground">暂无草稿。从内容库将笔记加入草稿工坊。</div>
+        : drafts.length === 0 ? <DraftsEmpty />
         : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {drafts.map((draft) => (
               <Card key={draft.id} className="p-4">
@@ -180,7 +182,7 @@ export function XhsDraftsPage() {
           </div>
       ) : (
         isLoadingJobs ? <div className="flex justify-center py-12"><Spinner /></div>
-        : jobs.length === 0 ? <div className="text-center py-12 text-muted-foreground">暂无发布任务。</div>
+        : jobs.length === 0 ? <PublishEmpty />
         : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {jobs.map((job) => (
               <Card key={job.id} className="p-4">

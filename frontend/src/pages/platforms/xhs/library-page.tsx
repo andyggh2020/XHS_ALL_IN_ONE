@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { HeaderControls } from "../../../components/layout/header-controls";
+import { ErrorBanner, MessageBanner } from "../../../components/ui/status-banners";
+import { LibraryEmpty } from "../../../components/ui/empty-states";
 import { Link, useNavigate } from "react-router-dom";
 
 import {
@@ -375,36 +377,16 @@ export function XhsLibraryPage() {
             <Button variant="destructive" disabled={isBatchWorking || !selectedNoteIds.length} onClick={batchDeleteNotes} size="sm">批量删除</Button>
             <Button variant="ghost" disabled={!selectedNoteIds.length} onClick={clearSelection} size="sm">清空选择</Button>
           </div>
-          {batchActionMessage && (
-            <div className="mt-2 p-3 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-400 flex items-center gap-2">
-              <span className="font-bold shrink-0">ℹ</span>
-              <span className="text-sm flex-1">{batchActionMessage}</span>
-              <button className="text-xs opacity-50 hover:opacity-100" onClick={() => setBatchActionMessage(null)}>✕</button>
-            </div>
-          )}
+          {batchActionMessage && <MessageBanner message={batchActionMessage} onClose={() => setBatchActionMessage(null)} />}
         </Card>
       )}
 
-      {error && (
-        <div className="mb-4 p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 flex items-center gap-2">
-          <span className="font-bold shrink-0">✕</span>
-          <span className="text-sm flex-1">{error}</span>
-        </div>
-      )}
+      {error && <ErrorBanner message={error} />}
 
       {isLoading ? (
         <Spinner className="mx-auto my-12" size="lg" />
       ) : notes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="text-5xl mb-4 opacity-40">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            </svg>
-          </div>
-          <p className="text-muted-foreground mb-4">内容库还是空的</p>
-          <Link to="/platforms/xhs/discovery"><Button>去发现笔记</Button></Link>
-        </div>
+        <LibraryEmpty />
       ) : viewMode === "table" ? (
         <Card>
           <div className="overflow-x-auto">
@@ -514,13 +496,7 @@ export function XhsLibraryPage() {
                       <span className="text-sm">{detailError}</span>
                     </div>
                   )}
-                  {detailActionMessage && (
-                    <div className="mb-3 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-2">
-                      <span className="font-bold shrink-0">✓</span>
-                      <span className="text-sm flex-1">{detailActionMessage}</span>
-                      <button className="text-xs opacity-50 hover:opacity-100" onClick={() => setDetailActionMessage(null)}>✕</button>
-                    </div>
-                  )}
+                  {detailActionMessage && <MessageBanner message={detailActionMessage} onClose={() => setDetailActionMessage(null)} />}
 
                   <div className="grid grid-cols-1 gap-2 mb-4 text-sm">
                     <div className="flex gap-2">
@@ -599,12 +575,7 @@ export function XhsLibraryPage() {
                   <Button variant="outline" onClick={toggleComments} className="mb-2">{isCommentsOpen ? "收起评论" : `查看评论 (${commentsTotal})`}</Button>
                   {isCommentsOpen && (
                     <Card className="p-4 mb-4" style={{ background: c.cardBg }}>
-                      {commentsError && (
-                        <div className="mb-2 p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 flex items-center gap-2">
-                          <span className="font-bold shrink-0">✕</span>
-                          <span className="text-sm">{commentsError}</span>
-                        </div>
-                      )}
+                      {commentsError && <ErrorBanner message={commentsError} />}
                       {isCommentsLoading && <Spinner size="sm" />}
                       {topLevelComments.length === 0 && !isCommentsLoading ? <p className="text-sm text-muted-foreground">暂无评论</p> : null}
                       {topLevelComments.map((cm) => (

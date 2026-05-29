@@ -19,6 +19,7 @@ import { Spinner } from "../../../components/ui/skeletons";
 import { Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter } from "../../../components/ui/dialog";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { HeaderControls } from "../../../components/layout/header-controls";
+import { AutoOpsEmpty } from "../../../components/ui/empty-states";
 import {
   createAutoTask,
   deleteAutoTask,
@@ -345,17 +346,7 @@ export function AutoOpsPage() {
           </div>
         </Card>
       ) : tasks.length === 0 && !showCreate ? (
-        <Card style={panelStyle}>
-          <div style={{ textAlign: "center", padding: "48px 24px" }}>
-            <Zap className="h-12 w-12" style={{ color: c.textMuted, margin: "0 auto 16px" }} />
-            <p style={{ fontSize: 16, fontWeight: 600, margin: "0 0 8px", color: c.textPrimary }}>
-              暂无自动运营任务
-            </p>
-            <p style={{ color: c.textMuted, fontSize: 13, margin: 0 }}>
-              点击"新建任务"开始配置关键词自动抓取、AI 改写和发布管线。
-            </p>
-          </div>
-        </Card>
+        <AutoOpsEmpty />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {tasks.map((task) => (

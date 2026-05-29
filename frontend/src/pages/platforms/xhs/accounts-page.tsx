@@ -10,6 +10,7 @@ import { checkAccount, deleteAccount, fetchAccounts } from "../../../lib/api";
 import { formatShanghaiTime } from "../../../lib/time";
 import { useThemeColors } from "../../../hooks/use-theme-colors";
 import { HeaderControls } from "../../../components/layout/header-controls";
+import { ErrorBanner } from "../../../components/ui/status-banners";
 import { ListSkeleton } from "../../../components/ui/skeletons";
 import { GuideEmpty } from "../../../components/ui/empty-states";
 import type { PlatformAccount } from "../../../types";
@@ -128,21 +129,7 @@ export function XhsAccountsPage() {
           </Button>
         </div>
         <div style={{ padding: 24 }}>
-          {error && (
-            <div
-              style={{
-                padding: "8px 12px",
-                borderRadius: 8,
-                border: "1px solid #fca5a5",
-                background: "rgba(239,68,68,0.08)",
-                color: "#ef4444",
-                fontSize: 13,
-                marginBottom: 16,
-              }}
-            >
-              {error}
-            </div>
-          )}
+          {error && <ErrorBanner message={error} onClose={() => setError(null)} />}
           {isLoading ? (
             <ListSkeleton rows={4} />
           ) : accounts.length === 0 ? (
