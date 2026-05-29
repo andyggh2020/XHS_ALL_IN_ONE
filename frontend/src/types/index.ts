@@ -508,6 +508,8 @@ export type SchedulerStatus = {
     next_run_time?: string | null;
   }>;
   recent_tasks: TaskRecord[];
+  registered_task_count?: number;
+  recent_executions_count?: number;
 };
 
 export type RunDueTasksResponse = {

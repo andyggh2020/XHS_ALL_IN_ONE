@@ -9,7 +9,7 @@ import { Card } from "../../components/ui/card";
 import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { useToast } from "../../components/ui/toast";
 import { fetchAdminUsers, fetchMembershipPlans, updateUserMembership } from "../../lib/api";
-import type { AdminUserItem, MembershipPlan } from "../../types";
+import type { AdminUserItem, MembershipLevel, MembershipPlan } from "../../types";
 
 const levelConfig: Record<string, { color: string; label: string }> = {
   free: { color: "secondary", label: "免费版" },

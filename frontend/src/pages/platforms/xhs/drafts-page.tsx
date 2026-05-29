@@ -28,6 +28,8 @@ import {
   retryPublishJob, cancelPublishJob, sendDraftToPublish, updatePublishJob,
 } from "../../../lib/api";
 import { formatShanghaiTime } from "../../../lib/time";
+// DraftAsset type for asset management
+interface DraftAsset { id: number; url: string; }
 import type { Draft, PublishAsset, PublishJob } from "../../../types";
 
 const { TextArea } = { TextArea: (props: any) => <textarea {...props} className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 resize-none" /> };

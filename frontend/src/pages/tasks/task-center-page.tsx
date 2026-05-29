@@ -72,7 +72,7 @@ export function TaskCenterPage() {
     exhausted: "耗尽",
   };
 
-  const renderProgress = (item: TaskItem) => {
+  const renderProgress = (item: TaskRecord) => {
     if (item.status === "completed") return 100;
     if (item.status === "failed" || item.status === "cancelled" || item.status === "exhausted") return item.progress ?? 0;
     return item.progress ?? 0;

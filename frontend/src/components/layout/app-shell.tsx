@@ -15,7 +15,7 @@ import { useAuth } from "../../hooks/use-auth";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { SearchContext } from "./search-context";
 import { globalSearch } from "../../lib/api";
-import type { SearchResult } from "../../types";
+import type { SearchResult } from "../../lib/api";
 import { cn } from "../../lib/utils";
 
 // KeepAlive route patterns (defined outside component to avoid JSX/regex parsing conflicts)
@@ -121,10 +121,10 @@ function SearchModal({ open, onClose }: { open: boolean; onClose: () => void }) 
   const flatItems = (() => {
     if (!results) return [];
     const items: { label: string; url: string; group: string }[] = [];
-    results.notes.forEach((n) => items.push({ label: `📝 ${n.title}`, url: n.url, group: "笔记" }));
-    results.accounts.forEach((a) => items.push({ label: `🔗 ${a.nickname} (${a.sub_type})`, url: a.url, group: "账号" }));
-    results.publish_jobs.forEach((j) => items.push({ label: `🚀 ${j.title} [${j.status}]`, url: j.url, group: "发布" }));
-    results.tasks.forEach((t) => items.push({ label: `⚡ ${t.task_type} [${t.status}]`, url: t.url, group: "任务" }));
+    results.notes.forEach((n: any) => items.push({ label: `📝 ${n.title}`, url: n.url, group: "笔记" }));
+    results.accounts.forEach((a: any) => items.push({ label: `🔗 ${a.nickname} (${a.sub_type})`, url: a.url, group: "账号" }));
+    results.publish_jobs.forEach((j: any) => items.push({ label: `🚀 ${j.title} [${j.status}]`, url: j.url, group: "发布" }));
+    results.tasks.forEach((t: any) => items.push({ label: `⚡ ${t.task_type} [${t.status}]`, url: t.url, group: "任务" }));
     return items;
   })();
 
