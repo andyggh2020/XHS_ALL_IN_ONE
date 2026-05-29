@@ -511,7 +511,7 @@ export function XhsDiscoveryPage() {
 
                 {commentPreviewErrors[selectedNote.note_id] && <ErrorBanner message={commentPreviewErrors[selectedNote.note_id]} />}
                 {commentPreviewByNoteId[selectedNote.note_id] && (
-                  <Card size="small" className="mb-3" style={{ background: c.cardBg }}>
+                  <Card className="mb-3" style={{ background: c.cardBg }}>
                     <CardHeader className="p-4 pb-2">
                       <CardTitle className="text-sm">评论预览</CardTitle>
                     </CardHeader>

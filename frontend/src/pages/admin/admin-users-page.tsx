@@ -65,7 +65,7 @@ export function AdminUsersPage() {
     setEditLoading(true);
     try {
       await updateUserMembership(editingUser.id, {
-        membership_level: editMembershipLevel,
+        membership_level: editMembershipLevel as MembershipLevel,
         is_admin: editIsAdmin,
         expires_in_days: editExpiresInDays ? parseInt(editExpiresInDays) : undefined,
       });

@@ -8,11 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Separator } from "../../components/ui/separator";
 import { useToast } from "../../components/ui/toast";
 import { fetchSchedulerStatus, fetchTasks, runDueTasks, cancelTask, retryTask } from "../../lib/api";
-import type { SchedulerStatus, TaskItem } from "../../types";
+import type { SchedulerStatus, TaskRecord } from "../../types";
 
 export function TaskCenterPage() {
-  const { toast } = useToast();
-  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const toast = useToast();
+  const [tasks, setTasks] = useState<TaskRecord[]>([]);
   const [scheduler, setScheduler] = useState<SchedulerStatus | null>(null);
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [triggering, setTriggering] = useState(false);

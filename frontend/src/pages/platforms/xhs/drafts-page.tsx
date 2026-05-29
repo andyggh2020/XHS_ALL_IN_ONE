@@ -28,7 +28,7 @@ import {
   retryPublishJob, cancelPublishJob, sendDraftToPublish, updatePublishJob,
 } from "../../../lib/api";
 import { formatShanghaiTime } from "../../../lib/time";
-import type { Draft, DraftAsset, PublishAsset, PublishJob } from "../../../types";
+import type { Draft, PublishAsset, PublishJob } from "../../../types";
 
 const { TextArea } = { TextArea: (props: any) => <textarea {...props} className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 resize-none" /> };
 
@@ -90,7 +90,7 @@ export function XhsDraftsPage() {
   async function handleSendToPublish(draftId: number) {
     setSendingDraftId(draftId);
     try {
-      const job = await sendDraftToPublish(draftId, { creator_upload: true });
+      const job = await sendDraftToPublish(draftId, {});
       setJobs((prev) => [job, ...prev]);
       toast.success("已发送到发布中心。");
     } catch { toast.error("发送失败，请检查 Creator 账号配置。"); }
@@ -167,7 +167,7 @@ export function XhsDraftsPage() {
               <Card key={draft.id} className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-semibold text-sm">{draft.title || "无标题"}</h3>
-                  <Badge variant={draft.status === "completed" ? "success" : "default"}>{draft.status}</Badge>
+                  <Badge variant={(draft as any).status === "completed" ? "success" : "default"}>{(draft as any).status}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{draft.body || "无正文"}</p>
                 {draft.tags?.length ? <div className="flex gap-1 flex-wrap mb-2">{draft.tags.map((t) => <Badge key={typeof t === "string" ? t : t.name} variant="secondary" className="text-[10px]">{typeof t === "string" ? t : t.name}</Badge>)}</div> : null}

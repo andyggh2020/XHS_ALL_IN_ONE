@@ -342,7 +342,7 @@ export function XhsLibraryPage() {
             <Input placeholder="标题、正文、作者" value={keywordFilter} onChange={(e) => setKeywordFilter(e.target.value)} />
           </div>
           <div className="w-[160px]">
-            <Select value={selectedTagFilter || undefined} onChange={(v) => setSelectedTagFilter(v ?? "")} placeholder="全部标签" options={availableTags.map((t) => ({ value: String(t.id), label: t.name }))} />
+            <Select value={selectedTagFilter || undefined} onChange={(e) => setSelectedTagFilter(e.target.value)} placeholder="全部标签" options={availableTags.map((t) => ({ value: String(t.id), label: t.name }))} />
           </div>
           <label className="flex items-center gap-1.5 text-sm cursor-pointer">
             <input type="checkbox" checked={hasAssetsFilter} onChange={(e) => setHasAssetsFilter(e.target.checked)} className="rounded" />
