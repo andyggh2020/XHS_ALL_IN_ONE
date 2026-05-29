@@ -16,14 +16,10 @@ from backend.app.api import accounts, admin, ai, auth, auto_tasks, drafts, files
 from backend.app.api.platforms import registry
 from backend.app.api.platforms.xhs import analytics, crawl, creator, monitoring, pc
 from backend.app.core.config import get_settings
-from backend.app.core.database import init_db
-from backend.app.services.scheduler_service import run_due_auto_tasks, shutdown_due_publish_scheduler, start_due_publish_scheduler
 
 settings = get_settings()
-
 app = FastAPI(title=settings.api_title)
 
-# CORS
 origins = [o.strip() for o in settings.backend_cors_origins.split(",") if o.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
@@ -31,7 +27,19 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True
 def health():
     return {"status": "ok", "service": "spider-xhs"}
 
-# Register all API routes
+@app.get("/api/_debug")
+def _debug():
+    cwd = Path.cwd()
+    frontend_dirs = list(cwd.rglob("dist/index.html"))
+    return {
+        "cwd": str(cwd),
+        "frontend_dist_exists": (cwd / "frontend" / "dist").is_dir(),
+        "public_exists": (cwd / "public").is_dir(),
+        "dist_index_html_exists": (cwd / "frontend" / "dist" / "index.html").exists(),
+        "dist_files": [str(f.relative_to(cwd / "frontend" / "dist")) for f in (cwd / "frontend" / "dist").iterdir()][:30] if (cwd / "frontend" / "dist").is_dir() else [],
+        "rglob_index": [str(f) for f in frontend_dirs],
+    }
+
 app.include_router(registry.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(accounts.router, prefix="/api")
@@ -55,24 +63,26 @@ app.include_router(auto_tasks.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 
-# Try to find frontend build directory
-frontend_dist = Path.cwd() / "frontend" / "dist"
-if not frontend_dist.is_dir():
-    frontend_dist = _project_root / "frontend" / "dist"
+# --- Frontend serving ---
+# Try to find index.html in multiple locations
+INDEX_CANDIDATES = [
+    Path.cwd() / "frontend" / "dist" / "index.html",
+    _project_root / "frontend" / "dist" / "index.html",
+    Path.cwd() / "public" / "index.html",
+    _project_root / "public" / "index.html",
+]
 
-if frontend_dist.is_dir():
-    print(f"[vercel] serving frontend from {frontend_dist}")
+index_html = None
+for candidate in INDEX_CANDIDATES:
+    if candidate.exists():
+        index_html = candidate
+        break
 
-    # Catch-all: serve index.html for paths not matched by API routes
-    # Note: Vercel rewrites all routes to /api/index.py before reaching here,
-    # so we ignore the path parameter and always serve index.html.
-    from fastapi.responses import JSONResponse as _JSONResponse
-    
+if index_html:
+    @app.get("/")
+    async def _root():
+        return FileResponse(str(index_html))
+
     @app.api_route("/{path:path}", methods=["GET"])
-    async def _serve_frontend(path: str):
-        idx = frontend_dist / "index.html"
-        if idx.exists():
-            return FileResponse(str(idx))
-        return _JSONResponse({"detail": "Not Found"}, status_code=404)
-else:
-    print(f"[vercel] WARNING: frontend_dist NOT FOUND at {frontend_dist}")
+    async def _spa_fallback(path: str):
+        return FileResponse(str(index_html))
