@@ -46,6 +46,11 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # Mount docs directory as static files for user manual access
+    docs_dir = Path(__file__).resolve().parent.parent.parent / "docs"
+    if docs_dir.is_dir():
+        app.mount("/manual", StaticFiles(directory=str(docs_dir), html=True), name="manual")
+
     @app.get("/api/health", tags=["health"])
     def health() -> dict:
         return {"status": "ok", "service": "spider-xhs"}

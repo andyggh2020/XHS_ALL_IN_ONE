@@ -24,7 +24,9 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 
 
 def resolve_npm_executable() -> str:
-    npm = shutil.which("npm") or shutil.which("npm.cmd")
+    # On Windows, prefer npm.cmd over the extensionless npm shell script
+    # to avoid WinError 193 (not a valid Win32 application)
+    npm = shutil.which("npm.cmd") or shutil.which("npm")
     if not npm:
         raise FileNotFoundError("npm was not found on PATH; install Node.js or start the frontend manually.")
     return npm

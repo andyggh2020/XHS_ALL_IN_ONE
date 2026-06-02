@@ -527,11 +527,11 @@ export function PageShell({
 }) {
   return (
     <div>
-      <div className="bg-page-header-feigua -mx-8 -mt-8 px-8 pt-8 pb-2 mb-6 border-b border-border/50">
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight mb-1.5">{title}</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+      <div className="bg-page-header-feigua -mx-4 sm:-mx-8 -mt-4 sm:-mt-8 px-4 sm:px-8 pt-4 sm:pt-8 pb-2 mb-4 sm:mb-6 border-b border-border/50">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight mb-1 sm:mb-1.5">{title}</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{description}</p>
           </div>
           {action && <div className="shrink-0">{action}</div>}
         </div>

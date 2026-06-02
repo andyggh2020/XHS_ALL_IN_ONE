@@ -4,23 +4,12 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": { "distDir": "dist" }
-    },
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python"
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "api/index.py" },
+    { "src": "/api/(.*)", "dest": "https://你的服务器IP:8000/api/$1" },
     { "src": "/assets/(.*)", "dest": "/dist/assets/$1" },
     { "src": "/favicon\\.svg", "dest": "/dist/favicon.svg" },
     { "src": "/(.*)", "dest": "/dist/index.html" }
-  ],
-  "env": {
-    "VERCEL": "1",
-    "DATABASE_SQLITE_PATH": "/tmp/spider_xhs.db",
-    "DATABASE_TYPE": "sqlite",
-    "SECRET_KEY": "vercel-deploy-change-me-in-production",
-    "BACKEND_CORS_ORIGINS": "*"
-  }
+  ]
 }

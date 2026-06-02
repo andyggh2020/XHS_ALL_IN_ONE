@@ -87,20 +87,24 @@ export function XhsDashboard() {
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23fff\' fill-opacity=\'0.15\'%3E%3Ccircle cx=\'30\' cy=\'30\' r=\'2\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full bg-white/5 blur-3xl" />
-        <div className="relative px-8 py-7 flex items-center justify-between">
+        <div className="relative px-4 sm:px-8 py-5 sm:py-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <span className="text-2xl font-bold text-white">{greeting}</span>
-              <span className="text-2xl">👋</span>
+            <div className="flex items-center gap-2 sm:gap-3 mb-0.5">
+              <span className="text-xl sm:text-2xl font-bold text-white">{greeting}</span>
+              <span className="text-xl sm:text-2xl">👋</span>
             </div>
-            <p className="text-white/70 text-sm">{dateStr}</p>
+            <p className="text-white/70 text-xs sm:text-sm">{dateStr}</p>
           </div>
-          <div className="flex items-center gap-3 bg-white/15 rounded-xl px-5 py-3 backdrop-blur-sm border border-white/10">
+          <div className="hidden sm:flex items-center gap-3 bg-white/15 rounded-xl px-5 py-3 backdrop-blur-sm border border-white/10">
             <TrendingUp className="h-5 w-5 text-white/90" />
             <div>
               <p className="text-white/65 text-[11px] font-medium">今日数据</p>
               <p className="text-white font-bold text-sm">{overview.today_crawls + overview.saved_notes} 条</p>
             </div>
+          </div>
+          <div className="sm:hidden flex items-center gap-2 bg-white/15 rounded-lg px-3 py-2 backdrop-blur-sm border border-white/10 self-end">
+            <TrendingUp className="h-3.5 w-3.5 text-white/90" />
+            <span className="text-white font-bold text-xs">{overview.today_crawls + overview.saved_notes} 条</span>
           </div>
         </div>
       </div>
@@ -110,9 +114,10 @@ export function XhsDashboard() {
         <div className="info-card-icon">
           <TrendingUp size={20} />
         </div>
-        <div className="info-card-content">
+        <div className="info-card-content min-w-0">
           <div className="info-card-title">小红书运营总览</div>
-          <div className="info-card-subtitle">监控账号健康度、内容表现和竞品趋势，掌握运营全局</div>
+          <div className="info-card-subtitle hidden sm:block">监控账号健康度、内容表现和竞品趋势，掌握运营全局</div>
+          <div className="info-card-subtitle sm:hidden text-[12px]">账号健康度、内容表现、竞品趋势</div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="capsule-tabs">
@@ -123,7 +128,7 @@ export function XhsDashboard() {
               </button>
             ))}
           </div>
-          <HeaderControls />
+          <div className="hidden sm:block"><HeaderControls /></div>
         </div>
       </div>
 
@@ -142,120 +147,124 @@ export function XhsDashboard() {
       {/* Quick Actions (old style removed) */}
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {metrics.map((metric) => (
-          <div key={metric.label} className="stat-card-clean p-4">
-            <div className="flex items-start justify-between mb-3">
+          <div key={metric.label} className="stat-card-clean p-3 sm:p-4">
+            <div className="flex items-start justify-between mb-2 sm:mb-3">
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: metric.bg, color: metric.color }}
               >
-                {metric.icon}
+                <span className="scale-90 sm:scale-100">{metric.icon}</span>
               </div>
               <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${metric.up ? 'text-[var(--success)]' : 'text-[var(--destructive)]'}`}>
                 {metric.up ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
                 {metric.trend}
               </span>
             </div>
-            <div className="text-2xl font-bold mb-0.5" style={{ color: metric.color }}>{metric.value}</div>
-            <div className="text-xs text-muted-foreground">{metric.label}</div>
+            <div className="text-xl sm:text-2xl font-bold mb-0.5" style={{ color: metric.color }}>{metric.value}</div>
+            <div className="text-[11px] sm:text-xs text-muted-foreground truncate">{metric.label}</div>
           </div>
         ))}
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {/* Area Chart - Weekly Trend */}
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-5">
-            <span className="section-title mb-0">本周趋势</span>
-            <Badge variant="secondary" className="text-[10px]">近 7 天</Badge>
+        <Card className="p-3 sm:p-5">
+          <div className="flex items-center justify-between mb-3 sm:mb-5">
+            <span className="section-title mb-0 text-[11px] sm:text-xs">本周趋势</span>
+            <Badge variant="secondary" className="text-[9px] sm:text-[10px]">近 7 天</Badge>
           </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={weekTrendData} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-              <defs>
-                <linearGradient id="pvGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="uvGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--purple)" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="var(--purple)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} className="text-muted-foreground" axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{
-                  background: "color-mix(in srgb, var(--card) 95%, transparent)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 10, fontSize: 12,
-                  backdropFilter: "blur(12px)",
-                }}
-              />
-              <Area type="monotone" dataKey="浏览量" stroke="var(--primary)" strokeWidth={2} fill="url(#pvGradient)" dot={false} />
-              <Area type="monotone" dataKey="互动" stroke="var(--purple)" strokeWidth={2} fill="url(#uvGradient)" dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Card>
-
-        {/* Topic Engagement Bar Chart */}
-        {topicChartData.length > 0 && (
-          <Card className="p-5">
-            <div className="flex items-center gap-2 mb-5">
-              <span className="section-title mb-0">话题互动排行</span>
-            </div>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={topicChartData} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+          <div className="h-[180px] sm:h-[240px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={weekTrendData} margin={{ top: 4, right: 4, bottom: 0, left: -12 }}>
+                <defs>
+                  <linearGradient id="pvGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="uvGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--purple)" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="var(--purple)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} className="text-muted-foreground" axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} className="text-muted-foreground" axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10 }} className="text-muted-foreground" axisLine={false} tickLine={false} width={40} />
                 <Tooltip
                   contentStyle={{
                     background: "color-mix(in srgb, var(--card) 95%, transparent)",
                     border: "1px solid var(--border)",
-                    borderRadius: 10, fontSize: 12,
+                    borderRadius: 10, fontSize: 11,
                     backdropFilter: "blur(12px)",
                   }}
                 />
-                <Bar dataKey="互动量" radius={[6, 6, 0, 0]} maxBarSize={36}>
-                  {topicChartData.map((entry, i) => (
-                    <Cell key={i} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
+                <Area type="monotone" dataKey="浏览量" stroke="var(--primary)" strokeWidth={2} fill="url(#pvGradient)" dot={false} />
+                <Area type="monotone" dataKey="互动" stroke="var(--purple)" strokeWidth={2} fill="url(#uvGradient)" dot={false} />
+              </AreaChart>
             </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {/* Topic Engagement Bar Chart */}
+        {topicChartData.length > 0 && (
+          <Card className="p-3 sm:p-5">
+            <div className="flex items-center gap-2 mb-3 sm:mb-5">
+              <span className="section-title mb-0 text-[11px] sm:text-xs">话题互动排行</span>
+            </div>
+            <div className="h-[180px] sm:h-[240px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topicChartData} margin={{ top: 4, right: 4, bottom: 0, left: -12 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} className="text-muted-foreground" axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10 }} className="text-muted-foreground" axisLine={false} tickLine={false} width={40} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "color-mix(in srgb, var(--card) 95%, transparent)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 10, fontSize: 11,
+                      backdropFilter: "blur(12px)",
+                    }}
+                  />
+                  <Bar dataKey="互动量" radius={[6, 6, 0, 0]} maxBarSize={24}>
+                    {topicChartData.map((entry, i) => (
+                      <Cell key={i} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
         )}
       </div>
 
       {/* Ranking Lists */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-8">
         {/* Left: Content Value Ranking */}
         <Card className="p-0 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border">
             <div className="flex items-center gap-2">
-              <span className="section-title mb-0">高潜话题</span>
-              <Badge variant="secondary" className="text-[10px] px-1.5">TOP</Badge>
+              <span className="section-title mb-0 text-[11px] sm:text-xs">高潜话题</span>
+              <Badge variant="secondary" className="text-[9px] sm:text-[10px] px-1.5">TOP</Badge>
             </div>
-            <Link to="/platforms/xhs/analytics"><Button size="sm" variant="ghost">查看洞察</Button></Link>
+            <Link to="/platforms/xhs/analytics"><Button size="sm" variant="ghost" className="text-xs sm:text-sm">查看洞察</Button></Link>
           </div>
           {overview.hot_topics.length === 0 ? (
-            <div className="text-center py-10 text-sm text-muted-foreground">采集笔记后会自动分析高潜话题</div>
+            <div className="text-center py-8 sm:py-10 text-xs sm:text-sm text-muted-foreground">采集笔记后会自动分析高潜话题</div>
           ) : (
             <div className="divide-y divide-border/40">
               {overview.hot_topics.map((topic, i) => (
-                <div key={topic.keyword} className="flex items-center justify-between px-5 py-3.5 hover:bg-surface-hover transition-colors">
-                  <div className="flex items-center gap-4">
-                    <span className={`rank-badge ${i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-default'}`}>
+                <div key={topic.keyword} className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3.5 hover:bg-surface-hover transition-colors">
+                  <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                    <span className={`rank-badge shrink-0 ${i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-default'}`}>
                       {i + 1}
                     </span>
-                    <span className="text-sm font-medium">{topic.keyword}</span>
+                    <span className="text-xs sm:text-sm font-medium truncate">{topic.keyword}</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground">{topic.engagement.toLocaleString()} 互动</span>
-                    <div className="w-20 h-1.5 rounded-full bg-surface-hover overflow-hidden">
+                  <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <span className="text-[11px] sm:text-xs text-muted-foreground whitespace-nowrap">{topic.engagement.toLocaleString()} 互动</span>
+                    <div className="hidden sm:block w-20 h-1.5 rounded-full bg-surface-hover overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (topic.engagement / 100))}%`, background: `linear-gradient(90deg, ${COLORS[i % COLORS.length]}, ${COLORS[(i + 1) % COLORS.length]})` }} />
                     </div>
                   </div>
@@ -267,55 +276,58 @@ export function XhsDashboard() {
 
         {/* Right: Recent Activity - Feigua Style */}
         <Card className="p-0 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <span className="section-title mb-0">最近动态</span>
-            <Badge variant="secondary" className="text-[10px] px-1.5">最新</Badge>
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border">
+            <span className="section-title mb-0 text-[11px] sm:text-xs">最近动态</span>
+            <Badge variant="secondary" className="text-[9px] sm:text-[10px] px-1.5">最新</Badge>
           </div>
           {overview.recent_activity.length === 0 ? (
-            <div className="text-center py-10 text-sm text-muted-foreground">还没有动态，开始采集吧</div>
+            <div className="text-center py-8 sm:py-10 text-xs sm:text-sm text-muted-foreground">还没有动态，开始采集吧</div>
           ) : (
-            <table className="data-table-feigua">
-              <thead>
-                <tr>
-                  <th style={{ width: '40%' }}>标题</th>
-                  <th style={{ width: '25%' }}>类型</th>
-                  <th style={{ width: '20%' }}>趋势</th>
-                  <th style={{ width: '15%' }}>状态</th>
-                </tr>
-              </thead>
-              <tbody>
-                {overview.recent_activity.slice(0, 6).map((item, i) => (
-                  <tr key={i}>
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <span className={`rank-badge ${i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-default'}`}>
-                          {i + 1}
-                        </span>
-                        <span className="font-medium text-sm truncate max-w-[180px]">{item.title}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <Badge variant="secondary" className="text-[10px] px-2 py-0">
-                        {item.type === "note" ? "笔记" : item.type}
-                      </Badge>
-                    </td>
-                    <td>
-                      <span className="trend-up inline-flex items-center gap-0.5">
-                        <ArrowUp size={12} />
-                        {(Math.random() * 15 + 2).toFixed(0)}%
-                      </span>
-                    </td>
-                    <td>
-                      <div className="sparkline-line">
-                        {Array.from({ length: 7 }, (_, j) => (
-                          <div key={j} className="sparkline-bar" style={{ height: `${8 + Math.random() * 16}px` }} />
-                        ))}
-                      </div>
-                    </td>
+            <div className="overflow-x-auto sm:overflow-visible">
+              <table className="data-table-feigua w-full" style={{ minWidth: '400px' }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '40%' }}>标题</th>
+                    <th style={{ width: '25%' }}>类型</th>
+                    <th style={{ width: '20%' }}>趋势</th>
+                    <th style={{ width: '15%' }}>状态</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {overview.recent_activity.slice(0, 6).map((item, i) => (
+                    <tr key={i}>
+                      <td>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <span className={`rank-badge hidden sm:inline-flex ${i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-default'}`}>
+                            {i + 1}
+                          </span>
+                          <span className="font-medium text-xs sm:text-sm truncate max-w-[120px] sm:max-w-[180px]">{item.title}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <Badge variant="secondary" className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0">
+                          {item.type === "note" ? "笔记" : item.type}
+                        </Badge>
+                      </td>
+                      <td>
+                        <span className="trend-up inline-flex items-center gap-0.5 text-xs sm:text-sm">
+                          <ArrowUp size={10} className="sm:hidden" />
+                          <ArrowUp size={12} className="hidden sm:block" />
+                          {(Math.random() * 15 + 2).toFixed(0)}%
+                        </span>
+                      </td>
+                      <td>
+                        <div className="sparkline-line">
+                          {Array.from({ length: 5 }, (_, j) => (
+                            <div key={j} className="sparkline-bar" style={{ height: `${8 + Math.random() * 14}px`, width: '4px' }} />
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Card>
       </div>

@@ -277,11 +277,14 @@ body {
 }
 /* Clean stat card variant — no top color bar */
 .stat-card-clean {
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   border: 1px solid var(--border-subtle);
-  padding: 1.25rem;
+  padding: 0.75rem;
   background: var(--surface-card);
   transition: all 0.2s ease;
+}
+@media (min-width: 640px) {
+  .stat-card-clean { border-radius: 1rem; padding: 1.25rem; }
 }
 .stat-card-clean:hover {
   border-color: color-mix(in srgb, var(--primary) 12%, var(--border));
@@ -632,31 +635,52 @@ main > div, .page-enter { animation: pageEnter 0.35s ease-out; }
 
 /* ===== Info Card Header (Feigua Style) ===== */
 .info-card-header {
-  display: flex; align-items: flex-start; gap: 16px;
-  padding: 20px 24px; border-radius: 12px;
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 16px; border-radius: 12px;
   background: linear-gradient(135deg, color-mix(in srgb, #6366f1 8%, var(--surface)), color-mix(in srgb, #8b5cf6 5%, var(--surface)));
   border: 1px solid color-mix(in srgb, #6366f1 12%, var(--border));
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+@media (min-width: 640px) {
+  .info-card-header { padding: 20px 24px; gap: 16px; margin-bottom: 20px; }
 }
 .info-card-icon {
-  width: 44px; height: 44px; border-radius: 10px;
+  width: 36px; height: 36px; border-radius: 8px;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   display: flex; align-items: center; justify-content: center;
   color: white; box-shadow: 0 4px 12px rgba(99,102,241,0.25);
 }
-.info-card-content { flex: 1; }
-.info-card-title { font-size: 16px; font-weight: 600; color: var(--foreground); margin-bottom: 4px; }
-.info-card-subtitle { font-size: 13px; color: var(--muted-foreground); }
+@media (min-width: 640px) {
+  .info-card-icon { width: 44px; height: 44px; border-radius: 10px; }
+}
+.info-card-content { flex: 1; min-width: 0; }
+.info-card-title { font-size: 14px; font-weight: 600; color: var(--foreground); margin-bottom: 2px; }
+@media (min-width: 640px) {
+  .info-card-title { font-size: 16px; margin-bottom: 4px; }
+}
+.info-card-subtitle { font-size: 12px; color: var(--muted-foreground); }
+@media (min-width: 640px) {
+  .info-card-subtitle { font-size: 13px; }
+}
 
 /* ===== Quick Access Grid (Feigua Style) ===== */
 .quick-access-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+@media (min-width: 480px) {
+  .quick-access-grid { gap: 12px; }
+}
+@media (min-width: 640px) {
+  .quick-access-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
 }
 .quick-access-item {
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  padding: 16px 12px; border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px; border-radius: 10px;
   background: var(--surface-card); border: 1px solid var(--border-subtle);
   transition: all 0.2s; cursor: pointer;
+}
+@media (min-width: 640px) {
+  .quick-access-item { padding: 16px 12px; gap: 8px; border-radius: 12px; }
 }
 .quick-access-item:hover {
   border-color: color-mix(in srgb, #6366f1 20%, var(--border));
@@ -664,11 +688,17 @@ main > div, .page-enter { animation: pageEnter 0.35s ease-out; }
   transform: translateY(-2px);
 }
 .quick-access-icon {
-  width: 40px; height: 40px; border-radius: 10px;
+  width: 32px; height: 32px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
+  font-size: 14px;
 }
-.quick-access-label { font-size: 12px; font-weight: 500; color: var(--foreground); }
+@media (min-width: 640px) {
+  .quick-access-icon { width: 40px; height: 40px; border-radius: 10px; font-size: 18px; }
+}
+.quick-access-label { font-size: 11px; font-weight: 500; color: var(--foreground); }
+@media (min-width: 640px) {
+  .quick-access-label { font-size: 12px; }
+}
 
 /* ===== Data Table Enhancements (Feigua Style) ===== */
 .data-table-feigua {
