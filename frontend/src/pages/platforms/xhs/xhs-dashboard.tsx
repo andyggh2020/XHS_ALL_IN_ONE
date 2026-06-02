@@ -7,6 +7,7 @@ import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { HeaderControls } from "../../../components/layout/header-controls";
+import { OnboardingGuide } from "../../../components/onboarding/onboarding-guide";
 import { fetchXhsOverview } from "../../../lib/api";
 import type { DashboardOverview } from "../../../types";
 
@@ -108,6 +109,9 @@ export function XhsDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Onboarding Guide for new users */}
+      <OnboardingGuide />
 
       {/* Info Card Header - Feigua Style */}
       <div className="info-card-header">
